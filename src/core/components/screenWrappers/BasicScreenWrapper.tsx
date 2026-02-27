@@ -1,0 +1,73 @@
+import React, {memo, useContext} from 'react';
+import {View, StyleSheet} from 'react-native';
+import { InsetsContext } from '../../utils/styles/insets.tsx';
+import GeneralHeader from '../headers/GeneralHeader.tsx';
+import GeneralGradient from '../../utils/styles/backgroundGradients/GeneralGradient.tsx';
+/* import GeneralHeader from '../headers/GeneralHeader.tsx'; */
+
+const BasicScreenWrapper = memo(
+  ({
+    children,
+    headerCenterText,
+    headerRightImage,
+    headerRightImageSize,
+    noHeader,
+    noPaddingBottom,
+    noBackButton,
+    headerSubText,
+    noGradient,
+    isTransactionLoading = false,
+    onBackPress,
+    noGoBack,
+  }: {
+    children: React.ReactNode;
+    headerCenterText?: string;
+    headerRightImage?: string;
+    headerRightImageSize?: number;
+    noHeader?: boolean;
+    noPaddingBottom?: boolean;
+    noBackButton?: boolean;
+    headerSubText?: string;
+    noGradient?: boolean;
+    isTransactionLoading?: boolean;
+    noGoBack?: boolean;
+    onBackPress?: () => void;
+  }) => {
+    /*  */
+    const INSETS = useContext(InsetsContext);
+
+    return (
+      <>
+        {!noGradient && <GeneralGradient />}
+        <View
+          style={[
+            STYLES.appWrapper,
+            !noPaddingBottom && {paddingBottom: INSETS.bottom},
+            noHeader && {marginTop: INSETS.top},
+          ]}>
+          {!noHeader && (
+            <GeneralHeader
+              subText={headerSubText}
+              titleText={headerCenterText}
+              noBackButton={noBackButton}
+              rightImage={headerRightImage}
+              rightImageSize={headerRightImageSize}
+              isTransactionLoading={isTransactionLoading}
+              onBack={onBackPress}
+              noGoBack={noGoBack}
+            />
+          )}
+          {children}
+        </View>
+      </>
+    );
+  },
+);
+
+const STYLES = StyleSheet.create({
+  appWrapper: {
+    flex: 1,
+  },
+});
+
+export default BasicScreenWrapper;

@@ -1,6 +1,7 @@
 /**
  * @format
  */
+import 'react-native-nitro-modules';
 
 import { AppRegistry } from 'react-native';
 import App from './App';
