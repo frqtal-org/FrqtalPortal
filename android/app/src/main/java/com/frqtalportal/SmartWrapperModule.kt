@@ -229,7 +229,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
-    
    // IMPLEMENTATION ERROR
    @ReactMethod
     fun queryUniqueTransaction(uniqueReference: String, date: String, promise: Promise) {
