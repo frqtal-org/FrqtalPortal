@@ -15,6 +15,7 @@ const GeneralHeader = memo(
     rightImageSize,
     rightComponent,
     noBackButton,
+    noTopInset,
     subText,
     isTransactionLoading,
     noGoBack = false,
@@ -25,6 +26,7 @@ const GeneralHeader = memo(
     rightImageSize?: number;
     rightComponent?: React.ReactNode;
     noBackButton?: boolean;
+    noTopInset?: boolean;
     noGoBack?: boolean;
     isTransactionLoading?: boolean;
     subText?: string;
@@ -60,7 +62,7 @@ const GeneralHeader = memo(
           STYLES.headerGradientContainer,
         ]}>
         {/*<HeaderGradient />*/}
-        <View style={[STYLES.headerContainer, { marginTop: INSETS.top }]}>
+        <View style={[STYLES.headerContainer, !noTopInset && { marginTop: INSETS.top }]}>
           {!noBackButton ? (
             <BackButton
               noGoBack={isTransactionLoading || noGoBack}

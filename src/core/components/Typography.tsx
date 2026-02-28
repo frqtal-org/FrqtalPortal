@@ -21,7 +21,7 @@ const Typography = ({
     return <Text 
         allowFontScaling={false}
         style={[
-            { color: theme.colors.text[color] },
+            { color: theme.colors.text[color], includeFontPadding: false },
             theme.typography[variant],
             style
         ]}

@@ -1,6 +1,5 @@
 import { NativeModules, StyleSheet, View } from 'react-native'
 import React, { useState } from 'react'
-import { Typography } from '../../../core/components/Typography'
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
@@ -9,7 +8,7 @@ import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad'
 import GradientButton from '../../../core/components/buttons/GradientButton'
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen'
-import { calculateExtraAmount, formatPercentageFromPrice, formatPriceFromDigits } from '../../../core/utils/priceFormater'
+import { calculateExtraAmount, formatPriceFromDigits } from '../../../core/utils/priceFormater'
 import { useMMKVString } from 'react-native-mmkv'
 import StorageKey from '../../../core/utils/store/keysStore'
 import { mmkvStorage } from '../../../core/store/principalStore'
@@ -20,7 +19,7 @@ const { SmartWrapperModule } = NativeModules;
 
 const InsertAmount = () => {
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
-    
+
     const [selectedExtra, setSelectedExtra] = useState<string>('');
     const [price, setPrice] = useState<string>('');
 
@@ -60,11 +59,7 @@ const InsertAmount = () => {
 
     return (
         <BasicScreenWrapper
-            noBackButton
-            headerCenterText={'Iniciar cobro'}
-            headerRightImage={require('../../../core/assets/images/bill.webp')}
-            headerRightImageSize={sizeToDp(APP_PADDING * 1.68)}
-            headerSubText={'Ingresa monto a cobrar'}
+            noHeader
         >
             <View style={[STYLES.screenWrapper]}>
                 <PaymentAmountHeader

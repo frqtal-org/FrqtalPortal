@@ -19,6 +19,7 @@ const BasicScreenWrapper = memo(
     isTransactionLoading = false,
     onBackPress,
     noGoBack,
+    noPaddingTop,
   }: {
     children: React.ReactNode;
     headerCenterText?: string;
@@ -31,6 +32,7 @@ const BasicScreenWrapper = memo(
     noGradient?: boolean;
     isTransactionLoading?: boolean;
     noGoBack?: boolean;
+    noPaddingTop?: boolean;
     onBackPress?: () => void;
   }) => {
     /*  */
@@ -43,7 +45,7 @@ const BasicScreenWrapper = memo(
           style={[
             STYLES.appWrapper,
             !noPaddingBottom && {paddingBottom: INSETS.bottom},
-            noHeader && {marginTop: INSETS.top},
+            (noHeader && !noPaddingTop) && {marginTop: INSETS.top},
           ]}>
           {!noHeader && (
             <GeneralHeader
