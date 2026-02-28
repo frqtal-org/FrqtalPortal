@@ -1,5 +1,5 @@
-import { NativeModules, StyleSheet, View } from 'react-native'
-import React, { useState } from 'react'
+import { Alert, NativeModules, StyleSheet, View } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
@@ -14,10 +14,12 @@ import StorageKey from '../../../core/utils/store/keysStore'
 import { mmkvStorage } from '../../../core/store/principalStore'
 import { getCurrentDateDDMMAAAA } from '../../../core/utils/getDateDDMMAAAA'
 import { generateTransactionId } from '../../../core/utils/getTransactionReference'
+import { InsetsContext } from '../../../core/utils/styles/insets'
 
 const { SmartWrapperModule } = NativeModules;
 
 const InsertAmount = () => {
+    const INSETS = useContext(InsetsContext)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
 
     const [selectedExtra, setSelectedExtra] = useState<string>('');
@@ -40,13 +42,26 @@ const InsertAmount = () => {
         const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
         const DATE = getCurrentDateDDMMAAAA();
         const UNIQUE_REFERENCE = generateTransactionId();
+        mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
+        mmkvStorage.set('PENDING_TX_DATE', DATE);
         try {
             isPaymentLoadingSV.set(true)
-            const respuesta = await SmartWrapperModule.sale(AMOUNT_TO_PAY, EXTRA, DATE, UNIQUE_REFERENCE, SPIdCemmerce);
-            console.log("Venta Exitosa", respuesta);
+            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY, EXTRA, DATE, UNIQUE_REFERENCE, SPIdCemmerce);
+
+
+            const respuestaJSON = JSON.parse(respuestaSale);
+            if (respuestaJSON.RESPONSE_CODE === '00') {
+                setPrice('')
+                setSelectedExtra('')
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+            }
+            /* const respuestaPrint = await SmartWrapperModule.reprintTicket(respuestaJSON.SG_REFERENCE);console.log(respuestaPrint) */
         } catch (error) {
             console.log('error')
             console.log(error)
+            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+            mmkvStorage.remove('PENDING_TX_DATE')
         } finally {
             isPaymentLoadingSV.set(false)
         }
@@ -57,10 +72,41 @@ const InsertAmount = () => {
         pointerEvents: isPaymentLoadingSV.get() ? 'auto' : 'none',
     }))
 
+    /* async function verificarTransaccionesPendientes() {
+        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+
+        if (pendingRef && pendingDate) {
+            console.log(`⚠️ ALERTA: Se encontró una transacción huérfana (${pendingRef}). Consultando con el banco...`);
+
+            try {
+                const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
+                const respuestaJSON = JSON.parse(respuestaString);
+
+                if (respuestaJSON.RESPONSE_CODE === "00") {
+                    Alert.alert(
+                        "Transacción Recuperada",
+                        `El cobro anterior de ${respuestaJSON.AMOUNT} sí se completó con éxito. Folio: ${respuestaJSON.SG_REFERENCE_FOLIO}`
+                    );
+                } else {
+                    console.log("La transacción pendiente fue rechazada por el banco.");
+                }
+
+            } catch (error) {
+                console.log("La transacción huérfana nunca se completó:", error);
+            } finally {
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+            }
+        }
+    }
+
+    useEffect(() => {
+        verificarTransaccionesPendientes();
+    }, []); */
+
     return (
-        <BasicScreenWrapper
-            noHeader
-        >
+        <View style={[{ flex: 1, marginTop: INSETS.top, marginBottom: INSETS.bottom }]} >
             <View style={[STYLES.screenWrapper]}>
                 <PaymentAmountHeader
                     price={price}
@@ -84,7 +130,7 @@ const InsertAmount = () => {
             <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
                 <LoadingScreen />
             </Animated.View>
-        </BasicScreenWrapper>
+        </View>
     )
 }
 

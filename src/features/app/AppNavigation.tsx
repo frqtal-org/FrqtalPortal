@@ -16,8 +16,8 @@ import Settings from './settings/Settings';
 const CAROUSEL_WIDTH = Dimensions.get('window').width;
 const CAROUSEL_HEIGHT = Dimensions.get('window').height;
 
-const DemoHeaderNav = ({ text, color, icon, onPress }: any) => {
-    return <Pressable onPress={onPress} style={[{  columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.3), paddingBottom: sizeToDp((APP_PADDING * 0.8) + 1), flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'center', opacity: 1 }]} >
+const DemoHeaderNav = ({ text, icon, onPress }: any) => {
+    return <Pressable onPress={onPress} style={[{ columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.3), paddingBottom: sizeToDp((APP_PADDING * 0.8) + 1), flexDirection: 'row', flex: 1, justifyContent: 'center', alignItems: 'center', opacity: 1 }]} >
         {icon && <FastImage
             source={icon}
             style={[{ width: sizeToDp(APP_PADDING * 1.28), aspectRatio: 1 }]}
@@ -98,8 +98,8 @@ const STYLES = StyleSheet.create({
         height: sizeToDp(APP_PADDING * 0.2)
     },
     paginationActiveDot: {
-        backgroundColor: theme.colors.brand200,
-        borderRadius: sizeToDp(APP_PADDING * 0.2),
+        backgroundColor: theme.colors.selectedBlue,
+        borderRadius: 999,
         width: Dimensions.get('window').width / 3,
     },
     paginationContainer: {

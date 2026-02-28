@@ -1,16 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper'
+import React, { useContext } from 'react'
 import SettingsItems from './SettingsItems'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
+import { InsetsContext } from '../../../core/utils/styles/insets'
 
 const Settings = () => {
+    const INSETS = useContext(InsetsContext)
+
     return (
-        <BasicScreenWrapper
-            noHeader
-            noPaddingBottom
-        >
+        <View style={[{ flex: 1, marginTop: INSETS.top, marginBottom: sizeToDp(APP_PADDING * 0.4) }]} >
             <View style={[{ marginBottom: 'auto', paddingTop: sizeToDp(APP_PADDING * 0.4) }]} >
                 <SettingsItems
                     icon={require('../../../core/assets/images/forwardArrow.webp')}
@@ -25,15 +24,14 @@ const Settings = () => {
                     onPress={() => { }}
                 />
             </View>
-            <View style={[{ paddingBottom: sizeToDp(APP_PADDING * 0.4) }]} >
-                <SettingsItems
-                    icon={require('../../../core/assets/images/logout.webp')}
-                    label={'Cerrar Sesión'}
-                    description={'Ir al inicio'}
-                    onPress={() => { }}
-                />
-            </View>
-        </BasicScreenWrapper>
+
+            <SettingsItems
+                icon={require('../../../core/assets/images/logout.webp')}
+                label={'Cerrar Sesión'}
+                description={'Ir al inicio'}
+                onPress={() => { }}
+            />
+        </View>
     )
 }
 

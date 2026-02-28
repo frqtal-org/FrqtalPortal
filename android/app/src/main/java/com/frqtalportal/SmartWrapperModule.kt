@@ -18,7 +18,8 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     private var currentPromise: Promise? = null
     private val REQUEST_CODE_SMART = 1001
 
-    private val jsonConfig = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": false}"
+    private val jsonConfigNoPrint = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": false}"
+    private val jsonConfigPrint = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": true}"
 
     private val authReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -54,6 +55,9 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         return "SmartWrapperModule"
     }
 
+
+
+
     @ReactMethod
     fun authenticate(apikey: String, idCommerce: String, idIntegrator: String, invoiceId: String, promise: Promise) {
         authPromise = promise 
@@ -73,6 +77,9 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         reactContext.sendBroadcast(intent)
     }
 
+
+
+
     @ReactMethod
     fun sale(amount: String, tip: String, date: String, unique_reference: String, idCommerce: String, promise: Promise) {
         currentPromise = promise
@@ -85,7 +92,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("unique_reference", unique_reference) // Campo alfanumérico, para referenciar una única transacción.
             intent.putExtra("tip", tip) // Parámetro para indicar la propina de una venta.
             intent.putExtra("from", "FrqtalPortal") // Parámetro para indicar el nombre del aplicativo que solicita la transacción.
-            intent.putExtra("json", jsonConfig) // Parámetro en formato json, del aplicativo, contiene packageName del aplicativo solicitado.
+            intent.putExtra("json", jsonConfigPrint) // Parámetro en formato json, del aplicativo, contiene packageName del aplicativo solicitado.
             intent.putExtra("date", date) // Parámetro para indicar la fecha del día en formato “ddmmaaaa”.
             intent.putExtra("idCommerce", idCommerce) // Parámetro para indicar el identificador de comercio que se usa durante la venta.
             intent.putExtra("userNumber", "") // Parámetro para indicar el número de usuario que se usa durante la venta.
@@ -121,7 +128,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("reference", reference)
             intent.putExtra("cancel", true)
             intent.putExtra("from", "MiAppPOS")
-            intent.putExtra("json", jsonConfig)
+            intent.putExtra("json", jsonConfigNoPrint)
             
             reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
                 ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
@@ -140,7 +147,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("reference", reference)
             intent.putExtra("cancel", true)
             intent.putExtra("from", "MiAppPOS")
-            intent.putExtra("json", jsonConfig)
+            intent.putExtra("json", jsonConfigNoPrint)
             
             reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
                 ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
@@ -148,22 +155,45 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     }
 
     
+
     @ReactMethod
-    fun queryTransaction(reference: String, date: String, promise: Promise) {
+    fun reprintTicket(reference: String, promise: Promise) {
         currentPromise = promise
         try {
             val intent = Intent()
-            intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
-            intent.putExtra("operation", "QUERY_TX")
-            intent.putExtra("reference", reference)
-            intent.putExtra("date", date)
-            intent.putExtra("from", "MiAppPOS")
-            intent.putExtra("json", jsonConfig)
             
-            reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
-                ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
+            intent.putExtra("operation", "REPRINT")
+            intent.putExtra("reference", reference)
+            intent.putExtra("amount", "0.00") 
+            intent.putExtra("cancel", false)
+            intent.putExtra("unique_reference", "")
+            intent.putExtra("tip", "0.00")
+            intent.putExtra("from", "FrqtalPortal")
+            intent.putExtra("json", jsonConfigNoPrint)
+            intent.putExtra("date", "")
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
+            
+            intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
+            
+            val activity = reactContext.currentActivity
+            if (activity != null) activity.startActivityForResult(intent, REQUEST_CODE_SMART)
+            else promise.reject("ACTIVITY_NULL", "Actividad no disponible")
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
+
+
 
     @ReactMethod
     fun getBalance(printReport: Boolean, promise: Promise) {
@@ -180,59 +210,190 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
+
+    
     @ReactMethod
-    fun reprintTicket(reference: String, promise: Promise) {
+    fun queryTransaction(reference: String, date: String, promise: Promise) {
         currentPromise = promise
         try {
             val intent = Intent()
             intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
-            
-            intent.putExtra("operation", "REPRINT")
+            intent.putExtra("operation", "QUERY_TX")
             intent.putExtra("reference", reference)
+            intent.putExtra("date", date)
+            intent.putExtra("from", "MiAppPOS")
+            intent.putExtra("json", jsonConfigNoPrint)
             
             reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
                 ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
-    /* @ReactMethod
+    
+   // IMPLEMENTATION ERROR
+   @ReactMethod
+    fun queryUniqueTransaction(uniqueReference: String, date: String, promise: Promise) {
+        currentPromise = promise
+        try {
+            val intent = Intent()
+            intent.putExtra("operation", "QUERY_UNIQUE")
+            
+            intent.putExtra("amount", "0.00") 
+            intent.putExtra("tip", "0.00")
+            intent.putExtra("showDetailCheck", true)
+            intent.putExtra("cancel", false)
+            intent.putExtra("reference", "")
+            intent.putExtra("unique_reference", uniqueReference)
+            intent.putExtra("from", "FrqtalPortal")
+            intent.putExtra("json", jsonConfigPrint)
+            intent.putExtra("date", date)
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
+            intent.putExtra("folio", "")
+
+            intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
+
+            val activity = reactContext.currentActivity
+            if (activity != null) activity.startActivityForResult(intent, REQUEST_CODE_SMART)
+            else promise.reject("ACTIVITY_NULL", "Actividad no disponible")
+        } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
+    }
+    
+
+    /* 
+    @ReactMethod
+    fun reauthorization(amount: String, promise: Promise) {
+        currentPromise = promise
+        try {
+            val intent = Intent()
+            intent.putExtra("operation", "REAUTHORIZATION")
+            intent.putExtra("amount", amount)
+            intent.putExtra("cancel", false)
+            intent.putExtra("reference", "")
+            intent.putExtra("unique_reference", "")
+            intent.putExtra("tip", "")
+            intent.putExtra("from", "FrqtalPortal")
+            intent.putExtra("json", jsonConfigNoPrint)
+            intent.putExtra("date", "")
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
+
+            intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
+            
+            val activity = reactContext.currentActivity
+            if (activity != null) activity.startActivityForResult(intent, REQUEST_CODE_SMART)
+            else promise.reject("ACTIVITY_NULL", "Actividad no disponible")
+        } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
+    }
+    
+    @ReactMethod
     fun checkIn(folio: String, amount: String, promise: Promise) {
         currentPromise = promise
         try {
             val intent = Intent()
+            intent.putExtra("operation", "CHECK_IN")
+            intent.putExtra("amount", amount)
+            intent.putExtra("cancel", false)
+            intent.putExtra("reference", "")
+            intent.putExtra("unique_reference", "")
+            intent.putExtra("tip", "")
+            intent.putExtra("from", "FrqtalPortal")
+            intent.putExtra("json", jsonConfigNoPrint)
+            intent.putExtra("date", "")
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
+            intent.putExtra("folio", folio)
+            intent.putExtra("showDetailCheck", false)
+
             intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
             
-            intent.putExtra("operation", "CHECK_IN")
-            intent.putExtra("folio", folio) // Máx 6 caracteres
-            intent.putExtra("amount", amount)
-            intent.putExtra("from", "MiAppPOS")
-            intent.putExtra("json", jsonConfig)
-            
-            reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
-                ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
+            val activity = reactContext.currentActivity
+            if (activity != null) activity.startActivityForResult(intent, REQUEST_CODE_SMART)
+            else promise.reject("ACTIVITY_NULL", "Actividad no disponible")
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
-    } */
+    }
 
-    /* @ReactMethod
+    @ReactMethod
     fun checkOut(folio: String, amount: String, promise: Promise) {
         currentPromise = promise
         try {
             val intent = Intent()
+            intent.putExtra("operation", "CHECK_OUT")
+            intent.putExtra("amount", amount)
+            intent.putExtra("cancel", false)
+            intent.putExtra("reference", "")
+            intent.putExtra("unique_reference", "")
+            intent.putExtra("tip", "")
+            intent.putExtra("from", "FrqtalPortal")
+            intent.putExtra("json", jsonConfigNoPrint)
+            intent.putExtra("date", "")
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
+            intent.putExtra("folio", folio)
+            intent.putExtra("showDetailCheck", false)
+
             intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
             
-            intent.putExtra("operation", "CHECK_OUT")
-            intent.putExtra("folio", folio)
-            intent.putExtra("amount", amount)
-            intent.putExtra("from", "MiAppPOS")
-            intent.putExtra("json", jsonConfig)
-            
-            reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
-                ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
+            val activity = reactContext.currentActivity
+            if (activity != null) activity.startActivityForResult(intent, REQUEST_CODE_SMART)
+            else promise.reject("ACTIVITY_NULL", "Actividad no disponible")
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
-    } */
+    } 
+    */
 
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == REQUEST_CODE_SMART && resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE_SMART) {
+
+            if (resultCode != Activity.RESULT_OK) {
+                currentPromise?.reject("CANCELED", "Operación cancelada o la terminal falló")
+                currentPromise = null
+                return
+            }
+
             val status = data?.getBooleanExtra("TX_STATUS", false) ?: false
             
             if (status) {
