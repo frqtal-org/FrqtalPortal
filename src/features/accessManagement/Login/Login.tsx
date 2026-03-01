@@ -103,14 +103,14 @@ const Login = () => {
       headerCenterText={'Iniciar sesión'}
       headerRightImage={require('../../../core/assets/images/login.png')}
       headerRightImageSize={sizeToDp(APP_PADDING * 1.68)}
-      headerSubText={'Ingresa PIN para ingresar'}
+      headerSubText={'PIN de acceso'}
     >
 
       <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.8), alignItems: 'center', justifyContent: 'center', /* aspectRatio: 1.658,  width: '100%', */ flex: 0.8 }]} >
         <FastImage source={require('../../../core/assets/images/frqtalBrand.png')} resizeMode="contain" style={[STYLES.headerIcon]} />
 
         <View style={[{ width: '100%', alignItems: 'center', rowGap: sizeToDp(APP_PADDING * 0.7) }]} >
-          <Typography variant={'text02Medium'} >Ingresa PIN para usar la terminal</Typography>
+          <Typography variant={'text02Medium'} >Ingresa tu PIN para usar la terminal</Typography>
 
           <View style={[STYLES.codeInputWrapper]}>
             <Code value={values.code[0]} />

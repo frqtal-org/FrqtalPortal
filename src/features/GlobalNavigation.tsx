@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './accessManagement/Login/Login.tsx';
 import AppNavigation from './app/AppNavigation.tsx';
+import BootSplash from "react-native-bootsplash";
 
 const { Navigator, Screen } = createNativeStackNavigator();
 

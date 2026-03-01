@@ -28,12 +28,17 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             val jsonReturn = bundle.getString("TX_JSON_RETURN", "")
             val error = bundle.getString("TX_ERROR", "")
 
-            if (status) {
-                authPromise?.resolve(jsonReturn)
-            } else {
-                authPromise?.reject("AUTH_ERROR", error.ifEmpty { "Error en autenticación" })
+            if (authPromise != null) {
+                if (status) authPromise?.resolve(jsonReturn)
+                else authPromise?.reject("AUTH_ERROR", error.ifEmpty { "Error en autenticación" })
+                authPromise = null
             }
-            authPromise = null
+            
+            if (currentPromise != null) {
+                if (status) currentPromise?.resolve(jsonReturn)
+                else currentPromise?.reject("TX_ERROR", error.ifEmpty { "Transacción rechazada o no encontrada" })
+                currentPromise = null
+            }
         }
     }
 
@@ -217,12 +222,29 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         currentPromise = promise
         try {
             val intent = Intent()
-            intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
+            
             intent.putExtra("operation", "QUERY_TX")
             intent.putExtra("reference", reference)
             intent.putExtra("date", date)
-            intent.putExtra("from", "MiAppPOS")
+            intent.putExtra("amount", "0.00") 
+            intent.putExtra("tip", "0.00")
+            intent.putExtra("cancel", false)
+            intent.putExtra("unique_reference", "")
+            intent.putExtra("from", "FrqtalPortal")
             intent.putExtra("json", jsonConfigNoPrint)
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
             
             reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
                 ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")

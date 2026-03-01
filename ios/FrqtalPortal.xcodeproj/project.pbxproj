@@ -13,14 +13,17 @@
 		1747142CB41D47699D631441 /* Poppins-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0D8E122740C343CAA8E44DD3 /* Poppins-SemiBoldItalic.ttf */; };
 		1B6C35BD9541494792BA55B1 /* Poppins-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 00FEAC4276CC454D8E5B8324 /* Poppins-Italic.ttf */; };
 		22773006DC8746CC8984F1D9 /* Poppins-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2B1F47DD12C44710ADA9BE6C /* Poppins-Medium.ttf */; };
+		22D2162F9A904E3EA725D253 /* Colors.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3A919948DB274278A6D72547 /* Colors.xcassets */; };
 		2AF1A1946B0C41A480D42B6E /* Poppins-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC437DB452BC437CA6FC7C1E /* Poppins-MediumItalic.ttf */; };
 		3B334500FA26486BA0C67328 /* Poppins-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D261BE83FB9446D2B98F6D49 /* Poppins-ExtraBoldItalic.ttf */; };
 		3BD3AEF2B8414D58BD354444 /* Poppins-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 70D50C907B6944659F79574F /* Poppins-Thin.ttf */; };
 		5538A53193C840B6AF15895E /* Poppins-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 87A4F18A41B14850BE280BB9 /* Poppins-LightItalic.ttf */; };
 		593B0772EE044337A2D9EF19 /* Poppins-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 24FD267135A34CBD891F6551 /* Poppins-BlackItalic.ttf */; };
+		6044176631584E32ADD36556 /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5FD8F10DDAC14744B202B80B /* BootSplash.storyboard */; };
 		6BE9BEC6CC6143BE8BA21F7A /* Poppins-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D2EE607E4854AC08820BACA /* Poppins-ExtraLight.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		79D41F12932F4CBDBBD5F043 /* Poppins-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 90D5536E384140BDA812E468 /* Poppins-Black.ttf */; };
+		7DA9EEE81DD7A49591D6EE1F /* libPods-FrqtalPortal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3349F7F6B918647B18C4B168 /* libPods-FrqtalPortal.a */; };
 		7E37879FFBF549F79CEBA406 /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D117BE1CA554DB78C0E0B93 /* Poppins-SemiBold.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		A831BEACF4244DD0BA7A840D /* Poppins-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2963F24266304359BE48DB75 /* Poppins-ThinItalic.ttf */; };
@@ -28,7 +31,6 @@
 		AB19A1A3E1FC4397AAD4305D /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5E721BFC7DC34941A6ADFD94 /* Poppins-Regular.ttf */; };
 		EF019B3250994753BD8796F5 /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AD2125B5F5014994BE393237 /* Poppins-ExtraBold.ttf */; };
 		F5E7A575259846208EF3E8CC /* Poppins-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 780EC97F94D34B5591B47FB9 /* Poppins-ExtraLightItalic.ttf */; };
-		FBA9097D37E6D6412CFAB808 /* libPods-FrqtalPortal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 96C06280A69CEDC59EAC7658 /* libPods-FrqtalPortal.a */; };
 		FFE031413A7748B7BE313594 /* Poppins-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 980E282732994C4988FAC086 /* Poppins-Light.ttf */; };
 /* End PBXBuildFile section */
 
@@ -40,25 +42,27 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = FrqtalPortal/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = FrqtalPortal/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = FrqtalPortal/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		22C17DD979AA6C64D922186D /* Pods-FrqtalPortal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.release.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.release.xcconfig"; sourceTree = "<group>"; };
 		24FD267135A34CBD891F6551 /* Poppins-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-BlackItalic.ttf"; path = "../src/core/assets/fonts/Poppins-BlackItalic.ttf"; sourceTree = "<group>"; };
 		2963F24266304359BE48DB75 /* Poppins-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ThinItalic.ttf"; path = "../src/core/assets/fonts/Poppins-ThinItalic.ttf"; sourceTree = "<group>"; };
 		2B1F47DD12C44710ADA9BE6C /* Poppins-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Medium.ttf"; path = "../src/core/assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
+		3349F7F6B918647B18C4B168 /* libPods-FrqtalPortal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FrqtalPortal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A919948DB274278A6D72547 /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = FrqtalPortal/Colors.xcassets; sourceTree = "<group>"; };
 		5D117BE1CA554DB78C0E0B93 /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-SemiBold.ttf"; path = "../src/core/assets/fonts/Poppins-SemiBold.ttf"; sourceTree = "<group>"; };
 		5D2EE607E4854AC08820BACA /* Poppins-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraLight.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraLight.ttf"; sourceTree = "<group>"; };
 		5E721BFC7DC34941A6ADFD94 /* Poppins-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Regular.ttf"; path = "../src/core/assets/fonts/Poppins-Regular.ttf"; sourceTree = "<group>"; };
+		5FD8F10DDAC14744B202B80B /* BootSplash.storyboard */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = BootSplash.storyboard; path = FrqtalPortal/BootSplash.storyboard; sourceTree = "<group>"; };
 		70D50C907B6944659F79574F /* Poppins-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Thin.ttf"; path = "../src/core/assets/fonts/Poppins-Thin.ttf"; sourceTree = "<group>"; };
-		75D0E3AFA221436931F8B3AF /* Pods-FrqtalPortal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.release.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.release.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FrqtalPortal/AppDelegate.swift; sourceTree = "<group>"; };
 		780EC97F94D34B5591B47FB9 /* Poppins-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraLightItalic.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
+		7E0B84550B586F12120DD8F8 /* Pods-FrqtalPortal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.debug.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.debug.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FrqtalPortal/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		87A4F18A41B14850BE280BB9 /* Poppins-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-LightItalic.ttf"; path = "../src/core/assets/fonts/Poppins-LightItalic.ttf"; sourceTree = "<group>"; };
 		90D5536E384140BDA812E468 /* Poppins-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Black.ttf"; path = "../src/core/assets/fonts/Poppins-Black.ttf"; sourceTree = "<group>"; };
 		9364EC5E6EB641B78BB5EA69 /* Poppins-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Bold.ttf"; path = "../src/core/assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; };
-		96C06280A69CEDC59EAC7658 /* libPods-FrqtalPortal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FrqtalPortal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		980E282732994C4988FAC086 /* Poppins-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Light.ttf"; path = "../src/core/assets/fonts/Poppins-Light.ttf"; sourceTree = "<group>"; };
 		AD2125B5F5014994BE393237 /* Poppins-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBold.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraBold.ttf"; sourceTree = "<group>"; };
 		D261BE83FB9446D2B98F6D49 /* Poppins-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBoldItalic.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
-		DA982E1D7A394DDD1E709C59 /* Pods-FrqtalPortal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.debug.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.debug.xcconfig"; sourceTree = "<group>"; };
 		DC437DB452BC437CA6FC7C1E /* Poppins-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-MediumItalic.ttf"; path = "../src/core/assets/fonts/Poppins-MediumItalic.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -68,7 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FBA9097D37E6D6412CFAB808 /* libPods-FrqtalPortal.a in Frameworks */,
+				7DA9EEE81DD7A49591D6EE1F /* libPods-FrqtalPortal.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +87,8 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				5FD8F10DDAC14744B202B80B /* BootSplash.storyboard */,
+				3A919948DB274278A6D72547 /* Colors.xcassets */,
 			);
 			name = FrqtalPortal;
 			sourceTree = "<group>";
@@ -91,7 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				96C06280A69CEDC59EAC7658 /* libPods-FrqtalPortal.a */,
+				3349F7F6B918647B18C4B168 /* libPods-FrqtalPortal.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -155,8 +161,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				DA982E1D7A394DDD1E709C59 /* Pods-FrqtalPortal.debug.xcconfig */,
-				75D0E3AFA221436931F8B3AF /* Pods-FrqtalPortal.release.xcconfig */,
+				7E0B84550B586F12120DD8F8 /* Pods-FrqtalPortal.debug.xcconfig */,
+				22C17DD979AA6C64D922186D /* Pods-FrqtalPortal.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -168,13 +174,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FrqtalPortal" */;
 			buildPhases = (
-				E42793C9F55FD60BE8329F16 /* [CP] Check Pods Manifest.lock */,
+				0042FA5D5A0017830E2307AF /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				17CC724AC8BF2A99C86C7C7E /* [CP] Embed Pods Frameworks */,
-				1E46E95250CEA6A03A22F6D4 /* [CP] Copy Pods Resources */,
+				7DCF38B305EFE5C70E92F6C7 /* [CP] Embed Pods Frameworks */,
+				08E4B0EDB3ED52CDADDF83E8 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -242,63 +248,15 @@
 				7E37879FFBF549F79CEBA406 /* Poppins-SemiBold.ttf in Resources */,
 				1B6C35BD9541494792BA55B1 /* Poppins-Italic.ttf in Resources */,
 				2AF1A1946B0C41A480D42B6E /* Poppins-MediumItalic.ttf in Resources */,
+				6044176631584E32ADD36556 /* BootSplash.storyboard in Resources */,
+				22D2162F9A904E3EA725D253 /* Colors.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/.xcode.env.local",
-				"$(SRCROOT)/.xcode.env",
-			);
-			name = "Bundle React Native code and images";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
-		};
-		17CC724AC8BF2A99C86C7C7E /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		1E46E95250CEA6A03A22F6D4 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		E42793C9F55FD60BE8329F16 /* [CP] Check Pods Manifest.lock */ = {
+		0042FA5D5A0017830E2307AF /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -320,6 +278,56 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/.xcode.env",
+			);
+			name = "Bundle React Native code and images";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
+		};
+		08E4B0EDB3ED52CDADDF83E8 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		7DCF38B305EFE5C70E92F6C7 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -336,7 +344,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DA982E1D7A394DDD1E709C59 /* Pods-FrqtalPortal.debug.xcconfig */;
+			baseConfigurationReference = 7E0B84550B586F12120DD8F8 /* Pods-FrqtalPortal.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -367,7 +375,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 75D0E3AFA221436931F8B3AF /* Pods-FrqtalPortal.release.xcconfig */;
+			baseConfigurationReference = 22C17DD979AA6C64D922186D /* Pods-FrqtalPortal.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

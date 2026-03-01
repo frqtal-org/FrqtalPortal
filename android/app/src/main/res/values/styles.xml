@@ -1,9 +1,18 @@
 <resources>
-
-    <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+        <!-- Color del StatusBar (Android moderno) -->
+        <item name="android:statusBarColor">#141220</item>
+        <!-- Iconos blancos (útil con fondo oscuro) -->
+        <item name="android:windowLightStatusBar">false</item>
+        <!-- Previene el modo oscuro automático -->
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 
+    <style name="BootTheme" parent="Theme.BootSplash">
+        <item name="bootSplashBackground">@color/bootsplash_background</item>
+        <item name="bootSplashLogo">@drawable/bootsplash_logo</item>
+        <item name="postBootSplashTheme">@style/AppTheme</item>
+    </style>
 </resources>
