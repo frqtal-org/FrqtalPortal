@@ -4,13 +4,16 @@ import SettingsItems from './SettingsItems'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { InsetsContext } from '../../../core/utils/styles/insets'
+import { useNavigation } from '@react-navigation/native'
 
 const Settings = () => {
     const INSETS = useContext(InsetsContext)
 
+    const { navigate } = useNavigation<any>()
+
     return (
-        <View style={[{ flex: 1, marginTop: INSETS.top, marginBottom: sizeToDp(APP_PADDING * 0.4) }]} >
-            <View style={[{ marginBottom: 'auto', paddingTop: sizeToDp(APP_PADDING * 0.4) }]} >
+        <View style={[{ flex: 1, marginTop: INSETS.top, marginBottom: sizeToDp(APP_PADDING * 0.2) }]} >
+            <View style={[{ marginBottom: 'auto', paddingTop: sizeToDp(APP_PADDING * 0.2) }]} >
                 <SettingsItems
                     icon={require('../../../core/assets/images/forwardArrow.webp')}
                     label={'General'}
@@ -29,7 +32,7 @@ const Settings = () => {
                 icon={require('../../../core/assets/images/logout.webp')}
                 label={'Cerrar Sesión'}
                 description={'Ir al inicio'}
-                onPress={() => { }}
+                onPress={() => navigate('Login')}
             />
         </View>
     )

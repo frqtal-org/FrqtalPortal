@@ -1,17 +1,18 @@
 import React, { memo, useContext, useRef, useState } from 'react';
 import InsertAmount from './insertAmount/InsertAmount';
-import Carousel, { CarouselRenderItem, Pagination } from 'react-native-reanimated-carousel';
+import Carousel, { CarouselRenderItem, ICarouselInstance, Pagination, TAnimationStyle } from 'react-native-reanimated-carousel';
 import BasicScreenWrapper from '../../core/components/screenWrappers/BasicScreenWrapper';
 import { APP_PADDING } from '../../core/utils/constants';
 import { sizeToDp } from '../../core/utils/sizeToDP';
 import { PanGesture } from 'react-native-gesture-handler';
-import { useSharedValue } from 'react-native-reanimated';
+import { Extrapolation, interpolate, useSharedValue } from 'react-native-reanimated';
 import { Dimensions, Pressable, StyleSheet, View } from 'react-native';
 import theme from '../../core/utils/styles/styles';
 import { InsetsContext } from '../../core/utils/styles/insets';
 import FastImage from 'react-native-fast-image';
 import { Typography } from '../../core/components/Typography';
 import Settings from './settings/Settings';
+import TransactionsHistory from './transactionsHistory/TransactionsHistory';
 
 const CAROUSEL_WIDTH = Dimensions.get('window').width;
 const CAROUSEL_HEIGHT = Dimensions.get('window').height;
@@ -30,23 +31,27 @@ const DemoHeaderNav = ({ text, icon, onPress }: any) => {
 const PAGES = [
     { component: () => <Settings /> },
     { component: () => <InsertAmount /> },
-    { component: () => <InsertAmount /> },
+    { component: () => <TransactionsHistory /> },
 ]
 
 const AppNavigation = memo(() => {
     /* */
-    const carouselRef = useRef<any>(null);
+    const carouselRef = useRef<ICarouselInstance>(null);
     const progress = useSharedValue<number>(0);
     const INSETS = useContext(InsetsContext)
 
     /* ------- Functions ------- */
     function panGestureConfig(gesture: PanGesture) {
         'worklet';
-        gesture.activeOffsetX([-10, 10]);
+        gesture.activeOffsetX([-20, 20]);
     }
 
-    function onPressPaginationDot(index: number) {
-        carouselRef.current.scrollTo({ index: index, animated: true })
+    function onPressPaginationDot(targetIndex: number) {
+        // Math.round asegura que tengamos el índice exacto actual
+        const currentIndex = Math.round(progress.value);
+        const difference = targetIndex - currentIndex;
+
+        carouselRef.current?.scrollTo({ count: difference, animated: true });
     }
     /* ------- END Functions ------- */
 
@@ -56,9 +61,9 @@ const AppNavigation = memo(() => {
         >
             <View style={[{ position: 'absolute', zIndex: 999, width: '100%' }]} >
                 <View style={[{ flexDirection: 'row' }]} >
-                    <DemoHeaderNav onPress={() => { carouselRef.current.scrollTo({ index: 0, animated: true }) }} icon={require('../../core/assets/images/settings.webp')} text='Ajustes' />
-                    <DemoHeaderNav onPress={() => { carouselRef.current.scrollTo({ index: 1, animated: true }) }} icon={require('../../core/assets/images/bill.webp')} text='Cobrar' />
-                    <DemoHeaderNav onPress={() => { carouselRef.current.scrollTo({ index: 2, animated: true }) }} icon={require('../../core/assets/images/Transactions.webp')} text='Historial' />
+                    <DemoHeaderNav onPress={() => { onPressPaginationDot(0) }} icon={require('../../core/assets/images/settings.webp')} text='Ajustes' />
+                    <DemoHeaderNav onPress={() => { onPressPaginationDot(1) }} icon={require('../../core/assets/images/bill.webp')} text='Cobrar' />
+                    <DemoHeaderNav onPress={() => { onPressPaginationDot(2) }} icon={require('../../core/assets/images/Transactions.webp')} text='Historial' />
                 </View>
                 <Pagination.Basic
                     progress={progress}
@@ -79,6 +84,7 @@ const AppNavigation = memo(() => {
                 onConfigurePanGesture={panGestureConfig}
                 onProgressChange={progress}
                 defaultIndex={1}
+                overscrollEnabled={false}
             />
         </BasicScreenWrapper>
     );

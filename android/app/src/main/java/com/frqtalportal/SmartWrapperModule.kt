@@ -201,14 +201,34 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
 
 
     @ReactMethod
-    fun getBalance(printReport: Boolean, promise: Promise) {
+    fun getBalance(promise: Promise) {
         currentPromise = promise
         try {
             val intent = Intent()
             intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
             intent.putExtra("operation", "BALANCE")
-            intent.putExtra("print_report", printReport.toString())
-            intent.putExtra("from", "MiAppPOS")
+            intent.putExtra("print_report", true)
+            intent.putExtra("reference", "")
+            intent.putExtra("date", "")
+            intent.putExtra("amount", "0.00") 
+            intent.putExtra("tip", "0.00")
+            intent.putExtra("cancel", false)
+            intent.putExtra("unique_reference", "")
+            intent.putExtra("from", "FrqtalPortal")
+            intent.putExtra("json", jsonConfigNoPrint)
+            intent.putExtra("idCommerce", "")
+            intent.putExtra("userNumber", "")
+            intent.putExtra("userName", "")
+            intent.putExtra("fuelType", "")
+            intent.putExtra("liters", "")
+            intent.putExtra("pricePerLiters", "")
+            intent.putExtra("periphericals", "")
+            intent.putExtra("paymentMethod", "")
+            intent.putExtra("promotionPay", "")
+            intent.putExtra("promotionSkip", "")
+            intent.putExtra("monthsToPay", "")
+            intent.putExtra("monthsToStartPaying", "")
+            intent.putExtra("printerExtras", "")
             
             reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
                 ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")

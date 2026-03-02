@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Typography } from '../../../core/components/Typography';
 import { sizeToDp } from '../../../core/utils/sizeToDP';
@@ -20,13 +20,13 @@ const SettingsItems = memo(({ onPress, label, description, icon }: Props) => {
   /* ------- END Functions ------- */
 
   return (
-    <TouchableOpacity
+    <Pressable
       style={[STYLES.wrapper]}
       onPress={handlePressAction}
     >
       <View style={[STYLES.textContainer]}>
         <Typography variant="subtitle02SemiBold" >{label}</Typography>
-        <Typography variant='text02Medium' color="textSecondary" >{description}</Typography>
+        <Typography variant='text02Medium' color="textEleventh" >{description}</Typography>
       </View>
 
       <FastImage
@@ -34,7 +34,7 @@ const SettingsItems = memo(({ onPress, label, description, icon }: Props) => {
         style={[STYLES.icon]}
         resizeMode="contain"
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 });
 

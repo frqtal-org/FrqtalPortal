@@ -6,6 +6,7 @@ import FastImage from 'react-native-fast-image';
 import { APP_PADDING } from '../../../../core/utils/constants.ts';
 import theme from '../../../../core/utils/styles/styles.ts';
 import { calculateExtraAmount, formatPercentageFromPrice, formatPriceFromDigits } from '../../../../core/utils/priceFormater.ts';
+import HeaderGradient from '../../../../core/utils/styles/backgroundGradients/HeaderGradient.tsx';
 
 const SubDataContainer = memo(
   ({ title, data, color }: { title: string; data: string; color?: any }) => {

@@ -191,7 +191,7 @@ const STYLES = StyleSheet.create({
   },
   codeInputWrapper: {
     flexDirection: 'row',
-    columnGap: sizeToDp(APP_PADDING * 1.2),
+    columnGap: sizeToDp((APP_PADDING * 1.2) - 1),
     width: '100%',
     justifyContent: 'center'
   },
