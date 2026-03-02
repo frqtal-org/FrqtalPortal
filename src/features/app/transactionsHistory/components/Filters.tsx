@@ -6,18 +6,18 @@ import { APP_PADDING } from '../../../../core/utils/constants.ts';
 import theme from '../../../../core/utils/styles/styles.ts';
 
 const LIST_STATUS_FILTERS = [
-    {
-        label: 'Todas',
-        selectionValue: 'all'
-    },
-    {
-        label: 'Exitosas',
-        selectionValue: 'successful'
-    },
-    {
-        label: 'Devueltas',
-        selectionValue: 'returned and cancelled'
-    },
+  {
+    label: 'Todas',
+    selectionValue: 'all'
+  },
+  {
+    label: 'Exitosas',
+    selectionValue: 'successful'
+  },
+  {
+    label: 'Devueltas',
+    selectionValue: 'returned and cancelled'
+  },
 ]
 
 const FilterBadge = memo(({ timeLabel, isSelected, onPress }: any) => {
@@ -60,25 +60,25 @@ export const Filters = memo(({ style = [{}] }: any) => {
 
 
   return (
-      <View style={[{ paddingTop: sizeToDp(APP_PADDING * 0), alignItems: 'center', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.7), zIndex: 999 }]} >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={[STYLES.headerFiltersContainer]}>
-          {LIST_STATUS_FILTERS.map((i: any) => (
-            <View key={`transactions-timeframe-selector-${i.label}`} style={[style]} >
-              <FilterBadge
-                timeLabel={i.label}
-                isSelected={selectedFilter === i.selectionValue}
-                onPress={() =>
-                  handlePressFilterBadge({ selectionValue: i.selectionValue })
-                }
-              />
-            </View>
-          ))}
-        </ScrollView>
+    <View style={[{ paddingTop: sizeToDp(APP_PADDING * 0), alignItems: 'center', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.7), zIndex: 999 }]} >
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={[STYLES.headerFiltersContainer]}>
+        {LIST_STATUS_FILTERS.map((i: any) => (
+          <View key={`transactions-timeframe-selector-${i.label}`} style={[style]} >
+            <FilterBadge
+              timeLabel={i.label}
+              isSelected={selectedFilter === i.selectionValue}
+              onPress={() =>
+                handlePressFilterBadge({ selectionValue: i.selectionValue })
+              }
+            />
+          </View>
+        ))}
+      </ScrollView>
 
-      </View>
+    </View>
 
   );
 });
@@ -92,12 +92,12 @@ const STYLES = StyleSheet.create({
     justifyContent: 'center',
     borderWidth: sizeToDp(1),
     backgroundColor: theme.colors.brand400 + '22',
-    borderColor: theme.colors.brand400 + '88',
+    borderColor: theme.colors.brand400 + 'aa',
   },
   timeFrameSelected: {
     backgroundColor: theme.colors.brand300 + '22',
+    borderColor: theme.colors.brand300 + 'aa',
     borderWidth: sizeToDp(1),
-    borderColor: theme.colors.brand300 + '88',
   },
 
   headerFiltersContainer: {

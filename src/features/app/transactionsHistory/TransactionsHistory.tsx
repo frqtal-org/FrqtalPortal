@@ -214,9 +214,9 @@ const TransactionsHistory = memo(() => {
               balanceTitle={'Ganancias totales:'}
               filterTitleText={'Semana'}
               onPressFilterTitle={() => { }}
-              balance={`$0.00`}
+              balance={`$19,743.20`}
               currency={'MXN'}
-              equivalentBalance={`$0.00`}
+              equivalentBalance={`$2,723.54`}
               equivalentBalanceColor={'notificationGreen'}
               equivalentMiniText='Hoy:'
             />
