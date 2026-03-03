@@ -82,9 +82,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         reactContext.sendBroadcast(intent)
     }
 
-
-
-
     @ReactMethod
     fun sale(amount: String, tip: String, date: String, unique_reference: String, idCommerce: String, promise: Promise) {
         currentPromise = promise
@@ -159,8 +156,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
-    
-
     @ReactMethod
     fun reprintTicket(reference: String, promise: Promise) {
         currentPromise = promise
@@ -198,8 +193,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
-
-
     @ReactMethod
     fun getBalance(promise: Promise) {
         currentPromise = promise
@@ -236,6 +229,8 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     }
 
 
+
+
     
     @ReactMethod
     fun queryTransaction(reference: String, date: String, promise: Promise) {
@@ -265,13 +260,14 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("monthsToPay", "")
             intent.putExtra("monthsToStartPaying", "")
             intent.putExtra("printerExtras", "")
+
+            intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
             
             reactContext.currentActivity?.startActivityForResult(intent, REQUEST_CODE_SMART)
                 ?: promise.reject("ACTIVITY_NULL", "Actividad no disponible")
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
-   // IMPLEMENTATION ERROR
    @ReactMethod
     fun queryUniqueTransaction(uniqueReference: String, date: String, promise: Promise) {
         currentPromise = promise
@@ -311,7 +307,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
     
-
     /* 
     @ReactMethod
     fun reauthorization(amount: String, promise: Promise) {

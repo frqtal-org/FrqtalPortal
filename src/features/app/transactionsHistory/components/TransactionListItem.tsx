@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useContext } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +10,8 @@ import {
 import { APP_PADDING } from '../../../../core/utils/constants.ts';
 import theme from '../../../../core/utils/styles/styles.ts';
 import { transactionDate } from '../../../../core/utils/transactionDate.ts';
+import { BottomSheetsContext } from '../../../../core/components/bottomSheets/context.tsx';
+import { toTitleCase } from '../../../../core/utils/titleCase.ts';
 /* import { formatDate } from '../../../../core/utils/formatDate.ts'; */
 /* import { capitalizarPalabrasEnString } from '../../../../core/utils/capitalizarPalabrasEnString.ts'; */
 /* import { parseFechaStringToDate } from '../../../../core/utils/parseFechaStringToDate.ts'; */
@@ -22,7 +24,7 @@ const statusToImageMap: Record<string, any> = {
 };
 
 const Transaction = memo(({ onBack, ...item }: any) => {
-  const { navigate } = useNavigation<any>();
+  const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
 
   const {
     RESPONSE_MESSAGE,
@@ -30,12 +32,14 @@ const Transaction = memo(({ onBack, ...item }: any) => {
     AMOUNT,
     TXN_TIME,
     TXN_DATE,
+    BRAND_NAME
   } = item;
 
   return (
     <View style={[STYLES.componentWrapper]}>
       <Pressable
         style={[STYLES.itemListWrapper]}
+        onPress={() => transactionBottomSheetRef.current.expand()}
       >
         <View style={[STYLES.itemListContainer]}>
           <FastImage
@@ -74,7 +78,7 @@ const Transaction = memo(({ onBack, ...item }: any) => {
           <Typography
             variant="text03Regular"
             color={'textEleventh'}>
-            **** {ACCOUNT_NUMBER.slice(-4)}
+            **** {ACCOUNT_NUMBER.slice(-4)} / {toTitleCase(BRAND_NAME)}
           </Typography>
         </View>
       </Pressable>

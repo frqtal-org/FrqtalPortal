@@ -36,6 +36,7 @@ const InsertAmount = () => {
 
     function handleResetDigits() {
         setPrice('');
+        setSelectedExtra('');
     }
 
     async function handlePayAmount() {
@@ -43,12 +44,15 @@ const InsertAmount = () => {
         const AMOUNT_TO_PAY = formatPriceFromDigits(price);
         const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
         const DATE = getCurrentDateDDMMAAAA();
-        const UNIQUE_REFERENCE = generateTransactionId();
+        const UNIQUE_REFERENCE = `frq${generateTransactionId()}`;
         /* mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
         mmkvStorage.set('PENDING_TX_DATE', DATE); */
+
+        console.log('AMOUNT_TO_PAY')
+        console.log(AMOUNT_TO_PAY)
         try {
             isPaymentLoadingSV.set(true)
-            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY, EXTRA, DATE, UNIQUE_REFERENCE, SPIdCemmerce);
+            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA, DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             const respuestaJSON = JSON.parse(respuestaSale);
             console.log(respuestaJSON)
 
@@ -76,10 +80,10 @@ const InsertAmount = () => {
         pointerEvents: isPaymentLoadingSV.get() ? 'auto' : 'none',
     }))
 
-    async function aoeuaoeu() {
-        const respuestaBalance = await SmartWrapperModule.getBalance()
-        console.log(respuestaBalance)
-        console.log(respuestaBalance)
+    function handleClear() {
+        console.log('aoeaoe')
+        setPrice('');
+        setSelectedExtra('');
     }
 
     /*  async function verificarTransaccionesPendientes() {
@@ -123,6 +127,7 @@ const InsertAmount = () => {
                         price={price}
                         extra={selectedExtra}
                         handleSetExtra={setSelectedExtra}
+                        handleClear={handleClear}
                     />
 
                     <NumbersKeyPad

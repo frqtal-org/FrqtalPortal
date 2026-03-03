@@ -13,6 +13,7 @@ import FastImage from 'react-native-fast-image';
 import { Typography } from '../../core/components/Typography';
 import Settings from './settings/Settings';
 import TransactionsHistory from './transactionsHistory/TransactionsHistory';
+import TransactionBottomSheet from '../../core/components/bottomSheets/TransactionBottomSheet';
 
 const CAROUSEL_WIDTH = Dimensions.get('window').width;
 const CAROUSEL_HEIGHT = Dimensions.get('window').height;
@@ -56,37 +57,41 @@ const AppNavigation = memo(() => {
     /* ------- END Functions ------- */
 
     return (
-        <BasicScreenWrapper
-            noHeader
-        >
-            <View style={[{ position: 'absolute', zIndex: 999, width: '100%' }]} >
-                <View style={[{ flexDirection: 'row' }]} >
-                    <DemoHeaderNav onPress={() => { onPressPaginationDot(0) }} icon={require('../../core/assets/images/settings.webp')} text='Ajustes' />
-                    <DemoHeaderNav onPress={() => { onPressPaginationDot(1) }} icon={require('../../core/assets/images/bill.webp')} text='Cobrar' />
-                    <DemoHeaderNav onPress={() => { onPressPaginationDot(2) }} icon={require('../../core/assets/images/Transactions.webp')} text='Historial' />
+        <>
+            <BasicScreenWrapper
+                noHeader
+            >
+                <View style={[{ position: 'absolute', zIndex: 999, width: '100%' }]} >
+                    <View style={[{ flexDirection: 'row' }]} >
+                        <DemoHeaderNav onPress={() => { onPressPaginationDot(0) }} icon={require('../../core/assets/images/settings.webp')} text='Ajustes' />
+                        <DemoHeaderNav onPress={() => { onPressPaginationDot(1) }} icon={require('../../core/assets/images/bill.webp')} text='Cobrar' />
+                        <DemoHeaderNav onPress={() => { onPressPaginationDot(2) }} icon={require('../../core/assets/images/Transactions.webp')} text='Historial' />
+                    </View>
+                    <Pagination.Basic
+                        progress={progress}
+                        data={PAGES}
+                        onPress={onPressPaginationDot}
+                        dotStyle={STYLES.paginationDotStyle}
+                        activeDotStyle={STYLES.paginationActiveDot}
+                        containerStyle={STYLES.paginationContainer}
+                    />
                 </View>
-                <Pagination.Basic
-                    progress={progress}
+                <Carousel
+                    loop={false}
+                    ref={carouselRef}
+                    width={CAROUSEL_WIDTH}
+                    height={CAROUSEL_HEIGHT - INSETS.top}
                     data={PAGES}
-                    onPress={onPressPaginationDot}
-                    dotStyle={STYLES.paginationDotStyle}
-                    activeDotStyle={STYLES.paginationActiveDot}
-                    containerStyle={STYLES.paginationContainer}
+                    renderItem={({ item }) => item.component()}
+                    onConfigurePanGesture={panGestureConfig}
+                    onProgressChange={progress}
+                    defaultIndex={1}
+                    overscrollEnabled={false}
                 />
-            </View>
-            <Carousel
-                loop={false}
-                ref={carouselRef}
-                width={CAROUSEL_WIDTH}
-                height={CAROUSEL_HEIGHT - INSETS.top}
-                data={PAGES}
-                renderItem={({ item }) => item.component()}
-                onConfigurePanGesture={panGestureConfig}
-                onProgressChange={progress}
-                defaultIndex={1}
-                overscrollEnabled={false}
-            />
-        </BasicScreenWrapper>
+            </BasicScreenWrapper>
+            
+            <TransactionBottomSheet />
+        </>
     );
 });
 
