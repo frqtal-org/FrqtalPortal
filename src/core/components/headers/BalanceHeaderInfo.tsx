@@ -12,7 +12,7 @@ const BalanceHeaderInfo = memo(({ onPressFilterTitle, balance, currency, equival
                 <View style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3) }]} >
                     <Typography variant="subtitle01SemiBold">{balanceTitle}</Typography>
                     {filterTitleText && <Pressable onPress={onPressFilterTitle} style={[{ columnGap: sizeToDp(APP_PADDING * 0.2), flexDirection: 'row', alignItems: 'center', zIndex: 999}]} hitSlop={sizeToDp(APP_PADDING * 1.3)} >
-                        <Typography variant="subtitle01SemiBold" color='brand200' >{filterTitleText}</Typography>
+                        <Typography variant="subtitle01SemiBold" color='textEleventh' >{filterTitleText}</Typography>
                         {/* <FastImage
                             source={require('../../assets/images/down-arrow.webp')}
                             style={[STYLES.cryptoSelectorChevron]}

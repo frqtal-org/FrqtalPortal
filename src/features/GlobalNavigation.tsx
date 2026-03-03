@@ -2,12 +2,10 @@ import React, { useCallback } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from './accessManagement/Login/Login.tsx';
 import AppNavigation from './app/AppNavigation.tsx';
-import BootSplash from "react-native-bootsplash";
 import { BackHandler, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import LoadingScreen from '../core/components/Loading/LoadingScreen.tsx';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { Typography } from '../core/components/Typography.tsx';
 
 const { Navigator, Screen } = createNativeStackNavigator();
 

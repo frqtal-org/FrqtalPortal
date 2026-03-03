@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BootSplash from "react-native-bootsplash";
 import { BottomSheetsProvider } from './src/core/components/bottomSheets/context';
+import { LoginProvider } from './src/features/accessManagement/Login/context';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,11 +41,13 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         <TerminalDeviceContextProvider>
           <SafeAreaProvider>
             <InsetsProvider>
-              <BottomSheetsProvider>
-                <GestureHandlerRootView style={[{ height: Dimensions.get('window').height }]} >
-                  {children}
-                </GestureHandlerRootView>
-              </BottomSheetsProvider>
+              <GestureHandlerRootView style={[{ height: Dimensions.get('window').height }]} >
+                <BottomSheetsProvider>
+                  <LoginProvider>
+                    {children}
+                  </LoginProvider>
+                </BottomSheetsProvider>
+              </GestureHandlerRootView>
             </InsetsProvider>
           </SafeAreaProvider>
         </TerminalDeviceContextProvider>

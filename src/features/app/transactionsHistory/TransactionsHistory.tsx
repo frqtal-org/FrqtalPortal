@@ -74,7 +74,7 @@ const TransactionsHistory = memo(() => {
               equivalentMiniText='Extra:'
             />
             <Pressable onPress={goToReports} style={[{ marginLeft: 'auto', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.3), paddingBottom: sizeToDp(APP_PADDING * 0.2), right: sizeToDp(APP_PADDING * 0.2), paddingTop: sizeToDp(APP_PADDING) }]} >
-              <Typography variant="text01Medium" color="brand200" >Reporte</Typography>
+              <Typography variant="text01Medium" color="brand200" >Reportes</Typography>
               <FastImage
                 source={require('../../../core/assets/images/report200.png')}
                 style={[{ width: sizeToDp(APP_PADDING * 1.2), aspectRatio: 1 }]}

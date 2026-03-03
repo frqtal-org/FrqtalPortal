@@ -1,8 +1,8 @@
-import { NativeModules, Pressable, StyleSheet, View } from 'react-native'
-import React, { useEffect } from 'react'
+import { Pressable, StyleSheet, View } from 'react-native'
+import React, { useContext, useEffect } from 'react'
 import { useMMKVString } from 'react-native-mmkv';
 import StorageKey from '../../../core/utils/store/keysStore';
-import { getItemWithExpiry, mmkvStorage, setItemWithExpiry } from '../../../core/store/principalStore';
+import { mmkvStorage } from '../../../core/store/principalStore';
 import { sizeToDp } from '../../../core/utils/sizeToDP';
 import { APP_PADDING } from '../../../core/utils/constants';
 import theme from '../../../core/utils/styles/styles';
@@ -10,11 +10,10 @@ import { Typography } from '../../../core/components/Typography';
 import { useFormik } from 'formik';
 import FastImage from 'react-native-fast-image';
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
-
-const { SmartWrapperModule } = NativeModules;
+import { LoginContext } from './context';
 
 const KeyCode = ({ onPress, text, pressColor, onLongPress, underLine }: { onPress: () => void, text: string, pressColor?: string, onLongPress?: () => void, underLine?: boolean }) => {
   return <Pressable onPress={onPress} onLongPress={onLongPress} style={({ pressed }) => [STYLES.keyButton, pressed && { backgroundColor: pressColor === 'red' ? theme.colors.notificationRed : theme.colors.glassBorder }]}>
@@ -28,42 +27,17 @@ const Code = ({ value }: { value: string }) => {
 
 const Login = () => {
   /*  */
+  const { handleLogin, isAuthenticationLoadingSV } = useContext(LoginContext)
+  /*  */
   const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
   const [SPApiKey, setSPApiKey] = useMMKVString(StorageKey.SP_API_KEY, mmkvStorage)
   const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
   const [SPIdIntegrator, setSPIdIntegrator] = useMMKVString(StorageKey.SP_ID_INTEGRATOR, mmkvStorage)
-  const [SPIdInvoice, setSPIdInvoice] = useMMKVString(StorageKey.SP_ID_INVOICE, mmkvStorage)
   const [appBuildNumber, setAppBuildNumber] = useMMKVString(StorageKey.APP_VERSION_NAME, mmkvStorage)
-  /*  */
-  const isAuthenticationLoadingSV = useSharedValue(false)
   /*  */
   const { navigate } = useNavigation<any>()
 
   /* ------- Functions ------- */
-  async function autenticarTerminal() {
-    try {
-      isAuthenticationLoadingSV.set(true)
-      const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
-
-      if (token === null) {
-        const response = await SmartWrapperModule.authenticate(SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice);
-        const RESPONSE_PARSED = JSON.parse(response)
-        if (RESPONSE_PARSED.response_code == 200) {
-          setItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN, true);
-          navigate('AppNavigation')
-        }
-      } else {
-        console.log("El token sigue vivo, podemos proceder con el cobro.");
-        navigate('AppNavigation')
-      }
-    } catch (err) {
-      console.error('err')
-      console.error(err)
-    } finally {
-      isAuthenticationLoadingSV.set(false)
-    }
-  };
-
   function handleKeyPress(key: any) {
     if (key === 'delete') {
       if (values.code.length === 0) return;
@@ -73,12 +47,21 @@ const Login = () => {
     if (values.code.length === 6) return;
     setFieldValue('code', values.code + key);
   }
+
+  function sendLoginCode({ code }: any) {
+    handleLogin({ code, deviceId, SPApiKey, SPIdCemmerce, SPIdIntegrator })
+      .then(() => navigate('AppNavigation'))
+      .catch((err: any) => {
+        setFieldValue('code', '')
+        console.error(err);
+      })
+  }
   /* ------- END Functions ------- */
 
   /* ------- Forms ------- */
   const { setFieldValue, handleSubmit, values, resetForm } = useFormik({
     initialValues: { code: '' },
-    onSubmit: autenticarTerminal,
+    onSubmit: sendLoginCode,
   });
   /* ------- END Forms ------- */
 

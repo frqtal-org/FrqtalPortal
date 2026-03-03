@@ -47,12 +47,9 @@ const InsertAmount = () => {
         const UNIQUE_REFERENCE = `frq${generateTransactionId()}`;
         /* mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
         mmkvStorage.set('PENDING_TX_DATE', DATE); */
-
-        console.log('AMOUNT_TO_PAY')
-        console.log(AMOUNT_TO_PAY)
         try {
             isPaymentLoadingSV.set(true)
-            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA, DATE, UNIQUE_REFERENCE, SPIdCemmerce);
+            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             const respuestaJSON = JSON.parse(respuestaSale);
             console.log(respuestaJSON)
 
