@@ -1,5 +1,5 @@
 import React, { memo, useContext } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { NativeModules, Pressable, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { sizeToDp } from '../../../../core/utils/sizeToDP.tsx';
@@ -12,19 +12,23 @@ import theme from '../../../../core/utils/styles/styles.ts';
 import { transactionDate } from '../../../../core/utils/transactionDate.ts';
 import { BottomSheetsContext } from '../../../../core/components/bottomSheets/context.tsx';
 import { toTitleCase } from '../../../../core/utils/titleCase.ts';
+import { mmkvStorage } from '../../../../core/store/principalStore.ts';
+import { getExtraPercentage } from '../../../../core/utils/getExtraPercentage.ts';
 /* import { formatDate } from '../../../../core/utils/formatDate.ts'; */
 /* import { capitalizarPalabrasEnString } from '../../../../core/utils/capitalizarPalabrasEnString.ts'; */
 /* import { parseFechaStringToDate } from '../../../../core/utils/parseFechaStringToDate.ts'; */
 
 const statusToImageMap: Record<string, any> = {
-  Devuelta: require('../../../../core/assets/images/error.webp'),
-  Cancelada: require('../../../../core/assets/images/error.webp'),
+  Declinada: require('../../../../core/assets/images/error.webp'),
+  Reembolso: require('../../../../core/assets/images/error.webp'),
   Pendiente: require('../../../../core/assets/images/pending.webp'),
   Aprobada: require('../../../../core/assets/images/accepted.webp'),
 };
 
+const { SmartWrapperModule } = NativeModules;
+
 const Transaction = memo(({ onBack, ...item }: any) => {
-  const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
+  const { transactionBottomSheetRef, setTransactionSelected } = useContext(BottomSheetsContext)
 
   const {
     RESPONSE_MESSAGE,
@@ -32,14 +36,26 @@ const Transaction = memo(({ onBack, ...item }: any) => {
     AMOUNT,
     TXN_TIME,
     TXN_DATE,
-    BRAND_NAME
+    BRAND_NAME,
+    TIP,
+    SG_REFERENCE,
   } = item;
+
+  function handleViewTransaction() {
+    setTransactionSelected(item)
+    transactionBottomSheetRef.current.expand()
+  }
+
+  async function printTicket() {
+    await SmartWrapperModule.reprintTicket(SG_REFERENCE);
+  }
 
   return (
     <View style={[STYLES.componentWrapper]}>
       <Pressable
         style={[STYLES.itemListWrapper]}
-        onPress={() => transactionBottomSheetRef.current.expand()}
+        onPress={handleViewTransaction}
+        onLongPress={printTicket}
       >
         <View style={[STYLES.itemListContainer]}>
           <FastImage
@@ -65,7 +81,15 @@ const Transaction = memo(({ onBack, ...item }: any) => {
 
         <View style={[STYLES.itemRightContainer]}>
           <View style={[STYLES.itemPriceContainer]}>
-            <View>
+            <View style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.2) }]} >
+              {TIP && <Typography
+                numberOfLines={1}
+                ellipsizeMode="middle"
+                variant="text02Regular"
+                color='notificationGreen'
+              >
+                +{getExtraPercentage({ montoBase: AMOUNT, montoExtra: TIP })}
+              </Typography>}
               <Typography
                 numberOfLines={1}
                 ellipsizeMode="middle"

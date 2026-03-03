@@ -11,7 +11,7 @@ import HeaderGradient from '../../utils/styles/backgroundGradients/HeaderGradien
 import SuperMenuGradient from '../../utils/styles/backgroundGradients/SuperMenuGradient';
 import FastImage from 'react-native-fast-image';
 
-const GeneralBottomSheet = ({ ref, children }: any) => {
+const GeneralBottomSheet = ({ ref, borderColor, children }: any) => {
     const INSETS = useContext(InsetsContext)
 
     const handleSheetChanges = useCallback((index: number) => {
@@ -39,14 +39,17 @@ const GeneralBottomSheet = ({ ref, children }: any) => {
             onChange={handleSheetChanges}
             enablePanDownToClose
             index={-1}
-            handleStyle={{ backgroundColor: theme.colors.black, top: sizeToDp(1), borderTopLeftRadius: sizeToDp(APP_PADDING * 1.8), borderTopRightRadius: sizeToDp(APP_PADDING * 1.8), borderTopWidth: sizeToDp(1), borderTopColor: theme.colors.notificationGreen, borderRightWidth: sizeToDp(1), borderRightColor: theme.colors.notificationGreen, borderLeftWidth: sizeToDp(1), borderLeftColor: theme.colors.notificationGreen }}
+            handleStyle={{ backgroundColor: theme.colors.black, top: sizeToDp(1), borderTopLeftRadius: sizeToDp(APP_PADDING * 1.8), borderTopRightRadius: sizeToDp(APP_PADDING * 1.8), borderTopWidth: sizeToDp(1), borderTopColor: theme.colors[borderColor], borderRightWidth: sizeToDp(1), borderRightColor: theme.colors[borderColor], borderLeftWidth: sizeToDp(1), borderLeftColor: theme.colors[borderColor] }}
             handleIndicatorStyle={{ backgroundColor: theme.colors.selectedBlue }}
             containerStyle={{ backgroundColor: 'transparent', zIndex: 9999 }}
             backgroundStyle={{ backgroundColor: 'transparent' }}
             enableOverDrag={false}
             backdropComponent={renderBackdrop}
         >
-            <BottomSheetView style={[styles.contentContainer]}>
+            <BottomSheetView style={[styles.contentContainer, {
+                borderRightColor: theme.colors[borderColor],
+                borderLeftColor: theme.colors[borderColor],
+            }]}>
                 <SuperMenuGradient />
                 {children}
             </BottomSheetView>
@@ -60,9 +63,7 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         borderRightWidth: sizeToDp(1),
-        borderRightColor: theme.colors.notificationGreen,
         borderLeftWidth: sizeToDp(1),
-        borderLeftColor: theme.colors.notificationGreen,
         /* aspectRatio: 1.658 */
     },
 });

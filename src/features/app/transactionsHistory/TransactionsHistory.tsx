@@ -1,6 +1,6 @@
 import { useFocusEffect, useNavigation, useRoute } from "@react-navigation/native";
 import React, { memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { BackHandler, FlatList, StyleSheet, View } from 'react-native';
+import { BackHandler, FlatList, NativeModules, Pressable, StyleSheet, View } from 'react-native';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper.tsx';
 import { Typography } from '../../../core/components/Typography.tsx';;
 import { sizeToDp } from '../../../core/utils/sizeToDP.tsx';
@@ -11,6 +11,7 @@ import BalanceHeaderInfo from "../../../core/components/headers/BalanceHeaderInf
 import { Filters } from "./components/Filters.tsx";
 import LoadingListLoader from "../../../core/components/LoadingListLoader.tsx";
 import HeaderGradient from "../../../core/utils/styles/backgroundGradients/HeaderGradient.tsx";
+import FastImage from "react-native-fast-image";
 
 type DateFilterItem = {
   label: string;
@@ -47,179 +48,39 @@ export function buildTransactionsRangeText(
   return `Transacciones de: ${fmt(start)} - ${fmt(endInclusive)}`;
 }
 
+const { SmartWrapperModule } = NativeModules;
+
 const TransactionsHistory = memo(() => {
   /*  */
-  /* const BOTTOM_SHEETS_CONTEXT = useContext(BottomSheetsContext)
-  const TRANSACTIONS_CONTEXT = useContext(TransactionsContext); */
-  /*  */
-  /* const [allTransactions, setAllTransactions] = useState(TRANSACTIONS_CONTEXT.historialListSV.value);
-  const [isHistorialLoading, setIsHistorialLoading] = useState(TRANSACTIONS_CONTEXT.isHistorialLoadingSV.value);
-  const [selectedFilter, setSelectedFilter] = useState(TRANSACTIONS_CONTEXT.selectedFilterSV.value);
-  const [selectedStatusFilter, setSelectedStatusFilter] = useState(TRANSACTIONS_CONTEXT.selectedStatusFilterSV.value);
-  const [isCancelingTransaction, setIsCancelingTransaction] = useState(TRANSACTIONS_CONTEXT.isActionLoading.value);
-  const [totalAmounts, setTotalAmounts] = useState(TRANSACTIONS_CONTEXT.totalAmountsSV.value);
-  const [totalAmountsFilterList, setTotalAmountsFilterList] = useState<any>([]);
-  const [dateFiltersDates, setDateFiltersDates] = useState<any>(TRANSACTIONS_CONTEXT.dateFiltersDatesSV.value);
-  const [totalPages, setTotalPages] = useState<any>(TRANSACTIONS_CONTEXT.transactionsTotalPagesSV.value);
-  const [selectedPage, setSelectedPage] = useState<any>(TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value); */
-  /*  */
   const listRef = useRef<FlatList<any>>(null)
-  /*  */
-  /* const { goBack } = useNavigation();
-  const { params } = useRoute<any>(); */
-  /*  */
-  /* const ALL_TRANSACTIONS = useMemo(() => JSON.parse(allTransactions), [allTransactions]);
-  const TOTAL_AMOUNTS = useMemo(() => JSON.parse(totalAmounts), [totalAmounts])
-  const DATE_FILTERS_DATES = useMemo(() => JSON.parse(dateFiltersDates), [dateFiltersDates]) */
 
-
-  /* ------- FUNCTIONS ------- */
-  /* function handleNetPage() {
-    if (selectedPage === totalPages || totalPages === 0 || isHistorialLoading) return
-    TRANSACTIONS_CONTEXT.isHistorialLoadingSV.value = true
-    TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value = TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value + 1
-  } */
-  /* ------- END FUNCTIONS ------- */
-
-  /* ------- ANIMATIONS ------- */
-  /* useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.selectedFilterSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setSelectedFilter, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.selectedStatusFilterSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setSelectedStatusFilter, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setSelectedPage, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.historialListSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setAllTransactions, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.isHistorialLoadingSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setIsHistorialLoading, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.isActionLoading.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setIsCancelingTransaction, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.totalAmountsSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setTotalAmounts, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.dateFiltersDatesSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setDateFiltersDates, currentValue)
-    }
-  })
-  useAnimatedReaction(() => {
-    return TRANSACTIONS_CONTEXT.transactionsTotalPagesSV.value
-  }, (currentValue, previousValue) => {
-    if (currentValue !== previousValue) {
-      scheduleOnRN(setTotalPages, currentValue)
-    }
-  }) */
-  /* ------- END ANIMATIONS ------- */
-
-  /* ------- EFFECTS ------- */
-  useFocusEffect(
-    useCallback(() => {
-      /* TRANSACTIONS_CONTEXT.montoToRefundSV.value = ''
-      TRANSACTIONS_CONTEXT.codigoAprobacionToRefundSV.value = ''
-      TRANSACTIONS_CONTEXT.referenciaBancoToRefundSV.value = ''
-      TRANSACTIONS_CONTEXT.transactionSignSV.value = ''
-      TRANSACTIONS_CONTEXT.transactionDateToRefundSV.value = ''
-      TRANSACTIONS_CONTEXT.emailToSendVoucherSV.value = ''
-      const onBackPress = () => {
-        goBack();
-        TRANSACTIONS_CONTEXT.selectedFilterSV.value = 'week'
-        TRANSACTIONS_CONTEXT.selectedStatusFilterSV.value = 'all'
-        ALL_TRANSACTIONS.length > 0 && listRef.current?.scrollToIndex?.({ index: 0 })
-        TRANSACTIONS_CONTEXT.transactionsTotalPagesSV.value = 1
-        TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value = 1
-        TRANSACTIONS_CONTEXT.historialListSV.value = '[]'
-        BOTTOM_SHEETS_CONTEXT.transactionsFilterBottomSheetRef.current.close()
-        return true
-      };
-
-      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-      return () => subscription.remove(); */
-    }, [])
-  );
-
-  /* useEffect(() => {
-    if (selectedPage === 1) return
-    TRANSACTIONS_CONTEXT.handleGetHistorial({ filter: selectedFilter, status: selectedStatusFilter, page: selectedPage });
-  }, [selectedPage]) */
-
-  /* useFocusEffect(useCallback(() => {
-    if (!params.loadData || params.bypassLoadData) {
-      params.bypassLoadData = false
-      return
-    }
-    TRANSACTIONS_CONTEXT.transactionsTotalPagesSV.value = 0
-    TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value = 1
-    TRANSACTIONS_CONTEXT.historialListSV.value = '[]'
-    TRANSACTIONS_CONTEXT.handleGetHistorial({ filter: selectedFilter, status: selectedStatusFilter, page: 1 });
-  }, [selectedFilter, selectedStatusFilter])) */
-
-
-  useEffect(() => {
-    /* if (!TOTAL_AMOUNTS?.totalThisWeek && TOTAL_AMOUNTS?.totalThisWeek !== 0) return
-    const FILTERS_WITH_AMOUNTS = TRANSACTIONS_CONTEXT.LIST_DATE_FILTERS.map((dateItem: any) => {
-      if (dateItem.selectionValue === 'week') { dateItem.infoText = `${TOTAL_AMOUNTS['totalThisWeek']}` }
-      if (dateItem.selectionValue === 'lastWeek') { dateItem.infoText = `${TOTAL_AMOUNTS['totalLastWeek']}` }
-      if (dateItem.selectionValue === 'month') { dateItem.infoText = `${TOTAL_AMOUNTS['totalThisMonth']}` }
-      if (dateItem.selectionValue === 'lastMonth') { dateItem.infoText = `${TOTAL_AMOUNTS['totalLastMonth']}` }
-      if (dateItem.selectionValue === 'yesterday') { dateItem.infoText = `${TOTAL_AMOUNTS['totalYesterday']}` }
-      return dateItem
-    })
-    setTotalAmountsFilterList(FILTERS_WITH_AMOUNTS) */
-  }, [/* TOTAL_AMOUNTS */])
-  /* ------- END EFFECTS ------- */
+  async function goToReports() {
+    await SmartWrapperModule.getBalance();
+  }
 
   return (
     <BasicScreenWrapper noHeader noPaddingBottom >
       <View style={[STYLES.listHeaderStyle]}>
         <View >
-          <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING), paddingTop: sizeToDp(APP_PADDING * 1) }]} >
+          <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING), paddingTop: sizeToDp(APP_PADDING * 1), flexDirection: 'row', alignItems: 'flex-end', width: '100%'}]} >
             <BalanceHeaderInfo
               balanceTitle={'Ganancias totales:'}
-              filterTitleText={'Semana'}
+              filterTitleText={'Hoy'}
               onPressFilterTitle={() => { }}
               balance={`$19,743.20`}
               currency={'MXN'}
-              equivalentBalance={`$2,723.54`}
+              equivalentBalance={`+$2,723.54`}
               equivalentBalanceColor={'notificationGreen'}
-              equivalentMiniText='Hoy:'
+              equivalentMiniText='Extra:'
             />
+            <Pressable onPress={goToReports} style={[{ marginLeft: 'auto', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.3), paddingBottom: sizeToDp(APP_PADDING * 0.2), right: sizeToDp(APP_PADDING * 0.2), paddingTop: sizeToDp(APP_PADDING) }]} >
+              <Typography variant="text01Medium" color="brand200" >Reporte</Typography>
+              <FastImage
+                source={require('../../../core/assets/images/report200.png')}
+                style={[{ width: sizeToDp(APP_PADDING * 1.2), aspectRatio: 1 }]}
+                resizeMode='contain'
+              />
+            </Pressable>
           </View>
 
           <Filters style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />
@@ -241,6 +102,57 @@ const TransactionsHistory = memo(() => {
         /* contentContainerStyle={[(ALL_TRANSACTIONS.length === 0 && !isHistorialLoading) && { flex: 1 }]}
         ListEmptyComponent={!isHistorialLoading ? <View style={[STYLES.emptyListContainer, { flex: 1 }]} ><Typography style={[{ textAlign: 'center' }]} variant='text02Medium' color='textSecondary' >Sin transacciones en el periodo seleccionado</Typography></View> : <></>} */
         data={[
+          {
+            "POS_ID": "caja07",
+            "TAG_9B": "0000",
+            "TAG_9F26": "C0DB62B2874AB8D6",
+            "TXN_UNIQUE_REF": "frq03032026015629274",
+            "APP_LABEL": "Mastercard",
+            "TAG_50": "Mastercard",
+            "TAG_95": "0000008001",
+            "AMOUNT": "53200",
+            "PAYMENT_PLAN_OPTION": "0",
+            "SUGGEST_QUERY_TXN": "false",
+            "APP_VERSION: ": "2.1.0.0.7",
+            "ACCOUNT_NUMBER": "532829******5876",
+            "AID": "A0000000041010",
+            "ARQC": "C0DB62B2874AB8D6",
+            "SERVICE_NAME": "Banco_P",
+            "TXN_TIME": "015637",
+            "TXN_APPROVAL_CODE": "075299",
+            "TAG_9F34": "1E0300",
+            "HEADER_2": "Insurgentes #1581",
+            "STATUS_FLAG_TXN": "2",
+            "HEADER_3": "Col. San Jose Insurgentes",
+            "HEADER_4": "C.P. 03900 CDMX",
+            "TSN": "015636",
+            "EXPIRATION_DATE": "3011",
+            "TAG_5F2A": "0484",
+            "SIGNATURE_BYTES": "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",
+            "controles": "{\"data\":[]}",
+            "SG_REFERENCE": "000038460912",
+            "RESPONSE_CODE": "00",
+            "SG_REFERENCE_FOLIO": "260620492407",
+            "CARD_TYPE": "1",
+            "MNEMO_NAME": "DD",
+            "TERMINAL_ID": "caja07",
+            "CURRENCY_CODE": "484",
+            "HEADER_1": "SMART PAYMENT SERVICES",
+            "BILLABLE": "true",
+            "PREFERRED_NAME": "Mastercard",
+            "RESPONSE_MESSAGE": "Aprobada",
+            "SIGNATURE_FLAG": "1",
+            "TXN_NAME": "VENTA EN LINEA",
+            "TAG_9F12": "Mastercard",
+            "CARD_NAME": "Didi",
+            "TRANSACTION_TYPE": "1",
+            "ENTRY_MODE": "07",
+            "BRAND_NAME": "MASTERCARD",
+            "TXN_DATE": "260303",
+            "TIP": "7980",
+            "BANK_NAME": "MASTERCARD",
+            "MERCHANT_ID": "12345678"
+          },
           {
             "POS_ID": "caja07",
             "TAG_9B": "0000",
@@ -480,7 +392,7 @@ const TransactionsHistory = memo(() => {
             "HEADER_1": "SMART PAYMENT SERVICES",
             "BILLABLE": "true",
             "PREFERRED_NAME": "Debit Mastercard",
-            "RESPONSE_MESSAGE": "Cancelada",
+            "RESPONSE_MESSAGE": "Reembolso",
             "SIGNATURE_FLAG": "1",
             "TXN_NAME": "VENTA EN LINEA",
             "TAG_9F12": "Debit Mastercard",
@@ -513,7 +425,7 @@ const TransactionsHistory = memo(() => {
             "PAYMENT_PLAN_OPTION": "0",
             "SUGGEST_QUERY_TXN": "false",
             "PREFERRED_NAME": "Debit Mastercard",
-            "RESPONSE_MESSAGE": "Devuelta",
+            "RESPONSE_MESSAGE": "Declinada",
             "APP_VERSION: ": "2.1.0.0.7",
             "ACCOUNT_NUMBER": "510125******8695",
             "AID": "A0000000041010",

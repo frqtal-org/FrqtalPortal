@@ -137,7 +137,6 @@ const STYLES = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: sizeToDp(APP_PADDING),
-    rowGap: sizeToDp(APP_PADDING * 0.3)
   },
   extrasContainer: {
     flexDirection: 'row',
