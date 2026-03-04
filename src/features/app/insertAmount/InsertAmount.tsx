@@ -1,6 +1,5 @@
-import { Alert, NativeModules, Pressable, StyleSheet, View } from 'react-native'
+import { Alert, NativeModules, StyleSheet, View } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
-import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
@@ -13,14 +12,17 @@ import { useMMKVString } from 'react-native-mmkv'
 import StorageKey from '../../../core/utils/store/keysStore'
 import { mmkvStorage } from '../../../core/store/principalStore'
 import { getCurrentDateDDMMAAAA } from '../../../core/utils/getDateDDMMAAAA'
-import { generateTransactionId } from '../../../core/utils/getTransactionReference'
 import { InsetsContext } from '../../../core/utils/styles/insets'
-import { Typography } from '../../../core/components/Typography'
+import uuid from 'react-native-uuid';
+import { registrarNuevoCobro } from '../../../core/utils/registerTxn'
+import { BottomSheetsContext } from '../../../core/components/bottomSheets/context'
+import { parseDateToDate } from '../../../core/utils/transactionDate'
 
 const { SmartWrapperModule } = NativeModules;
 
 const InsertAmount = () => {
     const INSETS = useContext(InsetsContext)
+    const { setTransactionSelected } = useContext(BottomSheetsContext)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
 
     const [selectedExtra, setSelectedExtra] = useState<string>('');
@@ -44,27 +46,29 @@ const InsertAmount = () => {
         const AMOUNT_TO_PAY = formatPriceFromDigits(price);
         const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
         const DATE = getCurrentDateDDMMAAAA();
-        const UNIQUE_REFERENCE = `frq${generateTransactionId()}`;
-        /* mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
-        mmkvStorage.set('PENDING_TX_DATE', DATE); */
+        const UNIQUE_REFERENCE = `frq${uuid.v4().replaceAll('-', '').slice(-16)}`;
+        mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
+        mmkvStorage.set('PENDING_TX_DATE', DATE);
         try {
             isPaymentLoadingSV.set(true)
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             const respuestaJSON = JSON.parse(respuestaSale);
+            setTransactionSelected(respuestaJSON)
             console.log(respuestaJSON)
 
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 setPrice('')
                 setSelectedExtra('')
-                /* mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE') */
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+                registrarNuevoCobro(respuestaJSON)
             }
             /* const respuestaPrint = await SmartWrapperModule.reprintTicket(respuestaJSON.SG_REFERENCE);console.log(respuestaPrint) */
         } catch (error) {
             console.log('error 777')
             console.log(error)
-            /* mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-            mmkvStorage.remove('PENDING_TX_DATE') */
+            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+            mmkvStorage.remove('PENDING_TX_DATE')
         } finally {
             setTimeout(() => {
                 isPaymentLoadingSV.set(false)
@@ -78,43 +82,40 @@ const InsertAmount = () => {
     }))
 
     function handleClear() {
-        console.log('aoeaoe')
         setPrice('');
         setSelectedExtra('');
     }
 
-    /*  async function verificarTransaccionesPendientes() {
-         const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-         const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
- 
-         if (pendingRef && pendingDate) {
-             console.log(`⚠️ ALERTA: Se encontró una transacción huérfana (${pendingRef}). Consultando con el banco...`);
- 
-             try {
-                 const respuestaString = await SmartWrapperModule.queryTransaction(pendingRef, pendingDate);
-                 const respuestaJSON = JSON.parse(respuestaString);
- 
-                 if (respuestaJSON.RESPONSE_CODE === "00") {
-                     Alert.alert(
-                         "Transacción Recuperada",
-                         `El cobro anterior de ${respuestaJSON.AMOUNT} sí se completó con éxito. Folio: ${respuestaJSON.SG_REFERENCE_FOLIO}`
-                     );
-                 } else {
-                     console.log("La transacción pendiente fue rechazada por el banco.");
-                 }
- 
-             } catch (error) {
-                 console.log("La transacción huérfana nunca se completó:", error);
-             } finally {
-                 mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                 mmkvStorage.remove('PENDING_TX_DATE')
-             }
-         }
-     }
- 
-     useEffect(() => {
-         verificarTransaccionesPendientes();
-     }, []); */
+    async function verificarTransaccionesPendientes() {
+        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+
+        if (pendingRef && pendingDate) {
+            try {
+                const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
+                const respuestaJSON = JSON.parse(respuestaString);
+
+                if (respuestaJSON.TXN_NAME === "VENTA EN LINEA") {
+                    registrarNuevoCobro(respuestaJSON)
+                    setTransactionSelected(respuestaJSON)
+                } else {
+                    console.log("La transacción pendiente fue rechazada por el banco.");
+                }
+
+            } catch (error) {
+                console.error(error);
+            } finally {
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+            }
+        }
+    }
+
+    useEffect(() => {
+        setTimeout(() => {
+            verificarTransaccionesPendientes();
+        }, 3000)
+    }, []);
 
     return (
         <>

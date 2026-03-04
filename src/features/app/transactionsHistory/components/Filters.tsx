@@ -8,15 +8,15 @@ import theme from '../../../../core/utils/styles/styles.ts';
 const LIST_STATUS_FILTERS = [
   {
     label: 'Todas',
-    selectionValue: 'all'
+    selectionValue: 'todas'
   },
   {
     label: 'Exitosas',
-    selectionValue: 'successful'
+    selectionValue: 'exitosas'
   },
   {
     label: 'Devueltas',
-    selectionValue: 'returned and cancelled'
+    selectionValue: 'devueltas'
   },
 ]
 
@@ -34,30 +34,18 @@ const FilterBadge = memo(({ timeLabel, isSelected, onPress }: any) => {
   );
 });
 
-export const Filters = memo(({ style = [{}] }: any) => {
+export const Filters = memo(({ style = [{}], onPress }: any) => {
   /*  */
-  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState('todas');
   /*  */
 
   /* ------- FUNCTIONS ------- */
   function handlePressFilterBadge({ selectionValue }: any) {
     if (selectedFilter === selectionValue) return
-    /* TRANSACTIONS_CONTEXT.isHistorialLoadingSV.value = true */
     setSelectedFilter(selectionValue);
+    onPress(selectionValue)
   }
   /* ------- END FUNCTIONS ------- */
-
-  /* ------- ANIMATIONS ------- */
-  /* useAnimatedReaction(() => {
-      return TRANSACTIONS_CONTEXT.selectedStatusFilterSV.value
-    }, (currentValue, previousValue) => {
-      if (currentValue !== previousValue) {
-        scheduleOnRN(setSelectedFilter, currentValue)
-      }
-    }
-  ) */
-  /* ------- END ANIMATIONS ------- */
-
 
   return (
     <View style={[{ paddingTop: sizeToDp(APP_PADDING * 0), alignItems: 'center', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.7), zIndex: 999 }]} >

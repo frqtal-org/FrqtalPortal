@@ -14,24 +14,32 @@ import { BottomSheetsContext } from '../../../../core/components/bottomSheets/co
 import { toTitleCase } from '../../../../core/utils/titleCase.ts';
 import { mmkvStorage } from '../../../../core/store/principalStore.ts';
 import { getExtraPercentage } from '../../../../core/utils/getExtraPercentage.ts';
+import { obtenerTransaccion } from '../../../../core/utils/registerTxn.ts';
 /* import { formatDate } from '../../../../core/utils/formatDate.ts'; */
 /* import { capitalizarPalabrasEnString } from '../../../../core/utils/capitalizarPalabrasEnString.ts'; */
 /* import { parseFechaStringToDate } from '../../../../core/utils/parseFechaStringToDate.ts'; */
 
 const statusToImageMap: Record<string, any> = {
-  Declinada: require('../../../../core/assets/images/error.webp'),
-  Reembolso: require('../../../../core/assets/images/error.webp'),
-  Pendiente: require('../../../../core/assets/images/pending.webp'),
-  Aprobada: require('../../../../core/assets/images/accepted.webp'),
+  /* Declinada: require('../../../../core/assets/images/error.webp'), */
+  CANCELACION: require('../../../../core/assets/images/error.webp'),
+  /* Pendiente: require('../../../../core/assets/images/pending.webp'), */
+  "VENTA EN LINEA": require('../../../../core/assets/images/accepted.webp'),
+};
+
+const statusText: Record<string, any> = {
+  /* Declinada: '', */
+  CANCELACION: 'Reembolso',
+  /* Pendiente: '', */
+  "VENTA EN LINEA": 'Aprobada',
 };
 
 const { SmartWrapperModule } = NativeModules;
 
-const Transaction = memo(({ onBack, ...item }: any) => {
+const Transaction = ({ onBack, ...item }: any) => {
   const { transactionBottomSheetRef, setTransactionSelected } = useContext(BottomSheetsContext)
 
   const {
-    RESPONSE_MESSAGE,
+    TXN_NAME,
     ACCOUNT_NUMBER,
     AMOUNT,
     TXN_TIME,
@@ -59,7 +67,7 @@ const Transaction = memo(({ onBack, ...item }: any) => {
       >
         <View style={[STYLES.itemListContainer]}>
           <FastImage
-            source={statusToImageMap[RESPONSE_MESSAGE]}
+            source={statusToImageMap[TXN_NAME]}
             style={[STYLES.itemImage]}
             resizeMode="contain"
           />
@@ -67,7 +75,7 @@ const Transaction = memo(({ onBack, ...item }: any) => {
           <View>
             <View style={[STYLES.itemTitleContainer]}>
               <Typography variant="subtitle02SemiBold" numberOfLines={1}>
-                {RESPONSE_MESSAGE}
+                {statusText[TXN_NAME]}
               </Typography>
             </View>
             <Typography
@@ -82,7 +90,7 @@ const Transaction = memo(({ onBack, ...item }: any) => {
         <View style={[STYLES.itemRightContainer]}>
           <View style={[STYLES.itemPriceContainer]}>
             <View style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.2) }]} >
-              {TIP && <Typography
+              {(TIP && TIP !== '0') && <Typography
                 numberOfLines={1}
                 ellipsizeMode="middle"
                 variant="text02Regular"
@@ -108,7 +116,7 @@ const Transaction = memo(({ onBack, ...item }: any) => {
       </Pressable>
     </View>
   );
-});
+};
 
 export default Transaction;
 

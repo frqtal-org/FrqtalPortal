@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View } from 'react-native'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useMMKVString } from 'react-native-mmkv';
 import StorageKey from '../../../core/utils/store/keysStore';
 import { mmkvStorage } from '../../../core/store/principalStore';
@@ -25,6 +25,8 @@ const Code = ({ value }: { value: string }) => {
   return <View style={[STYLES.containerWrapper, value && { backgroundColor: theme.colors.brand200 }, { borderRadius: 999, borderWidth: sizeToDp(1), borderColor: theme.colors.brand200, width: sizeToDp(APP_PADDING * 1.2), aspectRatio: 1 }]} />
 }
 
+let badCodeTO: number
+
 const Login = () => {
   /*  */
   const { handleLogin, isAuthenticationLoadingSV } = useContext(LoginContext)
@@ -34,6 +36,8 @@ const Login = () => {
   const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
   const [SPIdIntegrator, setSPIdIntegrator] = useMMKVString(StorageKey.SP_ID_INTEGRATOR, mmkvStorage)
   const [appBuildNumber, setAppBuildNumber] = useMMKVString(StorageKey.APP_VERSION_NAME, mmkvStorage)
+  /*  */
+  const [badCode, setBadCode] = useState(false)
   /*  */
   const { navigate } = useNavigation<any>()
 
@@ -50,10 +54,17 @@ const Login = () => {
 
   function sendLoginCode({ code }: any) {
     handleLogin({ code, deviceId, SPApiKey, SPIdCemmerce, SPIdIntegrator })
-      .then(() => navigate('AppNavigation'))
+      .then(() => {
+        setBadCode(false)
+        navigate('AppNavigation')
+      })
       .catch((err: any) => {
         setFieldValue('code', '')
-        console.error(err);
+        setBadCode(true)
+        badCodeTO && clearTimeout(badCodeTO)
+        badCodeTO = setTimeout(() => {
+          setBadCode(false)
+        }, 5000)
       })
   }
   /* ------- END Functions ------- */
@@ -103,10 +114,17 @@ const Login = () => {
             <Code value={values.code[4]} />
             <Code value={values.code[5]} />
           </View>
+
         </View>
 
         <Typography variant={'text02Regular'} color={'textEleventh'} >Versión: {appBuildNumber}</Typography>
+
+
+        {badCode && <View style={[{ bottom: 0, position: 'absolute', marginBottom: sizeToDp(APP_PADDING * 0.3) }]} >
+          <Typography color='notificationRed' variant='text02SemiBold' >PIN invalido, intenta de nuevo</Typography>
+        </View>}
       </View>
+
 
       <View style={[STYLES.keysWrapper]}>
         <View style={[STYLES.keyRowWrapper]}>

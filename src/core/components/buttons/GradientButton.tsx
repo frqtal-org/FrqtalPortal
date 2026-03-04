@@ -75,7 +75,7 @@ const Button = memo(
       mini: 'text02',
       small: 'text02Medium',
       extraSmall: 'text02',
-      large: 'text02Medium',
+      large: 'text02SemiBold',
     } as any;
 
     return (
