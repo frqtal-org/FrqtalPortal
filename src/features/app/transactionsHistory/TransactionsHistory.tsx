@@ -83,7 +83,7 @@ const TransactionsHistory = () => {
       setTXNs(obtenerTransaccionesPorEstado()[selectedFilter])
       setIsLoading(false)
     }, 700)
-  },[selectedFilter])
+  },[selectedFilter, transactionSelected])
 
   return (
     <BasicScreenWrapper noHeader noPaddingBottom >
@@ -124,8 +124,8 @@ const TransactionsHistory = () => {
         ref={listRef}
         keyExtractor={(item: any, index: number) => `all-transactions-list-${index}`}
         showsVerticalScrollIndicator={false}
-
-        ListEmptyComponent={!isLoading ? <View style={[STYLES.emptyListContainer, { flex: 1, paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} ><Typography style={[{ textAlign: 'center' }]} variant='subtitle02Regular' color='textSecondary' >Sin transacciones</Typography></View> : <></>}
+        contentContainerStyle={[(TXNs.length === 0 && !isLoading) && { flex: 1 }]}
+        ListEmptyComponent={!isLoading ? <View style={[STYLES.emptyListContainer, { height: '100%', paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} ><Typography style={[{ textAlign: 'center' }]} variant='subtitle02Regular' color='textSecondary' >Sin transacciones</Typography></View> : <></>}
         data={TXNs.reverse()}
         onEndReachedThreshold={2}
         renderItem={({ item }) => <TransactionListItem {...item} />}

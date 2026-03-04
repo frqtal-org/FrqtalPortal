@@ -54,6 +54,7 @@ const InsertAmount = () => {
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             const respuestaJSON = JSON.parse(respuestaSale);
             setTransactionSelected(respuestaJSON)
+            console.log('VENTAAA')
             console.log(respuestaJSON)
 
             if (respuestaJSON.RESPONSE_CODE === '00') {

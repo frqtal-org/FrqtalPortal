@@ -74,11 +74,15 @@ const TransactionBottomSheet = () => {
             if (isTodayTransactionDate(transactionSelected.TXN_DATE)) {
                 const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
                 const RESP_JSON = JSON.parse(resp);
+                console.log('CANCELACION')
+                console.log(RESP_JSON)
                 registrarCancelacion(RESP_JSON)
                 setTransactionSelected(RESP_JSON)
             } else {
                 const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                 const RESP_JSON = JSON.parse(resp);
+                console.log('DEVOLUCION')
+                console.log(RESP_JSON)
                 registrarCancelacion(RESP_JSON)
                 setTransactionSelected(RESP_JSON)
             }

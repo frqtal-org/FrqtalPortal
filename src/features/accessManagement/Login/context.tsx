@@ -18,8 +18,8 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     function autenticarTerminal({ SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice }: { SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, SPIdInvoice: string }) {
         return new Promise(async (res, rej) => {
             try {
-                const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
-                if (token !== null) res('ok')
+                /* const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
+                if (token !== null) res('ok') */
 
                 const response = await SmartWrapperModule.authenticate(SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice);
                 const RESPONSE_PARSED = JSON.parse(response)

@@ -9,7 +9,7 @@ import android.content.Context
 import android.content.IntentFilter
 import android.os.Build
 
-class SmartWrapperModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ActivityEventListener {
+class SmartWrapperModule(private val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ActivityEventListener, LifecycleEventListener {
 
     private var authPromise: Promise? = null
 
@@ -20,6 +20,31 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
 
     private val jsonConfigNoPrint = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": false}"
     private val jsonConfigPrint = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": true}"
+
+    private var isReceiverRegistered = false
+
+    private fun encenderReceptor() {
+        if (!isReceiverRegistered) {
+            val filter = IntentFilter()
+            filter.addAction("${reactContext.packageName}.PermissionBroadcast")
+            filter.addAction("com.smart.thirdpartysample.PermissionBroadcast")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                reactContext.registerReceiver(authReceiver, filter, Context.RECEIVER_EXPORTED)
+            } else {
+                reactContext.registerReceiver(authReceiver, filter)
+            }
+            isReceiverRegistered = true
+        }
+    }
+
+    private fun apagarReceptor() {
+        if (isReceiverRegistered) {
+            try {
+                reactContext.unregisterReceiver(authReceiver)
+            } catch (e: Exception) {}
+            isReceiverRegistered = false
+        }
+    }
 
     private val authReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -39,11 +64,14 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
                 else currentPromise?.reject("TX_ERROR", error.ifEmpty { "Transacción rechazada o no encontrada" })
                 currentPromise = null
             }
+
+            apagarReceptor()
         }
     }
 
     init {
         reactContext.addActivityEventListener(this)
+        reactContext.addLifecycleEventListener(this)
 
         val filter = IntentFilter()
         filter.addAction("${reactContext.packageName}.PermissionBroadcast")
@@ -64,6 +92,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun authenticate(apikey: String, idCommerce: String, idIntegrator: String, invoiceId: String, promise: Promise) {
         authPromise = promise 
+        encenderReceptor()
         
         val intent = Intent().apply {
             putExtra("authentication", apikey)
@@ -83,6 +112,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun sale(amount: String, tip: String, date: String, unique_reference: String, idCommerce: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("amount", amount) // Monto a enviar en la transacción solicitada.
@@ -120,6 +150,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun cancelTransaction(amount: String, extra: String, date: String, reference: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("operation", "CANCEL")
@@ -155,6 +186,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun refundTransaction(amount: String, extra: String, date: String, reference: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("operation", "TH_REFUND")
@@ -190,6 +222,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun reprintTicket(reference: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             
@@ -227,6 +260,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun getBalance(promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
@@ -260,12 +294,11 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     }
 
 
-
-
     
     @ReactMethod
     fun queryTransaction(reference: String, date: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             
@@ -302,18 +335,18 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
    @ReactMethod
     fun queryUniqueTransaction(uniqueReference: String, date: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("operation", "QUERY_UNIQUE")
             
             intent.putExtra("amount", "0.00") 
             intent.putExtra("tip", "0.00")
-            intent.putExtra("showDetailCheck", true)
             intent.putExtra("cancel", false)
             intent.putExtra("reference", "")
             intent.putExtra("unique_reference", uniqueReference)
             intent.putExtra("from", "FrqtalPortal")
-            intent.putExtra("json", jsonConfigPrint)
+            intent.putExtra("json", jsonConfigNoPrint)
             intent.putExtra("date", date)
             intent.putExtra("idCommerce", "")
             intent.putExtra("userNumber", "")
@@ -328,7 +361,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("monthsToPay", "")
             intent.putExtra("monthsToStartPaying", "")
             intent.putExtra("printerExtras", "")
-            intent.putExtra("folio", "")
 
             intent.setClassName(APP_ID, "$SMART_PACKAGE_BASE.activities.ContainerActivity")
 
@@ -342,6 +374,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun reauthorization(amount: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("operation", "REAUTHORIZATION")
@@ -378,6 +411,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun checkIn(folio: String, amount: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("operation", "CHECK_IN")
@@ -416,6 +450,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     @ReactMethod
     fun checkOut(folio: String, amount: String, promise: Promise) {
         currentPromise = promise
+        encenderReceptor()
         try {
             val intent = Intent()
             intent.putExtra("operation", "CHECK_OUT")
@@ -454,7 +489,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
 
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_SMART) {
-
+            apagarReceptor()
             if (resultCode != Activity.RESULT_OK) {
                 currentPromise?.reject("CANCELED", "Operación cancelada o la terminal falló")
                 currentPromise = null
@@ -480,5 +515,48 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
 
     override fun onNewIntent(intent: Intent) {
         // Obligatorio por la interfaz, vacío
+    }
+
+
+    override fun onHostResume() {
+        // Obligatorio por la interfaz, se queda vacío
+    }
+
+    override fun onHostPause() {
+        // Obligatorio por la interfaz, se queda vacío
+    }
+
+    override fun onHostDestroy() {
+        // 🔴 Apagamos definitivamente si la app se cierra o recarga (Fast Refresh)
+        apagarReceptor()
+        
+        try {
+            reactContext.removeActivityEventListener(this)
+            reactContext.removeLifecycleEventListener(this)
+            authPromise?.reject("CANCELED", "La aplicación se cerró")
+            currentPromise?.reject("CANCELED", "La aplicación se cerró")
+            authPromise = null
+            currentPromise = null
+        } catch (e: Exception) {}
+    }
+
+    override fun invalidate() {
+        // ¡OJO! NO ponemos "super.invalidate()" aquí
+        try {
+            // 1. Apagamos el radio (desconectamos el receptor de Android)
+            reactContext.unregisterReceiver(authReceiver)
+            
+            // 2. Dejamos de escuchar la actividad
+            reactContext.removeActivityEventListener(this)
+            
+            // 3. Matamos cualquier promesa que se haya quedado colgada
+            authPromise?.reject("CANCELED", "La aplicación se recargó")
+            currentPromise?.reject("CANCELED", "La aplicación se recargó")
+            authPromise = null
+            currentPromise = null
+            
+        } catch (e: Exception) {
+            // Si ya estaba desconectado, ignoramos el error silenciosamente
+        }
     }
 }
