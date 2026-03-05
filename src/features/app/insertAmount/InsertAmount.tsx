@@ -1,5 +1,5 @@
-import { Alert, NativeModules, StyleSheet, View } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import { NativeModules, StyleSheet, View } from 'react-native'
+import React, { useContext, useState } from 'react'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
@@ -16,7 +16,7 @@ import { InsetsContext } from '../../../core/utils/styles/insets'
 import uuid from 'react-native-uuid';
 import { registrarNuevoCobro } from '../../../core/utils/registerTxn'
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context'
-import { parseDateToDate } from '../../../core/utils/transactionDate'
+import { Typography } from '../../../core/components/Typography'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -86,37 +86,6 @@ const InsertAmount = () => {
         setPrice('');
         setSelectedExtra('');
     }
-
-    async function verificarTransaccionesPendientes() {
-        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
-
-        if (pendingRef && pendingDate) {
-            try {
-                const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
-                const respuestaJSON = JSON.parse(respuestaString);
-
-                if (respuestaJSON.TXN_NAME === "VENTA EN LINEA") {
-                    registrarNuevoCobro(respuestaJSON)
-                    setTransactionSelected(respuestaJSON)
-                } else {
-                    console.log("La transacción pendiente fue rechazada por el banco.");
-                }
-
-            } catch (error) {
-                console.error(error);
-            } finally {
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
-            }
-        }
-    }
-
-    useEffect(() => {
-        setTimeout(() => {
-            verificarTransaccionesPendientes();
-        }, 3000)
-    }, []);
 
     return (
         <>
