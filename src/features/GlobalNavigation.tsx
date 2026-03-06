@@ -48,7 +48,7 @@ const AppNavigationWrapper = () => {
     return <View onTouchStart={resetLockScreen} style={[{ flex: 1 }]} >
         <AppNavigation />
         <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-            <LoadingScreen />
+            <LoadingScreen text='Bloqueando pantalla' />
         </Animated.View>
     </View>
 }

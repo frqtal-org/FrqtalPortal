@@ -10,14 +10,14 @@ import { Typography } from '../../../core/components/Typography';
 import { useFormik } from 'formik';
 import FastImage from 'react-native-fast-image';
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen';
-import Animated, { useAnimatedStyle } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import { LoginContext } from './context';
 
-const KeyCode = ({ onPress, text, pressColor, onLongPress, underLine }: { onPress: () => void, text: string, pressColor?: string, onLongPress?: () => void, underLine?: boolean }) => {
-  return <Pressable onPress={onPress} onLongPress={onLongPress} style={({ pressed }) => [STYLES.keyButton, pressed && { backgroundColor: pressColor === 'red' ? theme.colors.notificationRed : theme.colors.glassBorder }]}>
-    <Typography style={[{ includeFontPadding: false }]} variant="title02SemiBold">{text}</Typography>
+const KeyCode = ({ onPress, text, pressColor, onLongPress, silentKey }: { onPress?: () => void, text?: string, pressColor?: string, onLongPress?: () => void, underLine?: boolean, silentKey?: boolean }) => {
+  return <Pressable onPress={onPress} onLongPress={onLongPress} style={({ pressed }) => [STYLES.keyButton, (pressed && !silentKey) && { backgroundColor: pressColor === 'red' ? theme.colors.notificationRed : theme.colors.glassBorder }]}>
+    {text && <Typography style={[{ includeFontPadding: false }]} variant="title02SemiBold">{text}</Typography>}
   </Pressable>
 }
 
@@ -26,6 +26,7 @@ const Code = ({ value }: { value: string }) => {
 }
 
 let badCodeTO: number
+let diveceIdTO: number
 
 const Login = () => {
   /*  */
@@ -37,7 +38,10 @@ const Login = () => {
   const [SPIdIntegrator, setSPIdIntegrator] = useMMKVString(StorageKey.SP_ID_INTEGRATOR, mmkvStorage)
   const [appBuildNumber, setAppBuildNumber] = useMMKVString(StorageKey.APP_VERSION_NAME, mmkvStorage)
   /*  */
-  const [badCode, setBadCode] = useState(false)
+  const [loadingTextStatus, setLoadingTextStatus] = useState('')
+  /*  */
+  const isBadCodeSV = useSharedValue(false)
+  const showDeviceIdSV = useSharedValue(false)
   /*  */
   const { navigate } = useNavigation<any>()
 
@@ -52,20 +56,32 @@ const Login = () => {
     setFieldValue('code', values.code + key);
   }
 
+  function onLogin() {
+    setLoadingTextStatus('Activando terminal')
+  }
+
   function sendLoginCode({ code }: any) {
-    handleLogin({ code, deviceId, SPApiKey, SPIdCemmerce, SPIdIntegrator })
+    handleLogin({ code, deviceId, SPApiKey, SPIdCemmerce, SPIdIntegrator, onLogin })
       .then(() => {
-        setBadCode(false)
+        isBadCodeSV.set(false)
         navigate('AppNavigation')
       })
       .catch((err: any) => {
         setFieldValue('code', '')
-        setBadCode(true)
+        isBadCodeSV.set(true)
         badCodeTO && clearTimeout(badCodeTO)
         badCodeTO = setTimeout(() => {
-          setBadCode(false)
+          isBadCodeSV.set(false)
         }, 5000)
       })
+  }
+
+  function handleShowDeviceID() {
+    showDeviceIdSV.set(true)
+    diveceIdTO && clearTimeout(diveceIdTO)
+    diveceIdTO = setTimeout(() => {
+      showDeviceIdSV.set(false)
+    }, 15000)
   }
   /* ------- END Functions ------- */
 
@@ -81,11 +97,24 @@ const Login = () => {
     opacity: isAuthenticationLoadingSV.get() ? 1 : 0,
     pointerEvents: isAuthenticationLoadingSV.get() ? 'auto' : 'none',
   }))
+
+  const isBadCodeStyle = useAnimatedStyle(() => ({
+    opacity: isBadCodeSV.get() ? 1 : 0,
+    pointerEvents: isBadCodeSV.get() ? 'auto' : 'none',
+    height: isBadCodeSV.get() ? 'auto' : 0,
+  }))
+
+  const showDeviceIdStyle = useAnimatedStyle(() => ({
+    opacity: showDeviceIdSV.get() ? 1 : 0,
+    pointerEvents: showDeviceIdSV.get() ? 'auto' : 'none',
+    height: showDeviceIdSV.get() ? 'auto' : 0,
+  }))
   /* ------- END Animations ------- */
 
   /* ------- Effects ------- */
   useEffect(() => {
     if (values.code.length === 6) {
+      setLoadingTextStatus('Iniciando sesion')
       !isAuthenticationLoadingSV.get() && handleSubmit()
     }
   }, [values.code])
@@ -119,10 +148,14 @@ const Login = () => {
 
         <Typography variant={'text02Regular'} color={'textEleventh'} >Versión: {appBuildNumber}</Typography>
 
-
-        {badCode && <View style={[{ bottom: 0, position: 'absolute', marginBottom: sizeToDp(APP_PADDING * 0.3) }]} >
-          <Typography color='notificationRed' variant='text02SemiBold' >PIN invalido, intenta de nuevo</Typography>
-        </View>}
+        <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.3), bottom: 0, position: 'absolute', marginBottom: sizeToDp(APP_PADDING * 0.5), alignItems: 'center', justifyContent: 'center' }]} >
+          <Animated.View style={[showDeviceIdStyle]} >
+            <Typography color='notificationYellow' variant='text02Medium' >{deviceId}</Typography>
+          </Animated.View>
+          <Animated.View style={[isBadCodeStyle]} >
+            <Typography color='notificationRed' variant='text02Medium' >PIN invalido, intenta de nuevo</Typography>
+          </Animated.View>
+        </View>
       </View>
 
 
@@ -146,7 +179,7 @@ const Login = () => {
         </View>
 
         <View style={[STYLES.keyRowWrapper]}>
-          <View style={[STYLES.keyButton]} />
+          <KeyCode onLongPress={handleShowDeviceID} silentKey />
           <KeyCode onPress={() => handleKeyPress('0')} text='0' />
           <KeyCode onPress={() => handleKeyPress('delete')} text='⌫' pressColor='red' onLongPress={() => setFieldValue('code', '')} />
         </View>
@@ -158,7 +191,7 @@ const Login = () => {
 
 
       <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-        <LoadingScreen />
+        <LoadingScreen text={loadingTextStatus} />
       </Animated.View>
     </BasicScreenWrapper>
   )
@@ -184,7 +217,7 @@ const STYLES = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: sizeToDp(APP_PADDING * 0.8)
+    paddingHorizontal: sizeToDp(APP_PADDING * 0.8),
   },
   keysWrapper: {
     flex: 1,

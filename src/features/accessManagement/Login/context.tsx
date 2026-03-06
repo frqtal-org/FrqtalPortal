@@ -15,18 +15,22 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     const useLoginMutator = useLogin();
 
     /* ------- Functions ------- */
-    function autenticarTerminal({ SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice }: { SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, SPIdInvoice: string }) {
+    function autenticarTerminal({ SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice, onLogin }: { onLogin: () => void, SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, SPIdInvoice: string }) {
         return new Promise(async (res, rej) => {
             try {
-                /* const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
-                if (token !== null) res('ok') */
+                const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
+                if (token) {
+                    res('ok')
+                } else {
+                    onLogin()
+                    const response = await SmartWrapperModule.authenticate(SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice);
 
-                const response = await SmartWrapperModule.authenticate(SPApiKey, SPIdCemmerce, SPIdIntegrator, SPIdInvoice);
-                const RESPONSE_PARSED = JSON.parse(response)
-                if (RESPONSE_PARSED.response_code != 200) rej(RESPONSE_PARSED)
+                    const RESPONSE_PARSED = JSON.parse(response)
+                    if (RESPONSE_PARSED.response_code != 200) rej(RESPONSE_PARSED)
 
-                setItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN, true);
-                res('ok')
+                    setItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN, true);
+                    res('ok')
+                }
             } catch (err) {
                 rej(err)
             }

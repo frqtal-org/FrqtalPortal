@@ -5,8 +5,9 @@ import { sizeToDp } from '../../utils/sizeToDP';
 import theme from '../../utils/styles/styles';
 import Loading from './Loading';
 import { APP_PADDING } from '../../utils/constants';
+import { Typography } from '../Typography';
 
-const LoadingScreen = () => {  
+const LoadingScreen = ({ text }: { text: string }) => {  
   return <View style={[STYLES.wrapper]}>
     <LinearGradient
       colors={[theme.colors.glassPrimary + 'ff', theme.colors.glassSecondary + 'ef']}
@@ -16,6 +17,7 @@ const LoadingScreen = () => {
       style={[STYLES.gradient]}
     />
     <Loading style={[STYLES.loadingAnimationContainer]} />
+    {text && <Typography  variant='subtitle01Medium' color='textEleventh' style={[{ maxWidth: '80%', textAlign: 'center' }]} >{text}</Typography>}
   </View>
 }
 
@@ -33,7 +35,8 @@ const STYLES = StyleSheet.create({
     width: '100%',
   },
   loadingAnimationContainer: {
-    width: sizeToDp(APP_PADDING * 8.2),
-    aspectRatio: 1 / 1
+    width: sizeToDp(APP_PADDING * 7.8),
+    aspectRatio: 1 / 1,
+    marginBottom: sizeToDp(APP_PADDING * 0.3)
   }
 })

@@ -149,7 +149,7 @@ const AppNavigation = memo(() => {
             <TransactionBottomSheet />
 
             <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-                <LoadingScreen />
+                <LoadingScreen text='Verificando transaccion inconclusa' />
             </Animated.View>
         </>
     );

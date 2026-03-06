@@ -26,6 +26,7 @@ const InsertAmount = () => {
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
 
     const [selectedExtra, setSelectedExtra] = useState<string>('');
+    const [loadingTextStatus, setLoadingTextStatus] = useState('')
     const [price, setPrice] = useState<string>('');
 
     const isPaymentLoadingSV = useSharedValue(false)
@@ -43,6 +44,7 @@ const InsertAmount = () => {
 
     async function handlePayAmount() {
         if (price.length === 0) return
+        setLoadingTextStatus('Iniciando cobro')
         const AMOUNT_TO_PAY = formatPriceFromDigits(price);
         const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
         const DATE = getCurrentDateDDMMAAAA();
@@ -52,6 +54,7 @@ const InsertAmount = () => {
         try {
             isPaymentLoadingSV.set(true)
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
+            setLoadingTextStatus('')
             const respuestaJSON = JSON.parse(respuestaSale);
             setTransactionSelected(respuestaJSON)
             console.log('VENTAAA')
@@ -117,7 +120,7 @@ const InsertAmount = () => {
 
             </View>
             <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-                <LoadingScreen />
+                <LoadingScreen text={loadingTextStatus} />
             </Animated.View>
         </>
     )
