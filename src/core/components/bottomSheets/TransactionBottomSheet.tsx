@@ -118,7 +118,7 @@ const TransactionBottomSheet = () => {
 
 
 
-            <Divider text='Transaccion' />
+            <Divider text='Transacción' />
             <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.5), paddingHorizontal: sizeToDp(APP_PADDING * 1), marginBottom: sizeToDp(APP_PADDING * 0.8) }]} >
                 <ListItem listKey='Tarjeta' listValue={`**** ${transactionSelected.ACCOUNT_NUMBER?.slice(-4)}`} />
                 <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected.BRAND_NAME)} />
@@ -131,10 +131,10 @@ const TransactionBottomSheet = () => {
                 }
             </View>
 
-            <Divider text='Informacion bancaria' />
+            <Divider text='Información bancaria' />
             <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING * 1), rowGap: sizeToDp(APP_PADDING * 0.5) }]} >
                 <ListItem listKey='Referencia' listValue={transactionSelected.SG_REFERENCE} />
-                <ListItem listKey='Código de aprovacion' listValue={transactionSelected.TXN_APPROVAL_CODE} />
+                <ListItem listKey='Código de aprovación' listValue={transactionSelected.TXN_APPROVAL_CODE} />
             </View>
 
 
