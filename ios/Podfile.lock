@@ -41,10 +41,10 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - MMKVCore (2.2.4)
-  - NitroMmkv (4.1.2):
+  - MMKVCore (2.3.0)
+  - NitroMmkv (4.2.0):
     - hermes-engine
-    - MMKVCore (= 2.2.4)
+    - MMKVCore (= 2.3.0)
     - NitroModules
     - RCTRequired
     - RCTTypeSafety
@@ -67,7 +67,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - NitroModules (0.34.1):
+  - NitroModules (0.35.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2467,9 +2467,9 @@ SPEC CHECKSUMS:
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
   lottie-ios: 8f959969761e9c45d70353667d00af0e5b9cadb3
   lottie-react-native: 6a080b2f109ef611c75c503a33ebb8ea75db0c91
-  MMKVCore: f2dd4c9befea04277a55e84e7812f930537993df
-  NitroMmkv: c9fd61d98afd00a6e4e1656a415c28f7be0fd74e
-  NitroModules: 1cebf8f4ba098b9f950a3d18127bb741325d9849
+  MMKVCore: d078dce7d6586a888b2c2ef5343b6242678e3ee8
+  NitroMmkv: 38dfb2983c83e9bbbb64423ff48fbeaaa097cc38
+  NitroModules: ff0d24be334de628166b9ac63661c998c732de7d
   RCTDeprecation: af44b104091a34482596cd9bd7e8d90c4e9b4bd7
   RCTRequired: bb77b070f75f53398ce43c0aaaa58337cebe2bf6
   RCTSwiftUI: afc0a0a635860da1040a0b894bfd529da06d7810

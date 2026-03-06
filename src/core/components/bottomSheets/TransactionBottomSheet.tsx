@@ -134,7 +134,7 @@ const TransactionBottomSheet = () => {
             <Divider text='Informacion bancaria' />
             <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING * 1), rowGap: sizeToDp(APP_PADDING * 0.5) }]} >
                 <ListItem listKey='Referencia' listValue={transactionSelected.SG_REFERENCE} />
-                <ListItem listKey='Codigo de aprovacion' listValue={transactionSelected.TXN_APPROVAL_CODE} />
+                <ListItem listKey='Código de aprovacion' listValue={transactionSelected.TXN_APPROVAL_CODE} />
             </View>
 
 

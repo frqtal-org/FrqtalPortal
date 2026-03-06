@@ -114,7 +114,7 @@ const Login = () => {
   /* ------- Effects ------- */
   useEffect(() => {
     if (values.code.length === 6) {
-      setLoadingTextStatus('Iniciando sesion')
+      setLoadingTextStatus('Iniciando sesión')
       !isAuthenticationLoadingSV.get() && handleSubmit()
     }
   }, [values.code])
@@ -153,7 +153,7 @@ const Login = () => {
             <Typography color='notificationYellow' variant='text02Medium' >{deviceId}</Typography>
           </Animated.View>
           <Animated.View style={[isBadCodeStyle]} >
-            <Typography color='notificationRed' variant='text02Medium' >PIN invalido, intenta de nuevo</Typography>
+            <Typography color='notificationRed' variant='text02Medium' >PIN inválido, intenta de nuevo</Typography>
           </Animated.View>
         </View>
       </View>

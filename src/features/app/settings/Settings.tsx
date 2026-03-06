@@ -30,7 +30,7 @@ const Settings = () => {
 
             <SettingsItems
                 icon={require('../../../core/assets/images/logout.webp')}
-                label={'Cerrar Sesión'}
+                label={'Cerrar sesión'}
                 description={'Ir al inicio'}
                 onPress={() => navigate('Login')}
             />
