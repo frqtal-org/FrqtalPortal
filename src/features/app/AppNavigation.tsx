@@ -18,6 +18,9 @@ import { mmkvStorage } from '../../core/store/principalStore';
 import { registrarNuevoCobro } from '../../core/utils/registerTxn';
 import { BottomSheetsContext } from '../../core/components/bottomSheets/context';
 import LoadingScreen from '../../core/components/Loading/LoadingScreen';
+import { useTransactionRegister } from '../../core/api/transactionRegister';
+import StorageKey from '../../core/utils/store/keysStore';
+import { useMMKVString } from 'react-native-mmkv';
 
 const CAROUSEL_WIDTH = Dimensions.get('window').width;
 const CAROUSEL_HEIGHT = Dimensions.get('window').height;
@@ -44,11 +47,14 @@ const PAGES = [
 const AppNavigation = memo(() => {
     /* */
     const carouselRef = useRef<ICarouselInstance>(null);
+    const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const progress = useSharedValue<number>(0);
     const INSETS = useContext(InsetsContext)
     const { setTransactionSelected } = useContext(BottomSheetsContext)
 
     const isVirifyingTransactionSV = useSharedValue(false)
+
+    const transactionRegisterMutator = useTransactionRegister()
 
     /* ------- Functions ------- */
     function panGestureConfig(gesture: PanGesture) {
@@ -74,15 +80,17 @@ const AppNavigation = memo(() => {
                 const respuestaJSON = JSON.parse(respuestaString);
                 
                 if (respuestaJSON.RESPONSE_CODE === '00') {
-                    registrarNuevoCobro(respuestaJSON)
                     setTransactionSelected(respuestaJSON)
-                    
+
+                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                    registrarNuevoCobro(respuestaJSON)
+
                     mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                     mmkvStorage.remove('PENDING_TX_DATE')
                 } else {
                     console.log("La transacción pendiente fue rechazada por el banco.");
                 }
-            } catch (error) {
+            } catch (error: any) {
                 const ERR = JSON.parse(error.message)
                 console.error(error);
                 if (ERR.response_code == '97') {

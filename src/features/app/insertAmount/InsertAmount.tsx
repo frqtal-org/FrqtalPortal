@@ -17,6 +17,7 @@ import uuid from 'react-native-uuid';
 import { registrarNuevoCobro } from '../../../core/utils/registerTxn'
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context'
 import { Typography } from '../../../core/components/Typography'
+import { useTransactionRegister } from '../../../core/api/transactionRegister'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -24,12 +25,15 @@ const InsertAmount = () => {
     const INSETS = useContext(InsetsContext)
     const { setTransactionSelected } = useContext(BottomSheetsContext)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
+    const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
 
     const [selectedExtra, setSelectedExtra] = useState<string>('');
     const [loadingTextStatus, setLoadingTextStatus] = useState('')
     const [price, setPrice] = useState<string>('');
 
     const isPaymentLoadingSV = useSharedValue(false)
+
+    const transactionRegisterMutator = useTransactionRegister()
 
     function handleAddDigit(item: string) {
         if (item === '0' && price === '') return;
@@ -56,21 +60,18 @@ const InsertAmount = () => {
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             setLoadingTextStatus('')
             const respuestaJSON = JSON.parse(respuestaSale);
-            setTransactionSelected(respuestaJSON)
-            console.log('VENTAAA')
-            console.log(respuestaJSON)
-
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 setPrice('')
                 setSelectedExtra('')
                 mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                 mmkvStorage.remove('PENDING_TX_DATE')
+                setTransactionSelected(respuestaJSON)
+                await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
                 registrarNuevoCobro(respuestaJSON)
             }
             /* const respuestaPrint = await SmartWrapperModule.reprintTicket(respuestaJSON.SG_REFERENCE);console.log(respuestaPrint) */
         } catch (error) {
-            console.log('error 777')
-            console.log(error)
+            console.error(error)
             mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
             mmkvStorage.remove('PENDING_TX_DATE')
         } finally {

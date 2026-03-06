@@ -14,6 +14,10 @@ import { getExtraPercentage } from '../../utils/getExtraPercentage'
 import { isTodayTransactionDate, parseDateToDate, transactionDate } from '../../utils/transactionDate'
 import { getCurrentDateDDMMAAAA } from '../../utils/getDateDDMMAAAA'
 import { registrarCancelacion } from '../../utils/registerTxn'
+import { useMMKVString } from 'react-native-mmkv'
+import StorageKey from '../../utils/store/keysStore'
+import { mmkvStorage } from '../../store/principalStore'
+import { useTransactionRegister } from '../../api/transactionRegister'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -57,7 +61,9 @@ const Divider = ({ text }: { text: string }) => {
 }
 
 const TransactionBottomSheet = () => {
+    const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const { transactionBottomSheetRef, transactionSelected, setTransactionSelected } = useContext(BottomSheetsContext)
+    const transactionRegisterMutator = useTransactionRegister()
 
     async function printTicket() {
         await SmartWrapperModule.reprintTicket(transactionSelected.SG_REFERENCE);
@@ -74,19 +80,18 @@ const TransactionBottomSheet = () => {
             if (isTodayTransactionDate(transactionSelected.TXN_DATE)) {
                 const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
                 const RESP_JSON = JSON.parse(resp);
-                console.log('CANCELACION')
-                console.log(RESP_JSON)
                 registrarCancelacion(RESP_JSON)
+                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected.TXN_UNIQUE_REF, device_id: deviceId })
                 setTransactionSelected(RESP_JSON)
             } else {
                 const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                 const RESP_JSON = JSON.parse(resp);
-                console.log('DEVOLUCION')
-                console.log(RESP_JSON)
                 registrarCancelacion(RESP_JSON)
+                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected.TXN_UNIQUE_REF, device_id: deviceId })
                 setTransactionSelected(RESP_JSON)
             }
         } catch (err) {
+            console.error('err------0')
             console.error(err)
         } finally {
             /* transactionBottomSheetRef.current.close() */
