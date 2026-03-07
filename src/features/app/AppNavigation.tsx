@@ -79,18 +79,15 @@ const AppNavigation = memo(() => {
             try {
                 const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
                 const respuestaJSON = JSON.parse(respuestaString);
-                
+
                 if (respuestaJSON.RESPONSE_CODE === '00') {
-                    setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON})
-                    setTimeout(async () => {
-                        /* prevents history duplications */
-                        await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                        setRefetchData(true)
-                    })
+                    setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                    setRefetchData(true)
                     mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                     mmkvStorage.remove('PENDING_TX_DATE')
                 } else {
-                    console.log("La transacción pendiente fue rechazada por el banco.");
+                    /* console.log("La transacción pendiente fue rechazada por el banco."); */
                 }
             } catch (error: any) {
                 const ERR = JSON.parse(error.message)
@@ -117,7 +114,7 @@ const AppNavigation = memo(() => {
             isVirifyingTransactionSV.set(true)
             setTimeout(() => {
                 verificarTransaccionesPendientes();
-            }, 700)
+            }, 3000)
         }
     }, []);
     /* ------- END Functions ------- */
@@ -140,7 +137,7 @@ const AppNavigation = memo(() => {
                         dotStyle={STYLES.paginationDotStyle}
                         activeDotStyle={STYLES.paginationActiveDot}
                         containerStyle={STYLES.paginationContainer}
-                        />
+                    />
                 </View>
                 <Carousel
                     loop={false}

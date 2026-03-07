@@ -73,10 +73,9 @@ const GlobalNavigation = () => {
         const TOKEN = await getToken()
         clearTimeout(REFRESH_TOKEN_TIMEOUT_ID);
         REFRESH_TOKEN_TIMEOUT_ID = setTimeout(() => {
-            if (url !== '/terminal/refresh-token' && url !== '/terminal/login') {
+            if (url !== '/terminal/refresh-token' && url !== '/terminal/login' && url !== '/terminal/logout') {
                 refreshTokenMutator.mutateAsync({ auth_token_login: TOKEN })
                 .then(async (newTokenResponse: any) => {
-                    console.log('TOKEN REFRESHED')
                     await saveToken(newTokenResponse.data.authToken)
                 });
             }
@@ -92,7 +91,6 @@ const GlobalNavigation = () => {
                     deleteToken()
                     await logoutMutator.mutateAsync()
                 } else {
-                    console.log('ERROR, GETTING NEW TOKEN REFRESHED')
                     await saveToken(newTokenResponse.data.authToken)
                 }
             })
@@ -113,7 +111,7 @@ const GlobalNavigation = () => {
                 return resp;
             },
             error => {
-                if (NO_TOKEN_ERROR_CODES?.includes(error.response?.status) && !error.response?.config?.url.includes?.('login')) {
+                if (NO_TOKEN_ERROR_CODES?.includes(error.response?.status) && !error.response?.config?.url.includes?.('login') && !error.response?.config?.url.includes?.('refresh-token') && !error.response?.config?.url.includes?.('logout')) {
                     refreshToken()
                 }
             },

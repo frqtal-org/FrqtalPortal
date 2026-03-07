@@ -70,14 +70,21 @@ const TransactionsHistory = () => {
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [TXNs, setTXNs] = useState<any>([])
   const [totalAmounts, setTotalAmounts] = useState({})
+  const [totalPages, setTotalPages] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   /*  */
-
   const isHistorialLoadingSV = useSharedValue(false)
-
   const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
+  const getAllTransactionsMutator = useGetAllTransactions()
 
-    const getAllTransactionsMutator = useGetAllTransactions()
+
+  function handleNextPage() {
+    if (currentPage === totalPages || totalPages === 0 || isLoading) return
+    setIsLoading(true)
+    handleGetHistorial({ status: selectedFilter, page: currentPage + 1 })
+    setCurrentPage(currentPage + 1)
+  }
 
   async function goToReports() {
     await SmartWrapperModule.getBalance();
@@ -93,8 +100,12 @@ const TransactionsHistory = () => {
       },
       serialNumber: deviceId
     }).then((resp: any) => {
-      /* transactionsTotalPagesSV.value = resp.data.totalPages
+      /* 
+      transactionsTotalPagesSV.value = resp.data.totalPages
       transactionsSelectedPageSV.value = page */
+      setTotalPages(resp.data.totalPages)
+      setTotal(resp.data.totalToday)
+      /* setExtra(resp.data.totalExtra) TODO */
 
       const totalAmounts: any = {}
       totalAmounts.totalThisMonth = resp.data.totalThisMonth
@@ -106,7 +117,6 @@ const TransactionsHistory = () => {
       totalAmounts.totalItems = resp.data.totalItems
 
       setTotalAmounts(totalAmounts)
-      console.log(resp.data.data[0])
       setTXNs((prev: any) => [...prev, ...resp.data.data])
     }).catch((err: any) => {
       console.log('---err ' + err)
@@ -127,16 +137,17 @@ const TransactionsHistory = () => {
     setIsLoading(true)
     setTXNs([])
     filterTO && clearTimeout(filterTO)
-    filterTO = setTimeout(() => {      
-      handleGetHistorial({ status: selectedFilter })
+    filterTO = setTimeout(() => {
+      handleGetHistorial({ status: selectedFilter, page: currentPage })
     }, 700)
   }, [selectedFilter])
 
   useEffect(() => {
-    if (refetchData){
+    if (refetchData) {
       setIsLoading(true)
       setTXNs([])
-      handleGetHistorial({ status: selectedFilter })
+      setCurrentPage(1)
+      handleGetHistorial({ status: selectedFilter, page: 1 })
     }
   }, [refetchData])
 
@@ -166,7 +177,10 @@ const TransactionsHistory = () => {
             </Pressable>
           </View>
 
-          <Filters onPress={(filter: any) => setSelectedFilter(filter)} style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />
+          <Filters onPress={(filter: any) => {
+            setCurrentPage(1)
+            setSelectedFilter(filter)
+            }} style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />
         </View>
 
         <View>
@@ -185,10 +199,10 @@ const TransactionsHistory = () => {
         data={TXNs}
         onEndReachedThreshold={2}
         renderItem={({ item }) => <TransactionListItem {...item} />}
-        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={isLoading} title={isLoading ? `Cargando transacciones` : `Fin de la lista`} subtitle={isLoading ? `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
+        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={!(totalPages === currentPage && !isLoading) } title={!(totalPages === currentPage && !isLoading) ?  (currentPage === 1 ? `Cargando transacciones` : `Cargando página ${currentPage}/${totalPages}`) : `Fin de la lista`} subtitle={!(totalPages === currentPage && !isLoading) ?  `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
         ListFooterComponentStyle={[(TXNs.length === 0) ? { marginBottom: sizeToDp(APP_PADDING * 0.2) } : { marginTop: sizeToDp(APP_PADDING * 0.2), marginBottom: sizeToDp(APP_PADDING * 0.8) }]}
         style={[STYLES.listStyle]}
-      /* onEndReached={(totalPages <= 1 || isHistorialLoading)? () => { } : handleNetPage} */
+        onEndReached={(totalPages <= 1 || isLoading) ? () => { } : handleNextPage}
       /* refreshControl={
         <RefreshControl
           refreshing={false}

@@ -11,8 +11,8 @@ const securityOptions = {
 
 export async function saveToken(sessionToken: string) {
     try {
-        await Keychain.setGenericPassword('secure_session_token', sessionToken, securityOptions);
         handleSetTokenToAxiosInstance(sessionToken)
+        await Keychain.setGenericPassword('secure_session_token', sessionToken, securityOptions);
         return true;
     } catch (error) {
         console.error("Error guardando en Keychain:", error);
@@ -33,8 +33,8 @@ export async function getToken() {
 
 export async function deleteToken() {
     try {
-        await Keychain.resetGenericPassword({ service: SERVICE_NAME });
         handleSetTokenToAxiosInstance('')
+        await Keychain.resetGenericPassword({ service: SERVICE_NAME });
         return true
     } catch (err) {
         console.error(err)
