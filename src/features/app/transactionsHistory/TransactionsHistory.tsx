@@ -140,10 +140,6 @@ const TransactionsHistory = () => {
     }
   }, [refetchData])
 
-  useEffect(() => {
-    setRefetchData(true)
-  }, [])
-
   return (
     <BasicScreenWrapper noHeader noPaddingBottom >
       <View style={[STYLES.listHeaderStyle]}>

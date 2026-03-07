@@ -82,8 +82,11 @@ const AppNavigation = memo(() => {
                 
                 if (respuestaJSON.RESPONSE_CODE === '00') {
                     setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON})
-                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                    setRefetchData(true)
+                    setTimeout(async () => {
+                        /* prevents history duplications */
+                        await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                        setRefetchData(true)
+                    })
                     mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                     mmkvStorage.remove('PENDING_TX_DATE')
                 } else {
