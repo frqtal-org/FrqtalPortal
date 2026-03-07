@@ -3,42 +3,6 @@ import { createMMKV } from 'react-native-mmkv';
 export const storageTxnHistory = createMMKV();
 const COBROS_KEY = 'lista_de_cobros';
 
-export const registrarNuevoCobro = (nuevoCobro: any) => {
-  try {
-    const cobrosGuardados = storageTxnHistory.getString(COBROS_KEY);    
-    let listaCobros = cobrosGuardados ? JSON.parse(cobrosGuardados) : [];
-
-    listaCobros.push(nuevoCobro);
-    storageTxnHistory.set(COBROS_KEY, JSON.stringify(listaCobros));
-  } catch (error) {
-    console.error('Hubo un problema guardando el cobro:', error);
-  }
-};
-
-
-
-export const registrarCancelacion = (datosDeCancelacion: any) => {
-  try {
-    const cobrosGuardados = storageTxnHistory.getString(COBROS_KEY);
-    
-    if (!cobrosGuardados) return;
-
-    let listaCobros = JSON.parse(cobrosGuardados);
-
-    const indiceCobro = listaCobros.findIndex(
-      (cobro: any) => (cobro.TXN_APPROVAL_CODE === datosDeCancelacion.TXN_APPROVAL_CODE) && (cobro.AMOUNT === datosDeCancelacion.AMOUNT)
-    );
-
-    if (indiceCobro !== -1) {
-      listaCobros[indiceCobro] = { ...datosDeCancelacion };
-      storageTxnHistory.set(COBROS_KEY, JSON.stringify(listaCobros));
-    } else {
-      console.error(`No se encontró el cobro original con la referencia`);
-    }
-  } catch (error) {
-    console.error('Hubo un problema guardando la cancelación:', error);
-  }
-};
 
 
 export const obtenerTransaccion = (txnApprovalCode: string, amount: string) => {

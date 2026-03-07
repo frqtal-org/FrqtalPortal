@@ -13,11 +13,11 @@ import { sumarMontosExactos } from '../../utils/sumarMontosExactos'
 import { getExtraPercentage } from '../../utils/getExtraPercentage'
 import { isTodayTransactionDate, parseDateToDate, transactionDate } from '../../utils/transactionDate'
 import { getCurrentDateDDMMAAAA } from '../../utils/getDateDDMMAAAA'
-import { registrarCancelacion } from '../../utils/registerTxn'
 import { useMMKVString } from 'react-native-mmkv'
 import StorageKey from '../../utils/store/keysStore'
 import { mmkvStorage } from '../../store/principalStore'
 import { useTransactionRegister } from '../../api/transactionRegister'
+import { TransactionsHistoryContext } from '../../../features/app/transactionsHistory/context'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -33,23 +33,23 @@ const ListItem = ({ listKey, listValue, greenText }: { listKey: string, listValu
 
 const statusToImageMap: Record<string, any> = {
     Declinada: require('../../assets/images/error.webp'),
-    CANCELACION: require('../../assets/images/error.webp'),
+    cancel: require('../../assets/images/error.webp'),
     Pendiente: require('../../assets/images/pending.webp'),
-    "VENTA EN LINEA": require('../../assets/images/accepted.webp'),
+    transaction: require('../../assets/images/accepted.webp'),
 };
 
 const statusToColor: Record<string, any> = {
     Declinada: 'notificationRed',
-    CANCELACION: 'notificationRed',
+    cancel: 'notificationRed',
     Pendiente: 'notificationYellow',
-    "VENTA EN LINEA": 'notificationGreen',
+    transaction: 'notificationGreen',
 };
 
 const txnName: Record<string, any> = {
     Declinada: '',
-    CANCELACION: 'Reembolso',
+    cancel: 'Reembolso',
     Pendiente: '',
-    "VENTA EN LINEA": 'Aprobada',
+    transaction: 'Aprobada',
 };
 
 const Divider = ({ text }: { text: string }) => {
@@ -64,31 +64,32 @@ const TransactionBottomSheet = () => {
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const { transactionBottomSheetRef, transactionSelected, setTransactionSelected } = useContext(BottomSheetsContext)
     const transactionRegisterMutator = useTransactionRegister()
+    const { setRefetchData } = useContext(TransactionsHistoryContext)
 
     async function printTicket() {
-        await SmartWrapperModule.reprintTicket(transactionSelected.SG_REFERENCE);
+        await SmartWrapperModule.reprintTicket(transactionSelected?.data_raw?.SG_REFERENCE);
     }
 
     async function handleRefund() {
-        const AMOUNT = formatPriceFromDigits(transactionSelected.AMOUNT)
-        const EXTRA = formatPriceFromDigits(transactionSelected.TIP)
-        const DATE = parseDateToDate(transactionSelected.TXN_DATE)
-        const REFERENCE = transactionSelected.SG_REFERENCE
-        const APPROVAL_CODE = transactionSelected.TXN_APPROVAL_CODE
+        const AMOUNT = formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)
+        const EXTRA = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
+        const DATE = parseDateToDate(transactionSelected?.data_raw?.TXN_DATE)
+        const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
+        const APPROVAL_CODE = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
 
         try {
-            if (isTodayTransactionDate(transactionSelected.TXN_DATE)) {
+            if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
                 const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
                 const RESP_JSON = JSON.parse(resp);
-                registrarCancelacion(RESP_JSON)
-                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected.TXN_UNIQUE_REF, device_id: deviceId })
-                setTransactionSelected(RESP_JSON)
+                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
+                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
+                setRefetchData(true)
             } else {
                 const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                 const RESP_JSON = JSON.parse(resp);
-                registrarCancelacion(RESP_JSON)
-                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected.TXN_UNIQUE_REF, device_id: deviceId })
-                setTransactionSelected(RESP_JSON)
+                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
+                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
+                setRefetchData(true)
             }
         } catch (err) {
             console.error('err------0')
@@ -99,16 +100,16 @@ const TransactionBottomSheet = () => {
     }
 
     return (
-        <GeneralBottomSheet borderColor={statusToColor[transactionSelected.TXN_NAME]} ref={transactionBottomSheetRef} >
+        <GeneralBottomSheet borderColor={statusToColor[transactionSelected?.event_name]} ref={transactionBottomSheetRef} >
             <View style={[{ alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.7), paddingHorizontal: sizeToDp(APP_PADDING * 0.8), paddingTop: sizeToDp(APP_PADDING * 0.8), rowGap: sizeToDp(APP_PADDING * 0.5) }]} >
                 <FastImage
-                    source={statusToImageMap[transactionSelected.TXN_NAME]}
+                    source={statusToImageMap[transactionSelected?.event_name]}
                     style={[{ width: sizeToDp(APP_PADDING * 4.5), aspectRatio: 1 }]}
                     resizeMode='contain'
                 />
                 <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.3), alignItems: 'center' }]} >
-                    <Typography variant='title01Bold' >{txnName[transactionSelected.TXN_NAME]}</Typography>
-                    <Typography variant='subtitle02Regular' color='textEleventh' >{transactionDate(transactionSelected.TXN_DATE, transactionSelected.TXN_TIME)}</Typography>
+                    <Typography variant='title01Bold' >{txnName[transactionSelected?.event_name]}</Typography>
+                    <Typography variant='subtitle02Regular' color='textEleventh' >{transactionDate(transactionSelected?.data_raw?.TXN_DATE, transactionSelected?.data_raw?.TXN_TIME)}</Typography>
                     <Pressable onPress={printTicket} hitSlop={{ right: sizeToDp(APP_PADDING * 2), left: sizeToDp(APP_PADDING * 2) }} style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.2), paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} >
                         <Typography variant='subtitle02Medium' color='brand200' >Imprimir</Typography>
                         <FastImage
@@ -125,25 +126,25 @@ const TransactionBottomSheet = () => {
 
             <Divider text='Transacción' />
             <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.5), paddingHorizontal: sizeToDp(APP_PADDING * 1), marginBottom: sizeToDp(APP_PADDING * 0.8) }]} >
-                <ListItem listKey='Tarjeta' listValue={`**** ${transactionSelected.ACCOUNT_NUMBER?.slice(-4)}`} />
-                <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected.BRAND_NAME)} />
-                {(transactionSelected.TIP && transactionSelected.TIP !== '0') && <ListItem listKey='Consumo' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />}
-                {(transactionSelected.TIP && transactionSelected.TIP !== '0') && <ListItem listKey='Extra' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} greenText={`${getExtraPercentage({ montoBase: transactionSelected.AMOUNT, montoExtra: transactionSelected.TIP })}`} />}
+                <ListItem listKey='Tarjeta' listValue={`**** ${transactionSelected?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`} />
+                <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected?.data_raw?.BRAND_NAME)} />
+                {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Consumo' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />}
+                {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Extra' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} greenText={`${getExtraPercentage({ montoBase: transactionSelected?.data_raw?.AMOUNT, montoExtra: transactionSelected?.data_raw?.TIP })}`} />}
                 {
-                    transactionSelected.TIP
-                        ? <ListItem listKey='Total' listValue={`${sumarMontosExactos(parseFloat(formatPriceFromDigits(transactionSelected.AMOUNT)), parseFloat(formatPriceFromDigits(transactionSelected.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />
-                        : <ListItem listKey='Total' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />
+                    transactionSelected?.data_raw?.TIP
+                        ? <ListItem listKey='Total' listValue={`${sumarMontosExactos(parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)), parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />
+                        : <ListItem listKey='Total' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />
                 }
             </View>
 
             <Divider text='Información bancaria' />
             <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING * 1), rowGap: sizeToDp(APP_PADDING * 0.5) }]} >
-                <ListItem listKey='Referencia' listValue={transactionSelected.SG_REFERENCE} />
-                <ListItem listKey='Código de aprovación' listValue={transactionSelected.TXN_APPROVAL_CODE} />
+                <ListItem listKey='Referencia' listValue={transactionSelected?.data_raw?.SG_REFERENCE} />
+                <ListItem listKey='Código de aprovación' listValue={transactionSelected?.data_raw?.TXN_APPROVAL_CODE} />
             </View>
 
 
-            {(transactionSelected.TXN_NAME !== 'CANCELACION' && transactionSelected.TXN_NAME !== 'Reembolso') && <View style={[{ flexDirection: 'row', width: '100%', justifyContent: 'space-around', paddingHorizontal: sizeToDp(APP_PADDING) }]} >
+            {(transactionSelected?.event_name !== 'cancel' && transactionSelected?.event_name !== 'Reembolso') && <View style={[{ flexDirection: 'row', width: '100%', justifyContent: 'space-around', paddingHorizontal: sizeToDp(APP_PADDING) }]} >
                 <Pressable onPress={handleRefund} style={[{ paddingBottom: sizeToDp(APP_PADDING), paddingTop: sizeToDp(APP_PADDING * 1.2), flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3) }]} >
                     <Typography variant='subtitle02Medium' color='notificationRed' >Reembolso</Typography>
                     <FastImage
@@ -154,7 +155,7 @@ const TransactionBottomSheet = () => {
                 </Pressable>
             </View>}
 
-            {!(transactionSelected.TXN_NAME !== 'CANCELACION' && transactionSelected.TXN_NAME !== 'Reembolso') && <View style={[{ height: sizeToDp(APP_PADDING * 0.8) }]} />}
+            {!(transactionSelected?.event_name !== 'cancel' && transactionSelected?.event_name !== 'Reembolso') && <View style={[{ height: sizeToDp(APP_PADDING * 0.8) }]} />}
         </GeneralBottomSheet>
     )
 }

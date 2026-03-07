@@ -21,16 +21,16 @@ import { obtenerTransaccion } from '../../../../core/utils/registerTxn.ts';
 
 const statusToImageMap: Record<string, any> = {
   /* Declinada: require('../../../../core/assets/images/error.webp'), */
-  CANCELACION: require('../../../../core/assets/images/error.webp'),
+  cancel: require('../../../../core/assets/images/error.webp'),
   /* Pendiente: require('../../../../core/assets/images/pending.webp'), */
-  "VENTA EN LINEA": require('../../../../core/assets/images/accepted.webp'),
+  transaction: require('../../../../core/assets/images/accepted.webp'),
 };
 
 const statusText: Record<string, any> = {
   /* Declinada: '', */
-  CANCELACION: 'Reembolso',
+  cancel: 'Reembolso',
   /* Pendiente: '', */
-  "VENTA EN LINEA": 'Aprobada',
+  transaction: 'Aprobada',
 };
 
 const { SmartWrapperModule } = NativeModules;
@@ -39,7 +39,6 @@ const Transaction = ({ onBack, ...item }: any) => {
   const { transactionBottomSheetRef, setTransactionSelected } = useContext(BottomSheetsContext)
 
   const {
-    TXN_NAME,
     ACCOUNT_NUMBER,
     AMOUNT,
     TXN_TIME,
@@ -47,7 +46,7 @@ const Transaction = ({ onBack, ...item }: any) => {
     BRAND_NAME,
     TIP,
     SG_REFERENCE,
-  } = item;
+  } = item.data_raw;
 
   function handleViewTransaction() {
     setTransactionSelected(item)
@@ -67,7 +66,7 @@ const Transaction = ({ onBack, ...item }: any) => {
       >
         <View style={[STYLES.itemListContainer]}>
           <FastImage
-            source={statusToImageMap[TXN_NAME]}
+            source={statusToImageMap[item.event_name]}
             style={[STYLES.itemImage]}
             resizeMode="contain"
           />
@@ -75,7 +74,7 @@ const Transaction = ({ onBack, ...item }: any) => {
           <View>
             <View style={[STYLES.itemTitleContainer]}>
               <Typography variant="subtitle02SemiBold" numberOfLines={1}>
-                {statusText[TXN_NAME]}
+                {statusText[item.event_name]}
               </Typography>
             </View>
             <Typography

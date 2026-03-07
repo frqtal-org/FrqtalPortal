@@ -29,7 +29,7 @@ const BalanceHeaderInfo = memo(({ onPressFilterTitle, balance, currency, equival
                     ellipsizeMode="middle"
                     style={[STYLES.balanceTitleAmount]}
                 >
-                    {`${balance} ${currency}`}
+                    {`${parseFloat(balance).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} ${currency}`}
                 </Typography>
 
                 <View style={[{ flexDirection: 'row', alignItems: 'center' }]} >
@@ -47,7 +47,7 @@ const BalanceHeaderInfo = memo(({ onPressFilterTitle, balance, currency, equival
                         ellipsizeMode="middle"
                         color={equivalentBalanceColor && equivalentBalanceColor}
                     >
-                        {equivalentBalance} {equivalentCurrency && equivalentCurrency}
+                        +{parseFloat(equivalentBalance).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} {equivalentCurrency && equivalentCurrency}
                     </Typography>}
                 </View>
             </View>

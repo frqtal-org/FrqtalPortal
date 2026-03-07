@@ -10,6 +10,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BootSplash from "react-native-bootsplash";
 import { BottomSheetsProvider } from './src/core/components/bottomSheets/context';
 import { LoginProvider } from './src/features/accessManagement/Login/context';
+import { TransactionsHistoryContextProvider } from './src/features/app/transactionsHistory/context';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,7 +45,9 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
               <GestureHandlerRootView style={[{ height: Dimensions.get('window').height }]} >
                 <BottomSheetsProvider>
                   <LoginProvider>
-                    {children}
+                    <TransactionsHistoryContextProvider>
+                      {children}
+                    </TransactionsHistoryContextProvider>
                   </LoginProvider>
                 </BottomSheetsProvider>
               </GestureHandlerRootView>

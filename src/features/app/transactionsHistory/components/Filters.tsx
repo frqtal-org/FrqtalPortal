@@ -8,15 +8,15 @@ import theme from '../../../../core/utils/styles/styles.ts';
 const LIST_STATUS_FILTERS = [
   {
     label: 'Todas',
-    selectionValue: 'todas'
+    selectionValue: 'all'
   },
   {
     label: 'Exitosas',
-    selectionValue: 'exitosas'
+    selectionValue: 'successful'
   },
   {
     label: 'Devueltas',
-    selectionValue: 'devueltas'
+    selectionValue: 'returned and cancelled'
   },
 ]
 
@@ -36,7 +36,7 @@ const FilterBadge = memo(({ timeLabel, isSelected, onPress }: any) => {
 
 export const Filters = memo(({ style = [{}], onPress }: any) => {
   /*  */
-  const [selectedFilter, setSelectedFilter] = useState('todas');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   /*  */
 
   /* ------- FUNCTIONS ------- */

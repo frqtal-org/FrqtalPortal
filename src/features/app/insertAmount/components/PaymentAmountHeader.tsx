@@ -49,7 +49,7 @@ export const PaymentAmountHeader = ({
       </View>
 
       <View style={[STYLES.subDataWrapper]}>
-        {price !== '' && <View style={[{ position: 'absolute', bottom: '100%', right: 0, marginBottom: sizeToDp(APP_PADDING * 0.3),zIndex: 999  }]} >
+        {/* {price !== '' && <View style={[{ position: 'absolute', bottom: '100%', right: 0, marginBottom: sizeToDp(APP_PADDING * 0.3),zIndex: 999  }]} >
           <Pressable onPress={handleClear} hitSlop={{ top: sizeToDp(APP_PADDING * 3), left: sizeToDp(APP_PADDING * 3), bottom: sizeToDp(APP_PADDING * 2) }} >
             <FastImage
               source={require('../../../../core/assets/images/clearRed.png')}
@@ -57,7 +57,7 @@ export const PaymentAmountHeader = ({
               resizeMode='contain'
             />
           </Pressable>
-        </View>}
+        </View>} */}
         <SubDataContainer
           title={'Extra:'}
           data={extra !== '' ? extra : '0%'}
@@ -99,7 +99,7 @@ export const PaymentAmountHeader = ({
           )}
         />
 
-        {extra !== '' && (
+        {/* {extra !== '' && (
           <Pressable
             style={[STYLES.deleteExtraButtonContainer]}
             hitSlop={{
@@ -117,7 +117,22 @@ export const PaymentAmountHeader = ({
               resizeMode={FastImage.resizeMode.contain}
             />
           </Pressable>
-        )}
+        )} */}
+
+        {(price !== '' || extra !== '') && <View style={[STYLES.deleteExtraButtonContainer]} >
+          <Pressable onPress={handleClear} hitSlop={{
+              right: sizeToDp(APP_PADDING),
+              top: sizeToDp(APP_PADDING * 2),
+              bottom: sizeToDp(APP_PADDING * 0.5),
+              left: sizeToDp(APP_PADDING * 2),
+            }} >
+            <FastImage
+              source={require('../../../../core/assets/images/clearRed.png')}
+              style={[{ width: sizeToDp(APP_PADDING * 1.8), aspectRatio: 1 }]}
+              resizeMode='contain'
+            />
+          </Pressable>
+        </View>}
       </View>
     </View>
   );
@@ -141,11 +156,12 @@ const STYLES = StyleSheet.create({
   extrasContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingRight: sizeToDp(APP_PADDING * 1.2),
+    paddingRight: sizeToDp(APP_PADDING * 1),
   },
   extrasList: {
     columnGap: sizeToDp(APP_PADDING * 0.5),
-    paddingHorizontal: sizeToDp(APP_PADDING * 0.8),
+    paddingRight: sizeToDp(APP_PADDING),
+    paddingLeft: sizeToDp(APP_PADDING * 0.8),
     paddingTop: sizeToDp(APP_PADDING * 0.5),
     paddingBottom: sizeToDp(APP_PADDING * 0.7),
   },

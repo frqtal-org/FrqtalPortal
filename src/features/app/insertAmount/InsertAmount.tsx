@@ -14,15 +14,15 @@ import { mmkvStorage } from '../../../core/store/principalStore'
 import { getCurrentDateDDMMAAAA } from '../../../core/utils/getDateDDMMAAAA'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import uuid from 'react-native-uuid';
-import { registrarNuevoCobro } from '../../../core/utils/registerTxn'
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context'
-import { Typography } from '../../../core/components/Typography'
 import { useTransactionRegister } from '../../../core/api/transactionRegister'
+import { TransactionsHistoryContext } from '../transactionsHistory/context'
 
 const { SmartWrapperModule } = NativeModules;
 
 const InsertAmount = () => {
     const INSETS = useContext(InsetsContext)
+    const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { setTransactionSelected } = useContext(BottomSheetsContext)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
@@ -65,11 +65,10 @@ const InsertAmount = () => {
                 setSelectedExtra('')
                 mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                 mmkvStorage.remove('PENDING_TX_DATE')
-                setTransactionSelected(respuestaJSON)
+                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
                 await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                registrarNuevoCobro(respuestaJSON)
+                setRefetchData(true)
             }
-            /* const respuestaPrint = await SmartWrapperModule.reprintTicket(respuestaJSON.SG_REFERENCE);console.log(respuestaPrint) */
         } catch (error) {
             console.error(error)
             mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');

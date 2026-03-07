@@ -13,6 +13,12 @@ import { sizeToDp } from '../../../core/utils/sizeToDP.tsx';
 import theme from "../../../core/utils/styles/styles.ts";
 import { Filters } from "./components/Filters.tsx";
 import TransactionListItem from "./components/TransactionListItem.tsx";
+import { useSharedValue } from 'react-native-reanimated';
+import { useMMKVString } from 'react-native-mmkv';
+import StorageKey from '../../../core/utils/store/keysStore.ts';
+import { mmkvStorage } from '../../../core/store/principalStore.ts';
+import { useGetAllTransactions } from '../../../core/api/getAllTransactions.ts';
+import { TransactionsHistoryContext } from './context.tsx';
 ;
 
 type DateFilterItem = {
@@ -56,22 +62,64 @@ let filterTO: number;
 
 const TransactionsHistory = () => {
   const { transactionSelected } = useContext(BottomSheetsContext)
+  const { setRefetchData, refetchData } = useContext(TransactionsHistoryContext)
   /*  */
   const listRef = useRef<FlatList<any>>(null)
   const [total, setTotal] = useState('0')
   const [extra, setExtra] = useState('0')
-  const [selectedFilter, setSelectedFilter] = useState('todas')
-  const [TXNs, setTXNs] = useState([])
+  const [selectedFilter, setSelectedFilter] = useState('all')
+  const [TXNs, setTXNs] = useState<any>([])
+  const [totalAmounts, setTotalAmounts] = useState({})
   const [isLoading, setIsLoading] = useState(false)
   /*  */
+
+  const isHistorialLoadingSV = useSharedValue(false)
+
+  const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
+
+    const getAllTransactionsMutator = useGetAllTransactions()
 
   async function goToReports() {
     await SmartWrapperModule.getBalance();
   }
 
+  function handleGetHistorial({ status = 'all', page = 1 }: any) {
+    isHistorialLoadingSV.value = true;
+
+    getAllTransactionsMutator.mutateAsync({
+      data: {
+        status,
+        page,
+      },
+      serialNumber: deviceId
+    }).then((resp: any) => {
+      /* transactionsTotalPagesSV.value = resp.data.totalPages
+      transactionsSelectedPageSV.value = page */
+
+      const totalAmounts: any = {}
+      totalAmounts.totalThisMonth = resp.data.totalThisMonth
+      totalAmounts.totalLastMonth = resp.data.totalLastMonth
+      totalAmounts.totalThisWeek = resp.data.totalThisWeek
+      totalAmounts.totalLastWeek = resp.data.totalLastWeek
+      totalAmounts.totalYesterday = resp.data.totalYesterday
+      totalAmounts.totalToday = resp.data.totalToday
+      totalAmounts.totalItems = resp.data.totalItems
+
+      setTotalAmounts(totalAmounts)
+      console.log(resp.data.data[0])
+      setTXNs((prev: any) => [...prev, ...resp.data.data])
+    }).catch((err: any) => {
+      console.log('---err ' + err)
+    }).finally(() => {
+      isHistorialLoadingSV.value = false
+      setRefetchData(false)
+      setIsLoading(false)
+    });
+  }
+
   useEffect(() => {
-    setTotal(formatPriceFromDigits?.(obtenerTotalCobrado().toString()))
-    setExtra(formatPriceFromDigits?.(obtenerTotalPropinas().toString()))
+    /* setTotal(formatPriceFromDigits?.(obtenerTotalCobrado().toString()))
+    setExtra(formatPriceFromDigits?.(obtenerTotalPropinas().toString())) */
   }, [transactionSelected])
 
 
@@ -79,11 +127,22 @@ const TransactionsHistory = () => {
     setIsLoading(true)
     setTXNs([])
     filterTO && clearTimeout(filterTO)
-    filterTO = setTimeout(() => {
-      setTXNs(obtenerTransaccionesPorEstado()[selectedFilter])
-      setIsLoading(false)
+    filterTO = setTimeout(() => {      
+      handleGetHistorial({ status: selectedFilter })
     }, 700)
-  },[selectedFilter, transactionSelected])
+  }, [selectedFilter])
+
+  useEffect(() => {
+    if (refetchData){
+      setIsLoading(true)
+      setTXNs([])
+      handleGetHistorial({ status: selectedFilter })
+    }
+  }, [refetchData])
+
+  useEffect(() => {
+    setRefetchData(true)
+  }, [])
 
   return (
     <BasicScreenWrapper noHeader noPaddingBottom >
@@ -94,9 +153,10 @@ const TransactionsHistory = () => {
               balanceTitle={'Ganancias totales:'}
               filterTitleText={'Hoy'}
               onPressFilterTitle={() => { }}
-              balance={`$${total}`}
+              balance={total}
               currency={'MXN'}
-              equivalentBalance={`+$${extra}`}
+              equivalentCurrency={'MXN'}
+              equivalentBalance={extra}
               equivalentBalanceColor={'notificationGreen'}
               equivalentMiniText='Extra:'
             />
@@ -126,10 +186,10 @@ const TransactionsHistory = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[(TXNs.length === 0 && !isLoading) && { flex: 1 }]}
         ListEmptyComponent={!isLoading ? <View style={[STYLES.emptyListContainer, { height: '100%', paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} ><Typography style={[{ textAlign: 'center' }]} variant='subtitle02Regular' color='textSecondary' >Sin transacciones</Typography></View> : <></>}
-        data={TXNs.reverse()}
+        data={TXNs}
         onEndReachedThreshold={2}
         renderItem={({ item }) => <TransactionListItem {...item} />}
-        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={isLoading} title={isLoading ? `Cargando transacciones` : `Fin de la lista`} subtitle={isLoading ?  `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
+        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={isLoading} title={isLoading ? `Cargando transacciones` : `Fin de la lista`} subtitle={isLoading ? `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
         ListFooterComponentStyle={[(TXNs.length === 0) ? { marginBottom: sizeToDp(APP_PADDING * 0.2) } : { marginTop: sizeToDp(APP_PADDING * 0.2), marginBottom: sizeToDp(APP_PADDING * 0.8) }]}
         style={[STYLES.listStyle]}
       /* onEndReached={(totalPages <= 1 || isHistorialLoading)? () => { } : handleNetPage} */

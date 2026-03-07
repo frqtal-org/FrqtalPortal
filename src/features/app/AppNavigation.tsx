@@ -15,12 +15,12 @@ import Settings from './settings/Settings';
 import TransactionsHistory from './transactionsHistory/TransactionsHistory';
 import TransactionBottomSheet from '../../core/components/bottomSheets/TransactionBottomSheet';
 import { mmkvStorage } from '../../core/store/principalStore';
-import { registrarNuevoCobro } from '../../core/utils/registerTxn';
 import { BottomSheetsContext } from '../../core/components/bottomSheets/context';
 import LoadingScreen from '../../core/components/Loading/LoadingScreen';
 import { useTransactionRegister } from '../../core/api/transactionRegister';
 import StorageKey from '../../core/utils/store/keysStore';
 import { useMMKVString } from 'react-native-mmkv';
+import { TransactionsHistoryContext } from './transactionsHistory/context';
 
 const CAROUSEL_WIDTH = Dimensions.get('window').width;
 const CAROUSEL_HEIGHT = Dimensions.get('window').height;
@@ -50,6 +50,7 @@ const AppNavigation = memo(() => {
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const progress = useSharedValue<number>(0);
     const INSETS = useContext(InsetsContext)
+    const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { setTransactionSelected } = useContext(BottomSheetsContext)
 
     const isVirifyingTransactionSV = useSharedValue(false)
@@ -80,11 +81,9 @@ const AppNavigation = memo(() => {
                 const respuestaJSON = JSON.parse(respuestaString);
                 
                 if (respuestaJSON.RESPONSE_CODE === '00') {
-                    setTransactionSelected(respuestaJSON)
-
+                    setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON})
                     await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                    registrarNuevoCobro(respuestaJSON)
-
+                    setRefetchData(true)
                     mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                     mmkvStorage.remove('PENDING_TX_DATE')
                 } else {
@@ -157,7 +156,7 @@ const AppNavigation = memo(() => {
             <TransactionBottomSheet />
 
             <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-                <LoadingScreen text='Verificando transaccion inconclusa' />
+                <LoadingScreen text='Verificando transacción inconclusa' />
             </Animated.View>
         </>
     );
