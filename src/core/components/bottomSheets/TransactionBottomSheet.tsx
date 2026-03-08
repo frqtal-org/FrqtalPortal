@@ -81,14 +81,14 @@ const TransactionBottomSheet = () => {
             if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
                 const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
                 const RESP_JSON = JSON.parse(resp);
-                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
                 await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
+                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
                 setRefetchData(true)
             } else {
                 const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                 const RESP_JSON = JSON.parse(resp);
-                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
                 await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
+                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
                 setRefetchData(true)
             }
         } catch (err) {
