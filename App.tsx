@@ -12,6 +12,8 @@ import { BottomSheetsProvider } from './src/core/components/bottomSheets/context
 import { LoginProvider } from './src/features/accessManagement/Login/context';
 import { TransactionsHistoryContextProvider } from './src/features/app/transactionsHistory/context';
 import { queryClient } from './src/core/utils/queryClientConfiguration';
+import { InsertAmountContextProvider } from './src/features/app/insertAmount/context';
+import { AppNavigationContextProvider } from './src/features/app/appNavigation/context';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -21,13 +23,17 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
           <SafeAreaProvider>
             <InsetsProvider>
               <GestureHandlerRootView style={[{ height: Dimensions.get('window').height }]} >
-                <BottomSheetsProvider>
-                  <LoginProvider>
-                    <TransactionsHistoryContextProvider>
-                      {children}
-                    </TransactionsHistoryContextProvider>
-                  </LoginProvider>
-                </BottomSheetsProvider>
+                <LoginProvider>
+                  <AppNavigationContextProvider>
+                    <BottomSheetsProvider>
+                      <TransactionsHistoryContextProvider>
+                        <InsertAmountContextProvider>
+                          {children}
+                        </InsertAmountContextProvider>
+                      </TransactionsHistoryContextProvider>
+                    </BottomSheetsProvider>
+                  </AppNavigationContextProvider>
+                </LoginProvider>
               </GestureHandlerRootView>
             </InsetsProvider>
           </SafeAreaProvider>

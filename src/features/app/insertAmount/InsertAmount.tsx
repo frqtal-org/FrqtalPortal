@@ -48,25 +48,31 @@ const InsertAmount = () => {
 
     async function handlePayAmount() {
         if (price.length === 0) return
-        setLoadingTextStatus('Iniciando cobro')
-        const AMOUNT_TO_PAY = formatPriceFromDigits(price);
-        const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
-        const DATE = getCurrentDateDDMMAAAA();
-        const UNIQUE_REFERENCE = `frq${uuid.v4().replaceAll('-', '').slice(-16)}`;
-        mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
-        mmkvStorage.set('PENDING_TX_DATE', DATE);
         try {
+            setLoadingTextStatus('Iniciando cobro')
             isPaymentLoadingSV.set(true)
+            
+            const AMOUNT_TO_PAY = formatPriceFromDigits(price);
+            const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
+            const DATE = getCurrentDateDDMMAAAA();
+            const UNIQUE_REFERENCE = `frq${uuid.v4().replaceAll('-', '').slice(-16)}`;
+            mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
+            mmkvStorage.set('PENDING_TX_DATE', DATE);
+
+
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             setLoadingTextStatus('')
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 setPrice('')
                 setSelectedExtra('')
+                await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                
+                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+
                 mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                 mmkvStorage.remove('PENDING_TX_DATE')
-                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
-                await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                /* TODO CATCH */
                 setRefetchData(true)
             }
         } catch (error) {
