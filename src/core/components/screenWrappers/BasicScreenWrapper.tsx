@@ -1,5 +1,5 @@
-import React, {memo, useContext} from 'react';
-import {View, StyleSheet} from 'react-native';
+import React, { memo, useContext } from 'react';
+import { View, StyleSheet, ViewComponent } from 'react-native';
 import { InsetsContext } from '../../utils/styles/insets.tsx';
 import GeneralHeader from '../headers/GeneralHeader.tsx';
 import GeneralGradient from '../../utils/styles/backgroundGradients/GeneralGradient.tsx';
@@ -20,6 +20,7 @@ const BasicScreenWrapper = memo(
     onBackPress,
     noGoBack,
     noPaddingTop,
+    onTouchStart = () => {}
   }: {
     children: React.ReactNode;
     headerCenterText?: string;
@@ -34,6 +35,7 @@ const BasicScreenWrapper = memo(
     noGoBack?: boolean;
     noPaddingTop?: boolean;
     onBackPress?: () => void;
+    onTouchStart?: () => void
   }) => {
     /*  */
     const INSETS = useContext(InsetsContext);
@@ -42,11 +44,13 @@ const BasicScreenWrapper = memo(
       <>
         {!noGradient && <GeneralGradient />}
         <View
+          onTouchStart={onTouchStart}
           style={[
             STYLES.appWrapper,
-            !noPaddingBottom && {paddingBottom: INSETS.bottom},
-            (noHeader && !noPaddingTop) && {marginTop: INSETS.top},
-          ]}>
+            !noPaddingBottom && { paddingBottom: INSETS.bottom },
+            (noHeader && !noPaddingTop) && { marginTop: INSETS.top },
+          ]}
+        >
           {!noHeader && (
             <GeneralHeader
               subText={headerSubText}

@@ -1,19 +1,31 @@
-import React, { createContext } from 'react';
+import React, { createContext, useEffect } from 'react';
 import { useLogin } from '../../../core/api/login';
 import { useSharedValue } from 'react-native-reanimated';
 import { NativeModules } from 'react-native';
 import { getItemWithExpiry, setItemWithExpiry } from '../../../core/store/principalStore';
 import StorageKey from '../../../core/utils/store/keysStore';
-import { saveToken } from '../../../core/store/tokenKeyChainStore';
+import { deleteToken, getToken, saveToken } from '../../../core/store/tokenKeyChainStore';
+import { useRefreshToken } from '../../../core/api/refreshToken';
+import { useLogout } from '../../../core/api/logout';
+import { useNavigation } from '@react-navigation/native';
+import { AXIOS_INSTANCE } from '../../../core/api/customInstance';
 
 const LoginContext = createContext<any>({});
 const { SmartWrapperModule } = NativeModules;
+
+const NO_TOKEN_ERROR_CODES = [403, 401];
+
+let REFRESH_TOKEN_TIMEOUT_ID: number;
 
 export function LoginProvider({ children }: { children: React.ReactNode }) {
     /*  */
     const isAuthenticationLoadingSV = useSharedValue(false)
     /*  */
     const useLoginMutator = useLogin();
+    const refreshTokenMutator = useRefreshToken();
+    const logoutMutator = useLogout()
+
+    const { navigate } = useNavigation<any>();
 
     /* ------- Functions ------- */
     function autenticarTerminal({ SPApiKey, SPIdCemmerce, SPIdIntegrator, invoice_id, onLogin }: { onLogin: () => void, SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, invoice_id: string }) {
@@ -54,7 +66,56 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
                 })
         })
     };
+
+    async function handleRefreshToken({ url }: any) {
+        const TOKEN = await getToken()
+        clearTimeout(REFRESH_TOKEN_TIMEOUT_ID);
+        REFRESH_TOKEN_TIMEOUT_ID = setTimeout(() => {
+            if (url !== '/terminal/refresh-token' && url !== '/terminal/login' && url !== '/terminal/logout') {
+                refreshTokenMutator.mutateAsync({ auth_token_login: TOKEN })
+                    .then(async (newTokenResponse: any) => {
+                        await saveToken(newTokenResponse.data.authToken)
+                    });
+            }
+        }, 5000);
+    };
+
+    async function handleRefreshTokenLastChance() {
+        const TOKEN = await getToken()
+        refreshTokenMutator.mutateAsync({ auth_token_login: TOKEN })
+            .then(async (newTokenResponse: any) => {
+                if (newTokenResponse === '') {
+                    navigate('Login')
+                    deleteToken()
+                    await logoutMutator.mutateAsync()
+                } else {
+                    await saveToken(newTokenResponse.data.authToken)
+                }
+            })
+            .catch(async (err: any) => {
+                console.error(err)
+                navigate('Login')
+                deleteToken()
+                await logoutMutator.mutateAsync()
+            });
+    };
     /* ------- END Functions ------- */
+
+    /* ------- Effects ------- */
+    useEffect(() => {
+        AXIOS_INSTANCE.interceptors.response.use(
+            resp => {
+                handleRefreshToken({ url: resp.config.url });
+                return resp;
+            },
+            error => {
+                if (NO_TOKEN_ERROR_CODES?.includes(error.response?.status) && !error.response?.config?.url.includes?.('login') && !error.response?.config?.url.includes?.('refresh-token') && !error.response?.config?.url.includes?.('logout')) {
+                    handleRefreshTokenLastChance()
+                }
+            },
+        );
+    }, []);
+    /* ------- END Effects ------- */
 
     return (
         <LoginContext.Provider

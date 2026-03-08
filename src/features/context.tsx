@@ -6,7 +6,7 @@ import StorageKey from "../core/utils/store/keysStore";
 const TerminalDeviceContext = createContext<any>({});
 
 export function TerminalDeviceContextProvider({ children }: { children: React.ReactNode }) {
-
+    
     useEffect(() => {
         (async () => {
             mmkvStorage.set(StorageKey.DEVICE_SERIAL_NUMBER, getUniqueIdSync())

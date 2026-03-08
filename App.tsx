@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dimensions, StatusBar } from 'react-native';
-import { keepPreviousData, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { NavigationContainer } from '@react-navigation/native';
 import GlobalNavigation from './src/features/GlobalNavigation';
 import { TerminalDeviceContextProvider } from './src/features/context';
@@ -11,29 +11,7 @@ import BootSplash from "react-native-bootsplash";
 import { BottomSheetsProvider } from './src/core/components/bottomSheets/context';
 import { LoginProvider } from './src/features/accessManagement/Login/context';
 import { TransactionsHistoryContextProvider } from './src/features/app/transactionsHistory/context';
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 30,
-      staleTime: 1000 * 60 * 10,
-      retry: 2,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-      refetchInterval: false,
-      networkMode: 'always',
-      retryOnMount: false,
-      placeholderData: keepPreviousData,
-      structuralSharing: true,
-      throwOnError: false,
-    },
-    mutations: {
-      retry: 1,
-      networkMode: 'always',
-    },
-  },
-})
+import { queryClient } from './src/core/utils/queryClientConfiguration';
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
