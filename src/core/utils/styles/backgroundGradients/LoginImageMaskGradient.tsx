@@ -1,10 +1,10 @@
-import React, { memo } from 'react'
+import React from 'react'
 
 import LinearGradient from 'react-native-linear-gradient'
 import { StyleSheet } from 'react-native'
 import theme from '../styles';
 
-const LoginImageMaskGradient = memo(() => {
+const LoginImageMaskGradient = () => {
   return (
     <LinearGradient
       start={{ x: 0, y: 0 }}
@@ -13,7 +13,7 @@ const LoginImageMaskGradient = memo(() => {
       style={[STYLES.gradient]}
     />
   );
-});
+};
 
 export default LoginImageMaskGradient;
 

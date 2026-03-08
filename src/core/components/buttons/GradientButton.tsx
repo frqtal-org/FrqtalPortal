@@ -1,8 +1,8 @@
-import React, {memo} from 'react';
-import { View, StyleSheet, PressableProps, Pressable, StyleProp, ViewStyle} from 'react-native';
+import React from 'react';
+import { View, StyleSheet, PressableProps, Pressable, StyleProp, ViewStyle } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import {sizeToDp} from '../../utils/sizeToDP.tsx';
-import {Typography} from '../Typography.tsx';
+import { sizeToDp } from '../../utils/sizeToDP.tsx';
+import { Typography } from '../Typography.tsx';
 import FastImage from 'react-native-fast-image';
 import theme from '../../utils/styles/styles.ts';
 import { APP_PADDING } from '../../utils/constants.ts';
@@ -57,77 +57,75 @@ const borders = {
   sharp: sizeToDp(APP_PADDING / 2),
 } as any;
 
-const Button = memo(
-  ({
-    onPress,
-    variant = 'primary',
-    borderType = 'rounded',
-    icon,
-    title,
-    isDisabled,
-    size = 'large',
-    disablePadding,
-    fitWidth = false,
-    ...rest
-  }: Props) => {
-    const colorVariant = getColorVariant(isDisabled ? 'disabled' : variant);
-    const getFontSize = {
-      mini: 'text02',
-      small: 'text02Medium',
-      extraSmall: 'text02',
-      large: 'text02SemiBold',
-    } as any;
+const Button = ({
+  onPress,
+  variant = 'primary',
+  borderType = 'rounded',
+  icon,
+  title,
+  isDisabled,
+  size = 'large',
+  disablePadding,
+  fitWidth = false,
+  ...rest
+}: Props) => {
+  const colorVariant = getColorVariant(isDisabled ? 'disabled' : variant);
+  const getFontSize = {
+    mini: 'text02',
+    small: 'text02Medium',
+    extraSmall: 'text02',
+    large: 'text02SemiBold',
+  } as any;
 
-    return (
-      <Pressable
-        onPress={onPress}
-        disabled={isDisabled}
-        {...rest}
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={isDisabled}
+      {...rest}
+      style={[
+        fitWidth ? STYLES.fitWidthContainer : {},
+        STYLES.buttonWrapper,
+        {
+          borderRadius: borders[borderType],
+        },
+        ...(Array.isArray(rest.style) ? rest.style : [rest.style]),
+      ]}>
+      <LinearGradient
+        colors={colorVariant.inactive}
+        start={colorVariant.start}
+        end={colorVariant.end}
+        locations={colorVariant.locations}
+        style={[STYLES.gradient]}
+      />
+
+      <View
         style={[
-          fitWidth ? STYLES.fitWidthContainer : {},
-          STYLES.buttonWrapper,
-          {
-            borderRadius: borders[borderType],
-          },
-          ...(Array.isArray(rest.style) ? rest.style : [rest.style]),
+          STYLES.buttonContentContainer,
+          size === 'large' && STYLES.buttonLargeContainer,
+          size === 'small' && STYLES.buttonSmallContainer,
+          size === 'extraSmall' && STYLES.buttonExtraSmallContainer,
+          disablePadding && STYLES.buttonNoPaddingContainer,
         ]}>
-        <LinearGradient
-          colors={colorVariant.inactive}
-          start={colorVariant.start}
-          end={colorVariant.end}
-          locations={colorVariant.locations}
-          style={[STYLES.gradient]}
-        />
+        {icon && (
+          <FastImage
+            source={icon}
+            style={[STYLES.iconImage]}
+            resizeMode={FastImage.resizeMode.contain}
+          />
+        )}
 
-        <View
-          style={[
-            STYLES.buttonContentContainer,
-            size === 'large' && STYLES.buttonLargeContainer,
-            size === 'small' && STYLES.buttonSmallContainer,
-            size === 'extraSmall' && STYLES.buttonExtraSmallContainer,
-            disablePadding && STYLES.buttonNoPaddingContainer,
-          ]}>
-          {icon && (
-            <FastImage
-              source={icon}
-              style={[STYLES.iconImage]}
-              resizeMode={FastImage.resizeMode.contain}
-            />
-          )}
-
-          {title && (
-            <Typography
-              variant={getFontSize[size]}
-              style={[icon ? STYLES.textPadded : {}, { includeFontPadding: false }]}
-              color={isDisabled ? 'textEleventh' : "textPrimary"}>
-              {title}
-            </Typography>
-          )}
-        </View>
-      </Pressable>
-    );
-  },
-);
+        {title && (
+          <Typography
+            variant={getFontSize[size]}
+            style={[icon ? STYLES.textPadded : {}, { includeFontPadding: false }]}
+            color={isDisabled ? 'textEleventh' : "textPrimary"}>
+            {title}
+          </Typography>
+        )}
+      </View>
+    </Pressable>
+  );
+};
 
 export default Button;
 

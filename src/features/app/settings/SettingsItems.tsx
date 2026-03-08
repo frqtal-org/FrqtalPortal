@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { Typography } from '../../../core/components/Typography';
@@ -12,7 +12,7 @@ interface Props {
   icon?: any;
 }
 
-const SettingsItems = memo(({ onPress, label, description, icon }: Props) => {
+const SettingsItems = ({ onPress, label, description, icon }: Props) => {
   /* ------- Functions ------- */
   const handlePressAction = useCallback(() => {
     onPress?.()
@@ -36,7 +36,7 @@ const SettingsItems = memo(({ onPress, label, description, icon }: Props) => {
       />
     </Pressable>
   );
-});
+};
 
 export default SettingsItems;
 

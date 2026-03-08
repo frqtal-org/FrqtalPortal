@@ -1,11 +1,11 @@
-import React, { memo } from 'react';
+import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { StyleSheet } from 'react-native';
 import theme from '../styles';
 
-const HeaderGradient = memo(() => {
+const HeaderGradient = () => {
   return <LinearGradient useAngle angle={0} style={[STYLES.gradient]} angleCenter={{ x: 0, y: 0.8 }} colors={[theme.colors.black + 'dc', theme.colors.glassSecondary]} />;
-});
+};
 
 export default HeaderGradient;
 

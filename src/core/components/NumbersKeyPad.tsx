@@ -1,7 +1,7 @@
 import { sizeToDp } from '../utils/sizeToDP.tsx';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Typography } from './Typography.tsx';
-import React, { memo } from 'react';
+import React from 'react';
 import theme from '../utils/styles/styles.ts';
 import { APP_PADDING } from '../utils/constants.ts';
 
@@ -11,34 +11,33 @@ const KeyCode = ({ onPress, text, pressColor, onLongPress }: { onPress: () => vo
   </Pressable>
 }
 
-export const NumbersKeyPad = memo(({ onPressNumber = () => { }, onResetDigits }: { onPressNumber: (number: string) => void; onResetDigits: () => void; }) => {
-    return <View style={[STYLES.keysWrapper]}>
-      <View style={[STYLES.keyRowWrapper]}>
-        <KeyCode onPress={() => onPressNumber('1')} text='1' />
-        <KeyCode onPress={() => onPressNumber('2')} text='2' />
-        <KeyCode onPress={() => onPressNumber('3')} text='3' />
-      </View>
-
-      <View style={[STYLES.keyRowWrapper]}>
-        <KeyCode onPress={() => onPressNumber('4')} text='4' />
-        <KeyCode onPress={() => onPressNumber('5')} text='5' />
-        <KeyCode onPress={() => onPressNumber('6')} text='6' />
-      </View>
-
-      <View style={[STYLES.keyRowWrapper]}>
-        <KeyCode onPress={() => onPressNumber('7')} text='7' />
-        <KeyCode onPress={() => onPressNumber('8')} text='8' />
-        <KeyCode onPress={() => onPressNumber('9')} text='9' />
-      </View>
-
-      <View style={[STYLES.keyRowWrapper]}>
-        <View style={[STYLES.keyButton]} />
-        <KeyCode onPress={() => onPressNumber('0')} text='0' />
-        <KeyCode onPress={() => onPressNumber('delete')} text='⌫' pressColor='red' onLongPress={onResetDigits} />
-      </View>
+export const NumbersKeyPad = ({ onPressNumber = () => { }, onResetDigits }: { onPressNumber: (number: string) => void; onResetDigits: () => void; }) => {
+  return <View style={[STYLES.keysWrapper]}>
+    <View style={[STYLES.keyRowWrapper]}>
+      <KeyCode onPress={() => onPressNumber('1')} text='1' />
+      <KeyCode onPress={() => onPressNumber('2')} text='2' />
+      <KeyCode onPress={() => onPressNumber('3')} text='3' />
     </View>
-  },
-);
+
+    <View style={[STYLES.keyRowWrapper]}>
+      <KeyCode onPress={() => onPressNumber('4')} text='4' />
+      <KeyCode onPress={() => onPressNumber('5')} text='5' />
+      <KeyCode onPress={() => onPressNumber('6')} text='6' />
+    </View>
+
+    <View style={[STYLES.keyRowWrapper]}>
+      <KeyCode onPress={() => onPressNumber('7')} text='7' />
+      <KeyCode onPress={() => onPressNumber('8')} text='8' />
+      <KeyCode onPress={() => onPressNumber('9')} text='9' />
+    </View>
+
+    <View style={[STYLES.keyRowWrapper]}>
+      <View style={[STYLES.keyButton]} />
+      <KeyCode onPress={() => onPressNumber('0')} text='0' />
+      <KeyCode onPress={() => onPressNumber('delete')} text='⌫' pressColor='red' onLongPress={onResetDigits} />
+    </View>
+  </View>
+};
 
 const STYLES = StyleSheet.create({
   keyButton: {

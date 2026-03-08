@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { StyleSheet } from 'react-native';
 import theme from '../styles';

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 
 import { View } from 'react-native';
 import { Typography } from './Typography';
@@ -7,7 +7,7 @@ import { APP_PADDING } from '../utils/constants';
 import Loading from './Loading/Loading';
 import theme from '../utils/styles/styles';
 
-const LoadingListLoader = memo(({ title, subtitle, showLoader = true }: any) => {
+const LoadingListLoader = ({ title, subtitle, showLoader = true }: any) => {
   return (
     <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING * 0.8), flex: 1 }]}>
       <View
@@ -36,6 +36,6 @@ const LoadingListLoader = memo(({ title, subtitle, showLoader = true }: any) => 
       </View>
     </View>
   );
-});
+};
 
 export default LoadingListLoader;

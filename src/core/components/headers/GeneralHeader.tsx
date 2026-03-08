@@ -1,5 +1,5 @@
 import { BackHandler, StyleSheet, View } from 'react-native';
-import React, { memo, useContext, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import FastImage from 'react-native-fast-image';
 import { sizeToDp } from '../../utils/sizeToDP.tsx';
 import { Typography } from '../Typography.tsx';
@@ -7,8 +7,7 @@ import { BackButton } from '../buttons/BackButton.tsx';
 import { APP_PADDING } from '../../utils/constants.ts';
 import { InsetsContext } from '../../utils/styles/insets.tsx';
 
-const GeneralHeader = memo(
-  ({
+const GeneralHeader = ({
     titleText,
     onBack,
     rightImage,
@@ -99,8 +98,7 @@ const GeneralHeader = memo(
         </View>
       </View>
     );
-  },
-);
+  };
 
 export default GeneralHeader;
 

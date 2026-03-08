@@ -1,4 +1,4 @@
-import React , {memo} from 'react';
+import React from 'react';
 import {
   Pressable,
   StyleProp,
@@ -20,7 +20,7 @@ interface Props {
   noGoBack?: boolean;
 }
 
-export const BackButton = memo(({
+export const BackButton = ({
   onBack,
   style,
   isCloseButton = false,
@@ -62,7 +62,7 @@ export const BackButton = memo(({
       )}
     </Pressable>
   );
-});
+};
 
 const STYLES = StyleSheet.create({
   buttonContainer: {

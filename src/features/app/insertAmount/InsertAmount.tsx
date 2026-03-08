@@ -59,7 +59,6 @@ const InsertAmount = () => {
             mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
             mmkvStorage.set('PENDING_TX_DATE', DATE);
 
-
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
             setLoadingTextStatus('')
             const respuestaJSON = JSON.parse(respuestaSale);

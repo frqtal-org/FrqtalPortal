@@ -1,11 +1,10 @@
 import { View, StyleSheet, TouchableOpacity, Pressable } from 'react-native'
-import React, { memo } from 'react'
-import FastImage from 'react-native-fast-image';
+import React from 'react'
 import { sizeToDp } from '../../utils/sizeToDP';
 import { Typography } from '../Typography';
 import { APP_PADDING } from '../../utils/constants';
 
-const BalanceHeaderInfo = memo(({ onPressFilterTitle, balance, currency, equivalentBalance, equivalentCurrency, iconActions, balanceTitle, filterTitleText, equivalentBalanceColor, equivalentMiniText }: any) => {
+const BalanceHeaderInfo = ({ onPressFilterTitle, balance, currency, equivalentBalance, equivalentCurrency, iconActions, balanceTitle, filterTitleText, equivalentBalanceColor, equivalentMiniText }: any) => {
     return (
         <View>
             <View style={[STYLES.headerButtonsWrapper]}>
@@ -53,7 +52,7 @@ const BalanceHeaderInfo = memo(({ onPressFilterTitle, balance, currency, equival
             </View>
         </View>
     )
-})
+};
 
 export default BalanceHeaderInfo;
 

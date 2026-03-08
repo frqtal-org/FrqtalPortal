@@ -1,12 +1,11 @@
-import React, { memo, useContext } from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet, ViewComponent } from 'react-native';
 import { InsetsContext } from '../../utils/styles/insets.tsx';
 import GeneralHeader from '../headers/GeneralHeader.tsx';
 import GeneralGradient from '../../utils/styles/backgroundGradients/GeneralGradient.tsx';
 /* import GeneralHeader from '../headers/GeneralHeader.tsx'; */
 
-const BasicScreenWrapper = memo(
-  ({
+const BasicScreenWrapper = ({
     children,
     headerCenterText,
     headerRightImage,
@@ -67,8 +66,7 @@ const BasicScreenWrapper = memo(
         </View>
       </>
     );
-  },
-);
+  };
 
 const STYLES = StyleSheet.create({
   appWrapper: {

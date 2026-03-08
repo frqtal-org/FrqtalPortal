@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Typography } from '../../../../core/components/Typography.tsx';
 import { sizeToDp } from '../../../../core/utils/sizeToDP.tsx';
@@ -20,7 +20,7 @@ const LIST_STATUS_FILTERS = [
   },
 ]
 
-const FilterBadge = memo(({ timeLabel, isSelected, onPress }: any) => {
+const FilterBadge = ({ timeLabel, isSelected, onPress }: any) => {
   return (
     <Pressable
       hitSlop={sizeToDp(APP_PADDING * 1.3)}
@@ -32,9 +32,9 @@ const FilterBadge = memo(({ timeLabel, isSelected, onPress }: any) => {
       <Typography color={isSelected ? 'textPrimary' : 'textEleventh'} variant="text01Medium">{timeLabel}</Typography>
     </Pressable>
   );
-});
+};
 
-export const Filters = memo(({ style = [{}], onPress }: any) => {
+export const Filters = ({ style = [{}], onPress }: any) => {
   /*  */
   const [selectedFilter, setSelectedFilter] = useState('all');
   /*  */
@@ -69,7 +69,7 @@ export const Filters = memo(({ style = [{}], onPress }: any) => {
     </View>
 
   );
-});
+};
 
 const STYLES = StyleSheet.create({
   filterBadge: {

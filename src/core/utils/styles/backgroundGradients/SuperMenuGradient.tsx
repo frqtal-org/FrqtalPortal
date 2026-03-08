@@ -1,9 +1,9 @@
-import React, { memo } from 'react';
+import React from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import { StyleSheet } from 'react-native';
 import theme from '../styles';
 
-const SuperMenuGradient = memo(() => {
+const SuperMenuGradient = () => {
   return (
     <LinearGradient
       colors={[theme.colors.glassSecondary + 'f7', theme.colors.black]}
@@ -13,7 +13,7 @@ const SuperMenuGradient = memo(() => {
       style={[STYLES.gradient]}
     />
   );
-});
+};
 
 export default SuperMenuGradient;
 
