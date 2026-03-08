@@ -7,8 +7,6 @@ import LoadingListLoader from "../../../core/components/LoadingListLoader.tsx";
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper.tsx';
 import { Typography } from '../../../core/components/Typography.tsx';
 import { APP_PADDING } from "../../../core/utils/constants.ts";
-import { formatPriceFromDigits } from '../../../core/utils/priceFormater.ts';
-import { obtenerTotalCobrado, obtenerTotalPropinas, obtenerTransaccionesPorEstado } from '../../../core/utils/registerTxn.ts';
 import { sizeToDp } from '../../../core/utils/sizeToDP.tsx';
 import theme from "../../../core/utils/styles/styles.ts";
 import { Filters } from "./components/Filters.tsx";
@@ -19,58 +17,18 @@ import StorageKey from '../../../core/utils/store/keysStore.ts';
 import { mmkvStorage } from '../../../core/store/principalStore.ts';
 import { useGetAllTransactions } from '../../../core/api/getAllTransactions.ts';
 import { TransactionsHistoryContext } from './context.tsx';
-;
-
-type DateFilterItem = {
-  label: string;
-  selectionValue: string;
-  dateStart: string
-  dateEnd: string;
-  infoText: string;
-};
-
-export function buildTransactionsRangeText(
-  items: DateFilterItem[],
-  selectionValue: string
-): string {
-  const item = items.find(i => i.selectionValue === selectionValue);
-  if (!item) return 'Transacciones de: —';
-
-  // Parse seguro en UTC para evitar problemas de huso horario/DST
-  const parseYMD = (s: string) => {
-    const [y, m, d] = s.split('-').map(Number);
-    return new Date(Date.UTC(y, m - 1, d));
-  };
-
-  const start = parseYMD(item.dateStart);
-  const endExclusive = parseYMD(item.dateEnd);
-
-  // Mostramos fin inclusivo => endExclusive - 1 día
-  const endInclusive = new Date(endExclusive);
-  endInclusive.setUTCDate(endInclusive.getUTCDate() - 1);
-
-  const MONTH_ABBR_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-  const fmt = (d: Date) =>
-    `${String(d.getUTCDate()).padStart(2, '0')} ${MONTH_ABBR_ES[d.getUTCMonth()]} ${String(d.getUTCFullYear()).slice(-2)}`;
-
-  return `Transacciones de: ${fmt(start)} - ${fmt(endInclusive)}`;
-}
 
 const { SmartWrapperModule } = NativeModules;
 
 let filterTO: number;
 
 const TransactionsHistory = () => {
-  const { transactionSelected } = useContext(BottomSheetsContext)
   const { setRefetchData, refetchData } = useContext(TransactionsHistoryContext)
   /*  */
   const listRef = useRef<FlatList<any>>(null)
-  const [total, setTotal] = useState('0')
-  const [extra, setExtra] = useState('0')
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [TXNs, setTXNs] = useState<any>([])
-  const [totalAmounts, setTotalAmounts] = useState({})
-  const [totalPages, setTotalPages] = useState(0)
+  const [totalAmounts, setTotalAmounts] = useState({ totalExtraToday: null, totalToday: null, totalPages: 0 })
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   /*  */
@@ -80,7 +38,7 @@ const TransactionsHistory = () => {
 
 
   function handleNextPage() {
-    if (currentPage === totalPages || totalPages === 0 || isLoading) return
+    if (currentPage === totalAmounts.totalPages || totalAmounts.totalPages === 0 || isLoading) return
     setIsLoading(true)
     handleGetHistorial({ status: selectedFilter, page: currentPage + 1 })
     setCurrentPage(currentPage + 1)
@@ -100,14 +58,9 @@ const TransactionsHistory = () => {
       },
       serialNumber: deviceId
     }).then((resp: any) => {
-      /* 
-      transactionsTotalPagesSV.value = resp.data.totalPages
-      transactionsSelectedPageSV.value = page */
-      setTotalPages(resp.data.totalPages)
-      setTotal(resp.data.totalToday)
-      /* setExtra(resp.data.totalExtra) TODO */
-
+      
       const totalAmounts: any = {}
+      /* totalAmounts.totalExtra = 'resp.data.totalExtra' */ /* TODO */
       totalAmounts.totalThisMonth = resp.data.totalThisMonth
       totalAmounts.totalLastMonth = resp.data.totalLastMonth
       totalAmounts.totalThisWeek = resp.data.totalThisWeek
@@ -115,6 +68,7 @@ const TransactionsHistory = () => {
       totalAmounts.totalYesterday = resp.data.totalYesterday
       totalAmounts.totalToday = resp.data.totalToday
       totalAmounts.totalItems = resp.data.totalItems
+      totalAmounts.totalPages = resp.data.totalPages
 
       setTotalAmounts(totalAmounts)
       setTXNs((prev: any) => [...prev, ...resp.data.data])
@@ -126,12 +80,6 @@ const TransactionsHistory = () => {
       setIsLoading(false)
     });
   }
-
-  useEffect(() => {
-    /* setTotal(formatPriceFromDigits?.(obtenerTotalCobrado().toString()))
-    setExtra(formatPriceFromDigits?.(obtenerTotalPropinas().toString())) */
-  }, [transactionSelected])
-
 
   useEffect(() => {
     setIsLoading(true)
@@ -160,10 +108,10 @@ const TransactionsHistory = () => {
               balanceTitle={'Ganancias totales:'}
               filterTitleText={'Hoy'}
               onPressFilterTitle={() => { }}
-              balance={total}
+              balance={totalAmounts.totalToday || '0.00'}
               currency={'MXN'}
               equivalentCurrency={'MXN'}
-              equivalentBalance={extra}
+              equivalentBalance={totalAmounts.totalExtraToday || '0.00'}
               equivalentBalanceColor={'notificationGreen'}
               equivalentMiniText='Extra:'
             />
@@ -182,13 +130,6 @@ const TransactionsHistory = () => {
             setSelectedFilter(filter)
             }} style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />
         </View>
-
-        <View>
-          {/* <HeaderGradient /> */}
-          {/* <View style={[{ alignItems: 'center', paddingVertical: sizeToDp(APP_PADDING * 0.5), borderTopWidth: sizeToDp(1), borderColor: theme.colors.glassPrimary }]} >
-              <Typography variant='text03Medium' color='textQuinary' >{TOTAL_AMOUNTS?.totalItems || 0} {buildTransactionsRangeText(DATE_FILTERS_DATES, selectedFilter)}</Typography>
-            </View> */}
-        </View>
       </View>
       <FlatList
         ref={listRef}
@@ -199,21 +140,10 @@ const TransactionsHistory = () => {
         data={TXNs}
         onEndReachedThreshold={2}
         renderItem={({ item }) => <TransactionListItem {...item} />}
-        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={!(totalPages === currentPage && !isLoading) } title={!(totalPages === currentPage && !isLoading) ?  (currentPage === 1 ? `Cargando transacciones` : `Cargando página ${currentPage}/${totalPages}`) : `Fin de la lista`} subtitle={!(totalPages === currentPage && !isLoading) ?  `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
+        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={!(totalAmounts.totalPages === currentPage && !isLoading) } title={!(totalAmounts.totalPages === currentPage && !isLoading) ?  (currentPage === 1 ? `Cargando transacciones` : `Cargando página ${currentPage}/${totalAmounts.totalPages}`) : `Fin de la lista`} subtitle={!(totalAmounts.totalPages === currentPage && !isLoading) ?  `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
         ListFooterComponentStyle={[(TXNs.length === 0) ? { marginBottom: sizeToDp(APP_PADDING * 0.2) } : { marginTop: sizeToDp(APP_PADDING * 0.2), marginBottom: sizeToDp(APP_PADDING * 0.8) }]}
         style={[STYLES.listStyle]}
-        onEndReached={(totalPages <= 1 || isLoading) ? () => { } : handleNextPage}
-      /* refreshControl={
-        <RefreshControl
-          refreshing={false}
-          onRefresh={() => {
-            TRANSACTIONS_CONTEXT.transactionsTotalPagesSV.value = 1
-            TRANSACTIONS_CONTEXT.transactionsSelectedPageSV.value = 1
-            TRANSACTIONS_CONTEXT.historialListSV.value = '[]'
-            TRANSACTIONS_CONTEXT.handleGetHistorial({ filter: selectedFilter, status: selectedStatusFilter, page: 1 })
-          }}
-        />
-      } */
+        onEndReached={(totalAmounts.totalPages <= 1 || isLoading) ? () => { } : handleNextPage}
       />
     </BasicScreenWrapper>
   );
@@ -226,11 +156,9 @@ const STYLES = StyleSheet.create({
     flex: 1,
   },
   listHeaderStyle: {
-    /* paddingBottom: sizeToDp(APP_PADDING * 0.8), */
     borderBottomWidth: sizeToDp(1),
     borderBottomColor: theme.colors.glassPrimary,
     marginBottom: -sizeToDp(1),
-    /* paddingHorizontal: sizeToDp(APP_PADDING), */
   },
   emptyListContainer: {
     alignItems: 'center',

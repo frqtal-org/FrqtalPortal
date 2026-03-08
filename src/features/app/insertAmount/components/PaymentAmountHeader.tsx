@@ -6,7 +6,6 @@ import FastImage from 'react-native-fast-image';
 import { APP_PADDING } from '../../../../core/utils/constants.ts';
 import theme from '../../../../core/utils/styles/styles.ts';
 import { calculateExtraAmount, formatPercentageFromPrice, formatPriceFromDigits } from '../../../../core/utils/priceFormater.ts';
-import HeaderGradient from '../../../../core/utils/styles/backgroundGradients/HeaderGradient.tsx';
 
 const SubDataContainer = ({ title, data, color }: { title: string; data: string; color?: any }) => {
     return (
@@ -47,15 +46,6 @@ export const PaymentAmountHeader = ({
       </View>
 
       <View style={[STYLES.subDataWrapper]}>
-        {/* {price !== '' && <View style={[{ position: 'absolute', bottom: '100%', right: 0, marginBottom: sizeToDp(APP_PADDING * 0.3),zIndex: 999  }]} >
-          <Pressable onPress={handleClear} hitSlop={{ top: sizeToDp(APP_PADDING * 3), left: sizeToDp(APP_PADDING * 3), bottom: sizeToDp(APP_PADDING * 2) }} >
-            <FastImage
-              source={require('../../../../core/assets/images/clearRed.png')}
-              style={[{ width: sizeToDp(APP_PADDING * 1.8), aspectRatio: 1 }]}
-              resizeMode='contain'
-            />
-          </Pressable>
-        </View>} */}
         <SubDataContainer
           title={'Extra:'}
           data={extra !== '' ? extra : '0%'}
@@ -96,26 +86,6 @@ export const PaymentAmountHeader = ({
             </Pressable>
           )}
         />
-
-        {/* {extra !== '' && (
-          <Pressable
-            style={[STYLES.deleteExtraButtonContainer]}
-            hitSlop={{
-              right: sizeToDp(APP_PADDING),
-              top: sizeToDp(APP_PADDING * 2),
-              bottom: sizeToDp(APP_PADDING * 0.5),
-              left: sizeToDp(APP_PADDING * 2),
-            }}
-            onPress={() => {
-              handleSetExtra('');
-            }}>
-            <FastImage
-              source={require('../../../../core/assets/images/close2.webp')}
-              style={[STYLES.deleteExtraButtonIcon]}
-              resizeMode={FastImage.resizeMode.contain}
-            />
-          </Pressable>
-        )} */}
 
         {(price !== '' || extra !== '') && <View style={[STYLES.deleteExtraButtonContainer]} >
           <Pressable onPress={handleClear} hitSlop={{

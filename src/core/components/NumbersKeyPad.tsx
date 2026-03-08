@@ -5,13 +5,13 @@ import React from 'react';
 import theme from '../utils/styles/styles.ts';
 import { APP_PADDING } from '../utils/constants.ts';
 
-const KeyCode = ({ onPress, text, pressColor, onLongPress }: { onPress: () => void, text: string, pressColor?: string, onLongPress?: () => void }) => {
-  return <Pressable onPress={onPress} onLongPress={onLongPress} style={({ pressed }) => [STYLES.keyButton, pressed && { backgroundColor: pressColor === 'red' ? theme.colors.notificationRed : theme.colors.glassBorder }]}>
-    <Typography style={[{ includeFontPadding: false }]} variant="title02SemiBold">{text}</Typography>
+const KeyCode = ({ onPress, text, pressColor, onLongPress }: { onPress?: () => void, text?: string, pressColor?: string, onLongPress?: () => void }) => {
+  return <Pressable onPress={onPress} onLongPress={onLongPress} style={({ pressed }) => [STYLES.keyButton, (pressed && text) && { backgroundColor: pressColor === 'red' ? theme.colors.notificationRed : theme.colors.glassBorder }]}>
+    {text && <Typography style={[{ includeFontPadding: false }]} variant="title02SemiBold">{text}</Typography>}
   </Pressable>
 }
 
-export const NumbersKeyPad = ({ onPressNumber = () => { }, onResetDigits }: { onPressNumber: (number: string) => void; onResetDigits: () => void; }) => {
+export const NumbersKeyPad = ({ onPressNumber = () => { }, onResetDigits, onSecret }: { onPressNumber: (number: string) => void; onResetDigits: () => void; onSecret?: () => void; }) => {
   return <View style={[STYLES.keysWrapper]}>
     <View style={[STYLES.keyRowWrapper]}>
       <KeyCode onPress={() => onPressNumber('1')} text='1' />
@@ -32,7 +32,7 @@ export const NumbersKeyPad = ({ onPressNumber = () => { }, onResetDigits }: { on
     </View>
 
     <View style={[STYLES.keyRowWrapper]}>
-      <View style={[STYLES.keyButton]} />
+      <KeyCode onLongPress={onSecret} />
       <KeyCode onPress={() => onPressNumber('0')} text='0' />
       <KeyCode onPress={() => onPressNumber('delete')} text='⌫' pressColor='red' onLongPress={onResetDigits} />
     </View>

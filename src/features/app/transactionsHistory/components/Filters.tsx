@@ -51,6 +51,7 @@ export const Filters = ({ style = [{}], onPress }: any) => {
     <View style={[{ paddingTop: sizeToDp(APP_PADDING * 0), alignItems: 'center', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.7), zIndex: 999 }]} >
       <ScrollView
         horizontal
+        scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[STYLES.headerFiltersContainer]}>
         {LIST_STATUS_FILTERS.map((i: any) => (

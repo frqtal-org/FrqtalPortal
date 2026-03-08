@@ -2,13 +2,14 @@ import React, { createContext, useEffect } from 'react';
 import { useLogin } from '../../../core/api/login';
 import { useSharedValue } from 'react-native-reanimated';
 import { NativeModules } from 'react-native';
-import { getItemWithExpiry, setItemWithExpiry } from '../../../core/store/principalStore';
+import { getItemWithExpiry, mmkvStorage, setItemWithExpiry } from '../../../core/store/principalStore';
 import StorageKey from '../../../core/utils/store/keysStore';
 import { deleteToken, getToken, saveToken } from '../../../core/store/tokenKeyChainStore';
 import { useRefreshToken } from '../../../core/api/refreshToken';
 import { useLogout } from '../../../core/api/logout';
 import { useNavigation } from '@react-navigation/native';
 import { AXIOS_INSTANCE } from '../../../core/api/customInstance';
+import { useMMKVString } from 'react-native-mmkv';
 
 const LoginContext = createContext<any>({});
 const { SmartWrapperModule } = NativeModules;
@@ -18,6 +19,10 @@ const NO_TOKEN_ERROR_CODES = [403, 401];
 let REFRESH_TOKEN_TIMEOUT_ID: number;
 
 export function LoginProvider({ children }: { children: React.ReactNode }) {
+    
+    const [SPApiKey, setSPApiKey] = useMMKVString(StorageKey.SP_API_KEY, mmkvStorage)
+    const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
+    const [SPIdIntegrator, setSPIdIntegrator] = useMMKVString(StorageKey.SP_ID_INTEGRATOR, mmkvStorage)
     /*  */
     const isAuthenticationLoadingSV = useSharedValue(false)
     /*  */
@@ -28,7 +33,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     const { navigate } = useNavigation<any>();
 
     /* ------- Functions ------- */
-    function autenticarTerminal({ SPApiKey, SPIdCemmerce, SPIdIntegrator, invoice_id, onLogin }: { onLogin: () => void, SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, invoice_id: string }) {
+    function autenticarTerminal({ onLogin, invoice_id }: { onLogin: () => void, SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, invoice_id: string }) {
         return new Promise(async (res, rej) => {
             try {
                 const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
@@ -50,12 +55,12 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         })
     };
 
-    function handleLogin({ code, deviceId, ...terminalData }: any): Promise<unknown> {
+    function handleLogin({ code, deviceId, onLogin }: any): Promise<unknown> {
         return new Promise((res, rej) => {
             isAuthenticationLoadingSV.set(true)
             useLoginMutator.mutateAsync({ pin: code, device_id: deviceId }).then(async ({ data }) => {
                 await saveToken(data.authToken)
-                autenticarTerminal({ ...terminalData, ...data })
+                autenticarTerminal({ onLogin, ...data })
                     .then(res)
                     .catch(rej)
                     .finally(() => isAuthenticationLoadingSV.set(false))

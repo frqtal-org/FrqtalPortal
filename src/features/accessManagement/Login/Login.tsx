@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { useMMKVString } from 'react-native-mmkv';
 import StorageKey from '../../../core/utils/store/keysStore';
@@ -14,12 +14,7 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import { useNavigation } from '@react-navigation/native';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import { LoginContext } from './context';
-
-const KeyCode = ({ onPress, text, pressColor, onLongPress, silentKey }: { onPress?: () => void, text?: string, pressColor?: string, onLongPress?: () => void, underLine?: boolean, silentKey?: boolean }) => {
-  return <Pressable onPress={onPress} onLongPress={onLongPress} style={({ pressed }) => [STYLES.keyButton, (pressed && !silentKey) && { backgroundColor: pressColor === 'red' ? theme.colors.notificationRed : theme.colors.glassBorder }]}>
-    {text && <Typography style={[{ includeFontPadding: false }]} variant="title02SemiBold">{text}</Typography>}
-  </Pressable>
-}
+import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad';
 
 const Code = ({ value }: { value: string }) => {
   return <View style={[STYLES.containerWrapper, value && { backgroundColor: theme.colors.brand200 }, { borderRadius: 999, borderWidth: sizeToDp(1), borderColor: theme.colors.brand200, width: sizeToDp(APP_PADDING * 1.2), aspectRatio: 1 }]} />
@@ -33,9 +28,6 @@ const Login = () => {
   const { handleLogin, isAuthenticationLoadingSV } = useContext(LoginContext)
   /*  */
   const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
-  const [SPApiKey, setSPApiKey] = useMMKVString(StorageKey.SP_API_KEY, mmkvStorage)
-  const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
-  const [SPIdIntegrator, setSPIdIntegrator] = useMMKVString(StorageKey.SP_ID_INTEGRATOR, mmkvStorage)
   const [appBuildNumber, setAppBuildNumber] = useMMKVString(StorageKey.APP_VERSION_NAME, mmkvStorage)
   /*  */
   const [loadingTextStatus, setLoadingTextStatus] = useState('')
@@ -61,7 +53,7 @@ const Login = () => {
   }
 
   function sendLoginCode({ code }: any) {
-    handleLogin({ code, deviceId, SPApiKey, SPIdCemmerce, SPIdIntegrator, onLogin })
+    handleLogin({ code, deviceId, onLogin })
       .then(() => {
         isBadCodeSV.set(false)
         navigate('AppNavigation')
@@ -159,31 +151,11 @@ const Login = () => {
       </View>
 
 
-      <View style={[STYLES.keysWrapper]}>
-        <View style={[STYLES.keyRowWrapper]}>
-          <KeyCode onPress={() => handleKeyPress('1')} text='1' />
-          <KeyCode onPress={() => handleKeyPress('2')} text='2' />
-          <KeyCode onPress={() => handleKeyPress('3')} text='3' />
-        </View>
-
-        <View style={[STYLES.keyRowWrapper]}>
-          <KeyCode onPress={() => handleKeyPress('4')} text='4' />
-          <KeyCode onPress={() => handleKeyPress('5')} text='5' />
-          <KeyCode onPress={() => handleKeyPress('6')} text='6' />
-        </View>
-
-        <View style={[STYLES.keyRowWrapper]}>
-          <KeyCode onPress={() => handleKeyPress('7')} text='7' />
-          <KeyCode onPress={() => handleKeyPress('8')} text='8' />
-          <KeyCode onPress={() => handleKeyPress('9')} text='9' />
-        </View>
-
-        <View style={[STYLES.keyRowWrapper]}>
-          <KeyCode onLongPress={handleShowDeviceID} silentKey />
-          <KeyCode onPress={() => handleKeyPress('0')} text='0' />
-          <KeyCode onPress={() => handleKeyPress('delete')} text='⌫' pressColor='red' onLongPress={() => setFieldValue('code', '')} />
-        </View>
-      </View>
+      <NumbersKeyPad
+        onPressNumber={handleKeyPress}
+        onResetDigits={() => setFieldValue('code', '')}
+        onSecret={handleShowDeviceID}
+      />
 
       <View style={[{ alignItems: 'center', paddingTop: sizeToDp(APP_PADDING * 0.8) }]} >
         <Typography variant='text02Light' color={'textSecondary'} >Frqtal Network S.A.P.I de C.V.</Typography>

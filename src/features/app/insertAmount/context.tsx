@@ -6,6 +6,9 @@ import { BottomSheetsContext } from "../../../core/components/bottomSheets/conte
 import StorageKey from "../../../core/utils/store/keysStore";
 import { useMMKVString } from "react-native-mmkv";
 import { useTransactionRegister } from "../../../core/api/transactionRegister";
+import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
+import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
+import uuid from 'react-native-uuid';
 
 const InsertAmountContext = createContext<any>({});
 
@@ -16,6 +19,7 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
     const { setTransactionSelected } = useContext(BottomSheetsContext)
 
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
+    const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
 
     const transactionRegisterMutator = useTransactionRegister()
 
@@ -49,9 +53,39 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
         }
     }
 
+    async function handlePayAmount({ price, selectedExtra }: any) {
+        try {
+            const AMOUNT_TO_PAY = formatPriceFromDigits(price);
+            const EXTRA = calculateExtraAmount(formatPriceFromDigits(price), selectedExtra);
+            const DATE = getCurrentDateDDMMAAAA();
+            const UNIQUE_REFERENCE = `frq${uuid.v4().replaceAll('-', '').slice(-16)}`;
+            mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
+            mmkvStorage.set('PENDING_TX_DATE', DATE);
+
+            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
+
+
+            const respuestaJSON = JSON.parse(respuestaSale);
+            if (respuestaJSON.RESPONSE_CODE === '00') {
+                
+                await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+
+                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+                setRefetchData(true)
+            }
+        } catch (error) {
+            console.error(error)
+            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+            mmkvStorage.remove('PENDING_TX_DATE')
+        }
+    };
+
     return (
         <InsertAmountContext.Provider value={{
             verifyPendingTransaction,
+            handlePayAmount,
         }} >
             {children}
         </InsertAmountContext.Provider>

@@ -70,6 +70,8 @@ const AppNavigation = () => {
 
     /* ------- Effects ------- */
     useFocusEffect(useCallback(() => {
+        resetLockScreen();
+        
         const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
         const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
 
@@ -101,7 +103,7 @@ const AppNavigation = () => {
 
             <TransactionBottomSheet />
 
-            <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
+            <Animated.View onTouchStart={resetLockScreen} style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
                 <LoadingScreen text={loadingText} />
             </Animated.View>
         </>

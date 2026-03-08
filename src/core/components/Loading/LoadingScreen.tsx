@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { sizeToDp } from '../../utils/sizeToDP';
 import theme from '../../utils/styles/styles';
@@ -25,7 +25,8 @@ export default LoadingScreen;
 
 const STYLES = StyleSheet.create({
   wrapper: {
-    flex: 1,
+    height: Dimensions.get('window').height,
+    width: Dimensions.get('window').width,
     alignItems: 'center',
     justifyContent: 'center',
   },

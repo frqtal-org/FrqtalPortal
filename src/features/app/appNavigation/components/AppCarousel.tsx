@@ -13,7 +13,7 @@ const AppCarousel = ({ ref, pages, progressSV }: any) => {
     /* ------- Animations ------- */
     function panGestureConfig(gesture: PanGesture) {
         'worklet';
-        gesture.activeOffsetX([-20, 20]);
+        gesture.activeOffsetX([-30, 30]);
     }
     /* ------- END Animations ------- */
 
