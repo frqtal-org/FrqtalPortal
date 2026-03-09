@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FlatList, NativeModules, Pressable, StyleSheet, View } from 'react-native';
 import FastImage from "react-native-fast-image";
-import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
 import BalanceHeaderInfo from "../../../core/components/headers/BalanceHeaderInfo.tsx";
 import LoadingListLoader from "../../../core/components/LoadingListLoader.tsx";
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper.tsx';
@@ -11,11 +10,6 @@ import { sizeToDp } from '../../../core/utils/sizeToDP.tsx';
 import theme from "../../../core/utils/styles/styles.ts";
 import { Filters } from "./components/Filters.tsx";
 import TransactionListItem from "./components/TransactionListItem.tsx";
-import { useSharedValue } from 'react-native-reanimated';
-import { useMMKVString } from 'react-native-mmkv';
-import StorageKey from '../../../core/utils/store/keysStore.ts';
-import { mmkvStorage } from '../../../core/store/principalStore.ts';
-import { useGetAllTransactions } from '../../../core/api/getAllTransactions.ts';
 import { TransactionsHistoryContext } from './context.tsx';
 
 const { SmartWrapperModule } = NativeModules;
@@ -23,7 +17,7 @@ const { SmartWrapperModule } = NativeModules;
 let filterTO: number;
 
 const TransactionsHistory = () => {
-  const { setRefetchData, refetchData } = useContext(TransactionsHistoryContext)
+  const { setRefetchData, refetchData, handleGetHistorial } = useContext(TransactionsHistoryContext)
   /*  */
   const listRef = useRef<FlatList<any>>(null)
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -31,62 +25,38 @@ const TransactionsHistory = () => {
   const [totalAmounts, setTotalAmounts] = useState({ totalExtraToday: null, totalToday: null, totalPages: 0 })
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
-  /*  */
-  const isHistorialLoadingSV = useSharedValue(false)
-  const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
-  const getAllTransactionsMutator = useGetAllTransactions()
 
-
-  function handleNextPage() {
-    if (currentPage === totalAmounts.totalPages || totalAmounts.totalPages === 0 || isLoading) return
-    setIsLoading(true)
-    handleGetHistorial({ status: selectedFilter, page: currentPage + 1 })
-    setCurrentPage(currentPage + 1)
-  }
-
+  /* ------- Functions ------- */
   async function goToReports() {
     await SmartWrapperModule.getBalance();
   }
 
-  function handleGetHistorial({ status = 'all', page = 1 }: any) {
-    isHistorialLoadingSV.value = true;
-
-    getAllTransactionsMutator.mutateAsync({
-      data: {
-        status,
-        page,
-      },
-      serialNumber: deviceId
-    }).then((resp: any) => {
-      
-      const totalAmounts: any = {}
-      /* totalAmounts.totalExtra = 'resp.data.totalExtra' */ /* TODO */
-      totalAmounts.totalThisMonth = resp.data.totalThisMonth
-      totalAmounts.totalLastMonth = resp.data.totalLastMonth
-      totalAmounts.totalThisWeek = resp.data.totalThisWeek
-      totalAmounts.totalLastWeek = resp.data.totalLastWeek
-      totalAmounts.totalYesterday = resp.data.totalYesterday
-      totalAmounts.totalToday = resp.data.totalToday
-      totalAmounts.totalItems = resp.data.totalItems
-      totalAmounts.totalPages = resp.data.totalPages
-
-      setTotalAmounts(totalAmounts)
-      setTXNs((prev: any) => [...prev, ...resp.data.data])
-    }).catch((err: any) => {
-      console.log('---err ' + err)
+  function handleGetData(props: any) {
+    handleGetHistorial(props).then((resp: any) => {
+      setTotalAmounts({ totalExtraToday: resp.extraToday, totalToday: resp.totalToday, totalPages: resp.totalPages })
+      setTXNs((prev: any) => [...prev, ...resp.data])
     }).finally(() => {
-      isHistorialLoadingSV.value = false
       setRefetchData(false)
       setIsLoading(false)
-    });
+    })
   }
 
+  function handleNextPage() {
+    if (currentPage === totalAmounts.totalPages || totalAmounts.totalPages === 0 || isLoading) return
+    setIsLoading(true)
+    handleGetData({ status: selectedFilter, page: currentPage + 1 })
+    setCurrentPage(currentPage + 1)
+  }
+  /* ------- END Functions ------- */
+
+
+  /* ------- Effects ------- */
   useEffect(() => {
     setIsLoading(true)
     setTXNs([])
     filterTO && clearTimeout(filterTO)
     filterTO = setTimeout(() => {
-      handleGetHistorial({ status: selectedFilter, page: currentPage })
+      handleGetData({ status: selectedFilter, page: currentPage })
     }, 700)
   }, [selectedFilter])
 
@@ -95,9 +65,10 @@ const TransactionsHistory = () => {
       setIsLoading(true)
       setTXNs([])
       setCurrentPage(1)
-      handleGetHistorial({ status: selectedFilter, page: 1 })
+      handleGetData({ status: selectedFilter, page: 1 })
     }
   }, [refetchData])
+  /* ------- END Effects ------- */
 
   return (
     <BasicScreenWrapper noHeader noPaddingBottom >
@@ -128,7 +99,7 @@ const TransactionsHistory = () => {
           <Filters onPress={(filter: any) => {
             setCurrentPage(1)
             setSelectedFilter(filter)
-            }} style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />
+          }} style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />
         </View>
       </View>
       <FlatList
@@ -140,7 +111,7 @@ const TransactionsHistory = () => {
         data={TXNs}
         onEndReachedThreshold={2}
         renderItem={({ item }) => <TransactionListItem {...item} />}
-        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={!(totalAmounts.totalPages === currentPage && !isLoading) } title={!(totalAmounts.totalPages === currentPage && !isLoading) ?  (currentPage === 1 ? `Cargando transacciones` : `Cargando página ${currentPage}/${totalAmounts.totalPages}`) : `Fin de la lista`} subtitle={!(totalAmounts.totalPages === currentPage && !isLoading) ?  `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
+        ListFooterComponent={(TXNs.length > 0 || isLoading) ? (<View style={[isLoading && { marginTop: sizeToDp(APP_PADDING) }]} ><LoadingListLoader showLoader={!(totalAmounts.totalPages === currentPage && !isLoading)} title={!(totalAmounts.totalPages === currentPage && !isLoading) ? (currentPage === 1 ? `Cargando transacciones` : `Cargando página ${currentPage}/${totalAmounts.totalPages}`) : `Fin de la lista`} subtitle={!(totalAmounts.totalPages === currentPage && !isLoading) ? `Por favor espera...` : `No hay más transacciones`} /></View>) : <></>}
         ListFooterComponentStyle={[(TXNs.length === 0) ? { marginBottom: sizeToDp(APP_PADDING * 0.2) } : { marginTop: sizeToDp(APP_PADDING * 0.2), marginBottom: sizeToDp(APP_PADDING * 0.8) }]}
         style={[STYLES.listStyle]}
         onEndReached={(totalAmounts.totalPages <= 1 || isLoading) ? () => { } : handleNextPage}

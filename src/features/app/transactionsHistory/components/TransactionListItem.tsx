@@ -1,35 +1,23 @@
 import React, { useContext } from 'react';
 import { NativeModules, Pressable, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
-import { useNavigation } from '@react-navigation/native';
 import { sizeToDp } from '../../../../core/utils/sizeToDP.tsx';
 import { Typography } from '../../../../core/components/Typography.tsx';
-import {
-  formatPriceFromDigits,
-} from '../../../../core/utils/priceFormater.ts';
+import { formatPriceFromDigits } from '../../../../core/utils/priceFormater.ts';
 import { APP_PADDING } from '../../../../core/utils/constants.ts';
 import theme from '../../../../core/utils/styles/styles.ts';
 import { transactionDate } from '../../../../core/utils/transactionDate.ts';
 import { BottomSheetsContext } from '../../../../core/components/bottomSheets/context.tsx';
 import { toTitleCase } from '../../../../core/utils/titleCase.ts';
-import { mmkvStorage } from '../../../../core/store/principalStore.ts';
 import { getExtraPercentage } from '../../../../core/utils/getExtraPercentage.ts';
-import { obtenerTransaccion } from '../../../../core/utils/registerTxn.ts';
-/* import { formatDate } from '../../../../core/utils/formatDate.ts'; */
-/* import { capitalizarPalabrasEnString } from '../../../../core/utils/capitalizarPalabrasEnString.ts'; */
-/* import { parseFechaStringToDate } from '../../../../core/utils/parseFechaStringToDate.ts'; */
 
 const statusToImageMap: Record<string, any> = {
-  /* Declinada: require('../../../../core/assets/images/error.webp'), */
   cancel: require('../../../../core/assets/images/error.webp'),
-  /* Pendiente: require('../../../../core/assets/images/pending.webp'), */
   transaction: require('../../../../core/assets/images/accepted.webp'),
 };
 
 const statusText: Record<string, any> = {
-  /* Declinada: '', */
   cancel: 'Reembolso',
-  /* Pendiente: '', */
   transaction: 'Aprobada',
 };
 
