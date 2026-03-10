@@ -1,4 +1,9 @@
-import { keepPreviousData, QueryClient } from "@tanstack/react-query";
+import { focusManager, keepPreviousData, onlineManager, QueryClient } from "@tanstack/react-query";
+import { NativeEventEmitter, NativeModules } from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
+
+const { ScreenStateModule } = NativeModules;
+const screenStateEmitter = new NativeEventEmitter(ScreenStateModule);
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,3 +27,37 @@ export const queryClient = new QueryClient({
     },
   },
 })
+
+export const configurarSensoresKiosco = () => {
+  onlineManager.setEventListener((setOnline) => {
+    const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
+      setOnline(!!state.isConnected);
+    });
+
+    return unsubscribeNetInfo; 
+  });
+
+
+  focusManager.setEventListener((handleFocus) => {
+    
+    ScreenStateModule.startListening();
+
+    const subscription = screenStateEmitter.addListener(
+      'ScreenStateEvent',
+      (event) => {
+        if (event === 'ScreenOn') {
+          console.log("React Query: Pantalla encendida. Refrescando...");
+          handleFocus(true); 
+        } else if (event === 'ScreenOff') {
+          console.log("React Query: Pantalla apagada. Pausando...");
+          handleFocus(false);
+        }
+      }
+    );
+
+    return () => {
+      subscription.remove();
+      ScreenStateModule.stopListening();
+    };
+  });
+};
