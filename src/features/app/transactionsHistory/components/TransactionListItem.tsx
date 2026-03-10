@@ -23,7 +23,7 @@ const statusText: Record<string, any> = {
 
 const { SmartWrapperModule } = NativeModules;
 
-const Transaction = ({ onBack, ...item }: any) => {
+const Transaction = ({ onBack, onVerify, ...item }: any) => {
   const { transactionBottomSheetRef, setTransactionSelected } = useContext(BottomSheetsContext)
 
   const {
@@ -37,12 +37,16 @@ const Transaction = ({ onBack, ...item }: any) => {
   } = item.data_raw;
 
   function handleViewTransaction() {
-    setTransactionSelected(item)
-    transactionBottomSheetRef.current.expand()
+    onVerify(async () => {
+      setTransactionSelected(item)
+      transactionBottomSheetRef.current.expand()
+    })
   }
 
-  async function printTicket() {
-    await SmartWrapperModule.reprintTicket(SG_REFERENCE);
+  function printTicket() {
+    onVerify(async () => {
+      await SmartWrapperModule.reprintTicket(SG_REFERENCE);
+    })
   }
 
   return (

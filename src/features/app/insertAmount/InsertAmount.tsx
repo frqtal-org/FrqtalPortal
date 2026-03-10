@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useCallback, useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
@@ -9,11 +9,8 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
-import { useFocusEffect } from '@react-navigation/native'
 import { mmkvStorage } from '../../../core/store/principalStore'
-import { addEventListener, useNetInfo } from "@react-native-community/netinfo";
-
-let checkPendingTxnTO: number
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const InsertAmount = () => {
     /*  */
@@ -59,7 +56,6 @@ const InsertAmount = () => {
     }
 
     async function handlePay() {
-
         if (isConnected) {
             if (price.length === 0) return
             const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
@@ -118,30 +114,20 @@ const InsertAmount = () => {
     /* ------- END Animations ------- */
 
     /* ------- Effects ------- */
-    useFocusEffect(useCallback(() => {
-        const unsubscribe = addEventListener(state => {
-            const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-            const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+    useEffect(() => {
+        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
 
-            checkPendingTxnTO && clearTimeout(checkPendingTxnTO)
-            checkPendingTxnTO = setTimeout(() => {
-                if (state.isConnected) {
-                    if (pendingRef && pendingDate) {
-                        setLoadingTextStatus('Verificando transacción inconclusa')
-                        isPaymentLoadingSV.set(true)
-                        setTimeout(async () => {
-                            await verifyPendigTxns();
-                        }, 3000)
-                    }
-                }
-            }, (pendingRef && pendingDate) ? 1500 : 0)
-        });
-
-        return () => {
-            unsubscribe();
-            checkPendingTxnTO && clearTimeout(checkPendingTxnTO)
+        if (isConnected) {
+            if (pendingRef && pendingDate) {
+                setLoadingTextStatus('Verificando transacción inconclusa')
+                isPaymentLoadingSV.set(true)
+                setTimeout(async () => {
+                    await verifyPendigTxns();
+                }, 3000)
+            }
         }
-    }, []));
+    }, [isConnected])
     /* ------- END Effects ------- */
 
     return (

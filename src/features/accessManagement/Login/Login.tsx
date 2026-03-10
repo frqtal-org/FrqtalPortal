@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import { LoginContext } from './context';
 import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad';
+import { useNetInfo } from '@react-native-community/netinfo';
 
 const Code = ({ value }: { value: string }) => {
   return <View style={[STYLES.containerWrapper, value && { backgroundColor: theme.colors.brand200 }, { borderRadius: 999, borderWidth: sizeToDp(1), borderColor: theme.colors.brand200, width: sizeToDp(APP_PADDING * 1.2), aspectRatio: 1 }]} />
@@ -36,6 +37,7 @@ const Login = () => {
   const showDeviceIdSV = useSharedValue(false)
   /*  */
   const { navigate } = useNavigation<any>()
+  const { isConnected } = useNetInfo();
 
   /* ------- Functions ------- */
   function handleKeyPress(key: any) {
@@ -106,8 +108,18 @@ const Login = () => {
   /* ------- Effects ------- */
   useEffect(() => {
     if (values.code.length === 6) {
-      setLoadingTextStatus('Iniciando sesión')
-      !isAuthenticationLoadingSV.get() && handleSubmit()
+      if (isConnected) {
+        setLoadingTextStatus('Iniciando sesión')
+        !isAuthenticationLoadingSV.get() && handleSubmit()
+      } else {
+        setLoadingTextStatus('Sin conexión')
+        isAuthenticationLoadingSV.set(true)
+        setTimeout(() => {
+          isAuthenticationLoadingSV.set(false)
+          setLoadingTextStatus('')
+          setFieldValue('code', '')
+        }, 3000)
+      }
     }
   }, [values.code])
   /* ------- END Effects ------- */

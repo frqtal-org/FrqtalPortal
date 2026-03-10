@@ -34,16 +34,18 @@ const FilterBadge = ({ timeLabel, isSelected, onPress }: any) => {
   );
 };
 
-export const Filters = ({ style = [{}], onPress }: any) => {
+export const Filters = ({ style = [{}], onPress, onVerify }: any) => {
   /*  */
   const [selectedFilter, setSelectedFilter] = useState('all');
   /*  */
 
   /* ------- FUNCTIONS ------- */
   function handlePressFilterBadge({ selectionValue }: any) {
-    if (selectedFilter === selectionValue) return
-    setSelectedFilter(selectionValue);
-    onPress(selectionValue)
+    onVerify(() => {
+      if (selectedFilter === selectionValue) return
+      setSelectedFilter(selectionValue);
+      onPress(selectionValue)
+    })
   }
   /* ------- END FUNCTIONS ------- */
 
