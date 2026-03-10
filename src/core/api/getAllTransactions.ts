@@ -23,7 +23,7 @@ export const useGetAllTransactions = () => {
                 queryClient.invalidateQueries({ queryKey: ['getAllTransactions'] });
             },
             onError: (error) => {
-                console.log("Error al iniciar sesion", error);
+                console.log("Error al obtener historial", error);
             }
         }
     );

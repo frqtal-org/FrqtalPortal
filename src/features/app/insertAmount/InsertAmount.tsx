@@ -52,7 +52,6 @@ const InsertAmount = () => {
 
             throw new Error(error?.message)
         }
-
     }
 
     async function handlePay() {

@@ -15,6 +15,8 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen.tsx';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
+import { mmkvStorage } from '../../../core/store/principalStore.ts';
+import { InsertAmountContext } from '../insertAmount/context.tsx';
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -23,6 +25,7 @@ let filterTO: number;
 const TransactionsHistory = () => {
   const { setRefetchData, refetchData, handleGetHistorial } = useContext(TransactionsHistoryContext)
   const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
+  const { verifyPendingTransaction } = useContext(InsertAmountContext)
   /*  */
   const listRef = useRef<FlatList<any>>(null)
   const [selectedFilter, setSelectedFilter] = useState('all')
@@ -37,7 +40,18 @@ const TransactionsHistory = () => {
   /* ------- Functions ------- */
   async function goToReports() {
     if (isConnected) {
-      await SmartWrapperModule.getBalance();
+      const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+      const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+
+      if (pendingRef && pendingDate) {
+        setLoadingTextStatus('Verificando transacción inconclusa')
+        isLoadingSV.set(true)
+        setTimeout(async () => {
+          await verifyPendigTxns();
+        }, 3000)
+      } else {
+        await SmartWrapperModule.getBalance();
+      }
     } else {
       setLoadingTextStatus('Sin conexión')
       isLoadingSV.set(true)
@@ -63,6 +77,29 @@ const TransactionsHistory = () => {
     setIsLoadingTxns(true)
     handleGetData({ status: selectedFilter, page: currentPage + 1 })
     setCurrentPage(currentPage + 1)
+  }
+
+  async function verifyPendigTxns() {
+    try {
+      await verifyPendingTransaction();
+      isLoadingSV.set(false)
+      setLoadingTextStatus('')
+    } catch (error: any) {
+      if (error?.message == '99') {
+        setLoadingTextStatus('Transacción en proceso, porfavor espere un momento')
+        isLoadingSV.set(true)
+        setTimeout(() => {
+          isLoadingSV.set(false)
+          setLoadingTextStatus('')
+        }, 3000)
+      }
+      if (error?.message == '97') {
+        isLoadingSV.set(false)
+        setLoadingTextStatus('')
+      }
+
+      throw new Error(error?.message)
+    }
   }
   /* ------- END Functions ------- */
 
@@ -156,7 +193,18 @@ const TransactionsHistory = () => {
           renderItem={({ item }) => <TransactionListItem
             onVerify={(onAction: () => void) => {
               if (isConnected) {
-                onAction()
+                const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+                const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+
+                if (pendingRef && pendingDate) {
+                  setLoadingTextStatus('Verificando transacción inconclusa')
+                  isLoadingSV.set(true)
+                  setTimeout(async () => {
+                    await verifyPendigTxns();
+                  }, 3000)
+                } else {
+                  onAction()
+                }
               } else {
                 setLoadingTextStatus('Sin conexión')
                 isLoadingSV.set(true)

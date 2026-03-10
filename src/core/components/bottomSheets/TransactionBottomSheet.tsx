@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, View, NativeModules } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useContext, useEffect } from 'react'
 import GeneralBottomSheet from './GeneralBottomSheet'
 import { BottomSheetsContext } from './context'
 import { Typography } from '../Typography'
@@ -17,6 +17,7 @@ import StorageKey from '../../utils/store/keysStore'
 import { mmkvStorage } from '../../store/principalStore'
 import { useTransactionRegister } from '../../api/transactionRegister'
 import { TransactionsHistoryContext } from '../../../features/app/transactionsHistory/context'
+import { useNetInfo } from '@react-native-community/netinfo'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -64,6 +65,7 @@ const TransactionBottomSheet = () => {
     const { transactionBottomSheetRef, transactionSelected, setTransactionSelected } = useContext(BottomSheetsContext)
     const transactionRegisterMutator = useTransactionRegister()
     const { setRefetchData } = useContext(TransactionsHistoryContext)
+    const { isConnected } = useNetInfo();
 
     async function printTicket() {
         await SmartWrapperModule.reprintTicket(transactionSelected?.data_raw?.SG_REFERENCE);
@@ -74,37 +76,56 @@ const TransactionBottomSheet = () => {
         const EXTRA = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
         const DATE = parseDateToDate(transactionSelected?.data_raw?.TXN_DATE)
         const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
-        const UNIQUE_REFERENCE = transactionSelected?.data_raw?.TXN_UNIQUE_REF
         const APPROVAL_CODE = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
-
-        mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
-        mmkvStorage.set('PENDING_TX_DATE', DATE);
 
         try {
             if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
                 const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
                 const RESP_JSON = JSON.parse(resp);
-                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
-                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
-                setRefetchData(true)
+                mmkvStorage.set('PENDING_CANCEL_TRANSACTION', JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
+                if (RESP_JSON.RESPONSE_CODE === '00') {
+                    await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(() => {
+                        mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
+                        setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
+                        setRefetchData(true)
+                    })
+                }
             } else {
                 const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                 const RESP_JSON = JSON.parse(resp);
-                await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
-                setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
-                setRefetchData(true)
+                mmkvStorage.set('PENDING_CANCEL_TRANSACTION', JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
+                if (RESP_JSON.RESPONSE_CODE === '00') {
+                    await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(() => {
+                        mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
+                        setRefetchData(true)
+                    })
+                }
             }
-        } catch (err) {
-            console.error('err------0')
-            console.error(err)
-        } finally {
-            /* transactionBottomSheetRef.current.close() */
+        } catch (error: any) {
+            const ERR = JSON.parse(error?.message)
+            console.error(ERR);
+            if (ERR.response_code == '67') {
+                /* Txn cancelada previamente - NO HAY FORMA DE VERIFICAR O GARDAR LA DATA PENDIENTE */
+            }
+            throw new Error(ERR.response_code)
         }
     }
+
+    useEffect(() => {
+        const pendingCancelation = mmkvStorage.getString('PENDING_CANCEL_TRANSACTION');
+        if (isConnected) {
+            if (pendingCancelation) {
+                const PENDING_CANCELATION = JSON.parse(pendingCancelation)
+                setTimeout(async () => {
+                    await transactionRegisterMutator.mutateAsync({ ...PENDING_CANCELATION }).then(() => {
+                        mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
+                        setTransactionSelected({ event_name: 'cancel', data_raw: PENDING_CANCELATION })
+                        setRefetchData(true)
+                    })
+                })
+            }
+        }
+    }, [isConnected])
 
     return (
         <GeneralBottomSheet borderColor={statusToColor[transactionSelected?.event_name]} ref={transactionBottomSheetRef} >
@@ -127,9 +148,6 @@ const TransactionBottomSheet = () => {
                     </Pressable>
                 </View>
             </View>
-
-
-
 
             <Divider text='Transacción' />
             <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.5), paddingHorizontal: sizeToDp(APP_PADDING * 1), marginBottom: sizeToDp(APP_PADDING * 0.8) }]} >
