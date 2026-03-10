@@ -1,14 +1,14 @@
 import React, { createContext, useContext } from "react";
-import { mmkvStorage } from "../../../core/store/principalStore";
 import { NativeModules } from "react-native";
-import { TransactionsHistoryContext } from "../transactionsHistory/context";
-import { BottomSheetsContext } from "../../../core/components/bottomSheets/context";
-import StorageKey from "../../../core/utils/store/keysStore";
 import { useMMKVString } from "react-native-mmkv";
-import { useTransactionRegister } from "../../../core/api/transactionRegister";
-import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
-import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
 import uuid from 'react-native-uuid';
+import { useTransactionRegister } from "../../../core/api/transactionRegister";
+import { BottomSheetsContext } from "../../../core/components/bottomSheets/context";
+import { mmkvStorage } from "../../../core/store/principalStore";
+import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
+import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
+import StorageKey from "../../../core/utils/store/keysStore";
+import { TransactionsHistoryContext } from "../transactionsHistory/context";
 
 const InsertAmountContext = createContext<any>({});
 
@@ -41,14 +41,17 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                     mmkvStorage.remove('PENDING_TX_DATE')
                 } else {
                     /* console.log("La transacción pendiente fue rechazada por el banco."); */
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
                 }
             } catch (error: any) {
-                const ERR = JSON.parse(error.message)
-                console.error(error);
+                const ERR = JSON.parse(error?.message)
+                console.error(ERR);
                 if (ERR.response_code == '97') {
                     mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                     mmkvStorage.remove('PENDING_TX_DATE')
                 }
+                throw new Error(ERR.response_code)
             }
         }
     }
@@ -62,12 +65,14 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
             mmkvStorage.set('PENDING_TX_DATE', DATE);
 
-            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
-
+            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce).catch(() => {
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+            });
 
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
-                
+
                 await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
 
                 setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
@@ -75,10 +80,9 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 mmkvStorage.remove('PENDING_TX_DATE')
                 setRefetchData(true)
             }
-        } catch (error) {
-            console.error(error)
-            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-            mmkvStorage.remove('PENDING_TX_DATE')
+        } catch (error: any) {
+            const ERR = JSON.parse(error.message)
+            console.error(ERR);
         }
     };
 
@@ -92,4 +96,5 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
     )
 }
 
-export { InsertAmountContext }
+export { InsertAmountContext };
+

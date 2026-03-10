@@ -3,22 +3,22 @@ import { keepPreviousData, QueryClient } from "@tanstack/react-query";
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      gcTime: 1000 * 60 * 30,
-      staleTime: 1000 * 60 * 10,
+      gcTime: 1000 * 60 * 10,
+      staleTime: 1000 * 60 * 5,
       retry: 2,
-      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
-      refetchOnWindowFocus: false,
+      retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 10000),
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
-      refetchInterval: false,
-      networkMode: 'always',
+      /* refetchInterval: false, */
+      networkMode: 'offlineFirst',
       retryOnMount: false,
       placeholderData: keepPreviousData,
       structuralSharing: true,
       throwOnError: false,
     },
     mutations: {
-      retry: 1,
-      networkMode: 'always',
+      retry: 0, // ⚠️ CRÍTICO: Nunca reintentar mutaciones automáticamente en un POS (evita pagos dobles)
+      networkMode: 'offlineFirst',
     },
   },
 })

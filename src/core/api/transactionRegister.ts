@@ -13,14 +13,15 @@ export const transactionRegister = (data: any) => {
 
 export const useTransactionRegister = () => {
   const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: transactionRegister,
     mutationKey: ['transactionRegister'],
-    onSuccess: data => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactionRegister'] });
-      queryClient.setQueryData(['transactionRegister'], (oldData: any) => {
-        return [...(oldData || []), data];
-      });
     },
+    onError: (error) => {
+      console.log("Error al registrar la transacción en el servidor", error);
+    }
   });
 };

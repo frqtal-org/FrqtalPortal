@@ -12,16 +12,14 @@ export const handleLogout = () => {
 
 export const useLogout = () => {
     const queryClient = useQueryClient();
-    return useMutation(
-        {
-            mutationFn: handleLogout,
-            mutationKey: ['logout'],
-            onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ['logout'] });
-                queryClient.setQueryData(['logout'], (oldData: any) => {
-                    return [...(oldData || []), data.data];
-                });
-            },
+    return useMutation({
+        mutationFn: handleLogout,
+        mutationKey: ['logout'],
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['logout'] });
+        },
+        onError: (error) => {
+            console.log("Error al cerrar sesion", error);
         }
-    );
+    });
 }

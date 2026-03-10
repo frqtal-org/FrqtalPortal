@@ -2,7 +2,7 @@
 import Axios, { AxiosError, AxiosRequestConfig } from 'axios';
 
 /* export const AXIOS_INSTANCE = Axios.create({ baseURL: 'https://prod.frqtal.org' }); */
-export const AXIOS_INSTANCE = Axios.create({ baseURL: 'https://qa.frqtal.org' });
+export const AXIOS_INSTANCE = Axios.create({ baseURL: 'https://qa.frqtal.org', timeout: 10000 });
 
 AXIOS_INSTANCE.defaults.headers.common['frqtal-access-token'] = '';
 AXIOS_INSTANCE.defaults.headers.common['Cache-Control'] = 'no-cache';

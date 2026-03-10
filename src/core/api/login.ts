@@ -16,16 +16,14 @@ export const handleLogin = (data: {
 
 export const useLogin = () => {
     const queryClient = useQueryClient();
-    return useMutation(
-        {
-            mutationFn: handleLogin,
-            mutationKey: ['login'],
-            onSuccess: (data) => {
-                queryClient.invalidateQueries({ queryKey: ['login'] });
-                queryClient.setQueryData(['login'], (oldData: any) => {
-                    return [...(oldData || []), data.data];
-                });
-            },
+    return useMutation({
+        mutationFn: handleLogin,
+        mutationKey: ['login'],
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['login'] });
+        },
+        onError: (error) => {
+            console.log("Error al iniciar sesion", error);
         }
-    );
+    });
 }

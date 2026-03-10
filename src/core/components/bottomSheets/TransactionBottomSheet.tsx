@@ -12,7 +12,6 @@ import { formatPriceFromDigits } from '../../utils/priceFormater'
 import { sumarMontosExactos } from '../../utils/sumarMontosExactos'
 import { getExtraPercentage } from '../../utils/getExtraPercentage'
 import { isTodayTransactionDate, parseDateToDate, transactionDate } from '../../utils/transactionDate'
-import { getCurrentDateDDMMAAAA } from '../../utils/getDateDDMMAAAA'
 import { useMMKVString } from 'react-native-mmkv'
 import StorageKey from '../../utils/store/keysStore'
 import { mmkvStorage } from '../../store/principalStore'
@@ -75,7 +74,11 @@ const TransactionBottomSheet = () => {
         const EXTRA = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
         const DATE = parseDateToDate(transactionSelected?.data_raw?.TXN_DATE)
         const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
+        const UNIQUE_REFERENCE = transactionSelected?.data_raw?.TXN_UNIQUE_REF
         const APPROVAL_CODE = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
+
+        mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
+        mmkvStorage.set('PENDING_TX_DATE', DATE);
 
         try {
             if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
@@ -83,12 +86,16 @@ const TransactionBottomSheet = () => {
                 const RESP_JSON = JSON.parse(resp);
                 await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
                 setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
                 setRefetchData(true)
             } else {
                 const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                 const RESP_JSON = JSON.parse(resp);
                 await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId })
                 setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
                 setRefetchData(true)
             }
         } catch (err) {

@@ -1,17 +1,15 @@
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { ICarouselInstance } from 'react-native-reanimated-carousel';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
 import TransactionBottomSheet from '../../../core/components/bottomSheets/TransactionBottomSheet';
-import { mmkvStorage } from '../../../core/store/principalStore';
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen';
 import { useLogout } from '../../../core/api/logout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { deleteToken } from '../../../core/store/tokenKeyChainStore';
 import AppPagination from './components/AppPagination';
 import AppCarousel from './components/AppCarousel';
-import { InsertAmountContext } from '../insertAmount/context';
 import Settings from '../settings/Settings';
 import InsertAmount from '../insertAmount/InsertAmount';
 import TransactionsHistory from '../transactionsHistory/TransactionsHistory';
@@ -27,7 +25,6 @@ const CAROUSEL_PAGES = [
 
 const AppNavigation = () => {
     /* */
-    const { verifyPendingTransaction } = useContext(InsertAmountContext)
     const progressSV = useSharedValue<number>(0);
     const isLoadingSV = useSharedValue(false)
     const [loadingText, setLoadingText] = useState('')
@@ -71,21 +68,6 @@ const AppNavigation = () => {
     /* ------- Effects ------- */
     useFocusEffect(useCallback(() => {
         resetLockScreen();
-        
-        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
-
-        if (pendingRef && pendingDate) {
-            setLoadingText('Verificando transacción inconclusa')
-            isLoadingSV.set(true)
-            setTimeout(() => {
-                verifyPendingTransaction()
-                    .finally(() => {
-                        isLoadingSV.set(false)
-                        setLoadingText('')
-                    });
-            }, 3000)
-        }
 
         return () => {
             isLoadingSV.set(false);

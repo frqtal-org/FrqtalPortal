@@ -19,12 +19,12 @@ export const useGetAllTransactions = () => {
         {
             mutationFn: getAllTransactions,
             mutationKey: ['getAllTransactions'],
-            onSuccess: (data) => {
+            onSuccess: () => {
                 queryClient.invalidateQueries({ queryKey: ['getAllTransactions'] });
-                queryClient.setQueryData(['getAllTransactions'], (oldData: any) => {
-                    return [...(oldData || []), data.data];
-                });
             },
+            onError: (error) => {
+                console.log("Error al iniciar sesion", error);
+            }
         }
     );
 }

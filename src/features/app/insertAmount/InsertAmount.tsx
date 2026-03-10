@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useContext, useState } from 'react'
+import React, { useCallback, useContext, useState } from 'react'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
@@ -9,17 +9,23 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
+import { useFocusEffect } from '@react-navigation/native'
+import { mmkvStorage } from '../../../core/store/principalStore'
+import { addEventListener, useNetInfo } from "@react-native-community/netinfo";
+
+let checkPendingTxnTO: number
 
 const InsertAmount = () => {
     /*  */
     const INSETS = useContext(InsetsContext)
-    const { handlePayAmount } = useContext(InsertAmountContext)
+    const { handlePayAmount, verifyPendingTransaction } = useContext(InsertAmountContext)
     /*  */
     const [selectedExtra, setSelectedExtra] = useState<string>('');
     const [loadingTextStatus, setLoadingTextStatus] = useState('')
     const [price, setPrice] = useState<string>('');
     /*  */
     const isPaymentLoadingSV = useSharedValue(false)
+    const { isConnected } = useNetInfo();
 
     /* ------- Functions ------- */
     function handleAddDigit(item: string) {
@@ -28,21 +34,74 @@ const InsertAmount = () => {
         item === 'delete' ? setPrice(price.slice(0, -1)) : setPrice(price + item);
     }
 
-    function handlePay() {
-        if (price.length === 0) return
-        setLoadingTextStatus('Iniciando cobro')
-        isPaymentLoadingSV.set(true)
-
-        handlePayAmount({ price, selectedExtra })
-            .then(() => {
-                setPrice('')
-                setSelectedExtra('')
-            })
-            .finally(() => {
+    async function verifyPendigTxns() {
+        try {
+            await verifyPendingTransaction();
+            isPaymentLoadingSV.set(false)
+            setLoadingTextStatus('')
+        } catch (error: any) {
+            if (error?.message == '99') {
+                setLoadingTextStatus('Transacción en proceso, porfavor espere un momento')
+                isPaymentLoadingSV.set(true)
                 setTimeout(() => {
                     isPaymentLoadingSV.set(false)
-                }, 300)
-            })
+                    setLoadingTextStatus('')
+                }, 3000)
+            }
+            if (error?.message == '97') {
+                isPaymentLoadingSV.set(false)
+                setLoadingTextStatus('')
+            }
+
+            throw new Error(error?.message)
+        }
+
+    }
+
+    async function handlePay() {
+
+        if (isConnected) {
+            if (price.length === 0) return
+            const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+            const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+            setLoadingTextStatus((pendingRef && pendingDate) ? 'Validando información' : 'Iniciando cobro')
+            isPaymentLoadingSV.set(true)
+
+            setTimeout(async () => {
+                await verifyPendigTxns().then(() => {
+                    handlePayAmount({ price, selectedExtra })
+                        .finally(() => {
+                            setPrice('')
+                            setSelectedExtra('')
+                            setTimeout(() => {
+                                isPaymentLoadingSV.set(false)
+                            }, 300)
+                        })
+                }).catch((error): any => {
+                    if (error?.message == '97') {
+                        setLoadingTextStatus('Iniciando cobro')
+                        isPaymentLoadingSV.set(true)
+                        setTimeout(() => {
+                            handlePayAmount({ price, selectedExtra })
+                                .finally(() => {
+                                    setPrice('')
+                                    setSelectedExtra('')
+                                    setTimeout(() => {
+                                        isPaymentLoadingSV.set(false)
+                                    }, 300)
+                                })
+                        }, 4000)
+                    }
+                })
+            }, (pendingRef && pendingDate) ? 3000 : 0)
+        } else {
+            setLoadingTextStatus('Sin conexión')
+            isPaymentLoadingSV.set(true)
+            setTimeout(() => {
+                isPaymentLoadingSV.set(false)
+                setLoadingTextStatus('')
+            }, 3000)
+        }
     }
 
     function handleClear() {
@@ -57,6 +116,33 @@ const InsertAmount = () => {
         pointerEvents: isPaymentLoadingSV.get() ? 'auto' : 'none',
     }))
     /* ------- END Animations ------- */
+
+    /* ------- Effects ------- */
+    useFocusEffect(useCallback(() => {
+        const unsubscribe = addEventListener(state => {
+            const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
+            const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+
+            checkPendingTxnTO && clearTimeout(checkPendingTxnTO)
+            checkPendingTxnTO = setTimeout(() => {
+                if (state.isConnected) {
+                    if (pendingRef && pendingDate) {
+                        setLoadingTextStatus('Verificando transacción inconclusa')
+                        isPaymentLoadingSV.set(true)
+                        setTimeout(async () => {
+                            await verifyPendigTxns();
+                        }, 3000)
+                    }
+                }
+            }, (pendingRef && pendingDate) ? 1500 : 0)
+        });
+
+        return () => {
+            unsubscribe();
+            checkPendingTxnTO && clearTimeout(checkPendingTxnTO)
+        }
+    }, []));
+    /* ------- END Effects ------- */
 
     return (
         <>

@@ -19,11 +19,11 @@ export const useRefreshToken = () => {
   return useMutation({
     mutationFn: refreshToken,
     mutationKey: ['refreshSessionToken'],
-    onSuccess: data => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['refreshSessionToken'] });
-      queryClient.setQueryData(['refreshSessionToken'], (oldData: any) => {
-        return [...(oldData || []), data];
-      });
     },
+    onError: (error) => {
+      console.log("Error al refrescar token", error);
+    }
   });
 };
