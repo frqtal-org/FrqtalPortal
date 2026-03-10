@@ -40,8 +40,8 @@ const AppNavigation = () => {
         lockScreenTimeOut && clearTimeout(lockScreenTimeOut)
         lockScreenTimeOut = setTimeout(async () => {
             navigate('Login')
-            deleteToken()
             await logoutMutator.mutateAsync()
+            deleteToken()
         }, 5 * 60 * 1000)
         loadingLockScreenTimeOut && clearTimeout(loadingLockScreenTimeOut)
         loadingLockScreenTimeOut = setTimeout(() => {

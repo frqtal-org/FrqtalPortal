@@ -91,8 +91,8 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             .then(async (newTokenResponse: any) => {
                 if (newTokenResponse === '') {
                     navigate('Login')
-                    deleteToken()
                     await logoutMutator.mutateAsync()
+                    deleteToken()
                 } else {
                     await saveToken(newTokenResponse.data.authToken)
                 }
@@ -100,8 +100,8 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             .catch(async (err: any) => {
                 console.error(err)
                 navigate('Login')
-                deleteToken()
                 await logoutMutator.mutateAsync()
+                deleteToken()
             });
     };
     /* ------- END Functions ------- */

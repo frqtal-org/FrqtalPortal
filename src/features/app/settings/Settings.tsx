@@ -37,8 +37,8 @@ const Settings = () => {
                 description={'Ir al inicio'}
                 onPress={async () => {
                     navigate('Login');
-                    deleteToken()
                     await logoutMutator.mutateAsync()
+                    deleteToken()
                 }}
             />
         </View>
