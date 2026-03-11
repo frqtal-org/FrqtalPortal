@@ -100,6 +100,8 @@ const InsertAmount = () => {
                                 isPaymentLoadingSV.set(false)
                                 setLoadingTextStatus('')
                             } else {
+                                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                                mmkvStorage.remove('PENDING_TX_DATE')
                                 setTimeout(() => {
                                     isPaymentLoadingSV.set(false)
                                     setLoadingTextStatus('')
@@ -140,6 +142,8 @@ const InsertAmount = () => {
                                         isPaymentLoadingSV.set(false)
                                         setLoadingTextStatus('')
                                     } else {
+                                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                                        mmkvStorage.remove('PENDING_TX_DATE')
                                         setTimeout(() => {
                                             isPaymentLoadingSV.set(false)
                                             setLoadingTextStatus('')
