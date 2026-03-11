@@ -64,6 +64,46 @@ const InsertAmount = () => {
         }
     }
 
+    function handleProceedPay() {
+        handlePayAmount({ price, selectedExtra })
+            .then(() => {
+                setTimeout(() => {
+                    isPaymentLoadingSV.set(false)
+                    setLoadingTextStatus('')
+                }, 300)
+            })
+            .catch((err: any) => {
+                const ERR = JSON.parse(err.message)
+                if (ERR.suggest_query === 'true') {
+                    setLoadingTextStatus('Validando información');
+                    isPaymentLoadingSV.set(true)
+                    setTimeout(async () => {
+                        await verifyPendigTxns()
+                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE')
+                        mmkvStorage.remove('PENDING_TX_DATE')
+                        isPaymentLoadingSV.set(false)
+                        setLoadingTextStatus('')
+                    }, 3000)
+                } else if (ERR?.response_code == '99') {
+                    /* Txn no registrada */
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
+                    isPaymentLoadingSV.set(false)
+                    setLoadingTextStatus('')
+                } else {
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
+                    setTimeout(() => {
+                        isPaymentLoadingSV.set(false)
+                        setLoadingTextStatus('')
+                    }, 300)
+                }
+            }).finally(() => {
+                setPrice('')
+                setSelectedExtra('')
+            })
+    }
+
     async function handlePay() {
         if (isConnected) {
             if (price.length === 0) return
@@ -74,85 +114,13 @@ const InsertAmount = () => {
 
             setTimeout(async () => {
                 await verifyPendigTxns().then(() => {
-                    handlePayAmount({ price, selectedExtra })
-                        .then(() => {
-                            setTimeout(() => {
-                                isPaymentLoadingSV.set(false)
-                                setLoadingTextStatus('')
-                            }, 300)
-                        })
-                        .catch((err: any) => {
-                            const ERR = JSON.parse(err.message)
-                            if (ERR.suggest_query === 'true') {
-                                setLoadingTextStatus('Validando información');
-                                isPaymentLoadingSV.set(true)
-                                setTimeout(async () => {
-                                    await verifyPendigTxns()
-                                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE')
-                                    mmkvStorage.remove('PENDING_TX_DATE')
-                                    isPaymentLoadingSV.set(false)
-                                    setLoadingTextStatus('')
-                                }, 3000)
-                            } else if (ERR?.response_code == '99') {
-                                /* Txn no registrada */
-                                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                                mmkvStorage.remove('PENDING_TX_DATE')
-                                isPaymentLoadingSV.set(false)
-                                setLoadingTextStatus('')
-                            } else {
-                                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                                mmkvStorage.remove('PENDING_TX_DATE')
-                                setTimeout(() => {
-                                    isPaymentLoadingSV.set(false)
-                                    setLoadingTextStatus('')
-                                }, 300)
-                            }
-                        }).finally(() => {
-                            setPrice('')
-                            setSelectedExtra('')
-                        })
+                    handleProceedPay()
                 }).catch((error): any => {
                     if (error?.message == '97') {
                         setLoadingTextStatus('Iniciando cobro')
                         isPaymentLoadingSV.set(true)
                         setTimeout(() => {
-                            handlePayAmount({ price, selectedExtra })
-                                .then(() => {
-                                    setTimeout(() => {
-                                        isPaymentLoadingSV.set(false)
-                                        setLoadingTextStatus('')
-                                    }, 300)
-                                })
-                                .catch((err: any) => {
-                                    const ERR = JSON.parse(err.message)
-                                    if (ERR.suggest_query === 'true') {
-                                        setLoadingTextStatus('Validando información');
-                                        isPaymentLoadingSV.set(true)
-                                        setTimeout(async () => {
-                                            await verifyPendigTxns()
-                                            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE')
-                                            mmkvStorage.remove('PENDING_TX_DATE')
-                                            isPaymentLoadingSV.set(false)
-                                            setLoadingTextStatus('')
-                                        }, 3000)
-                                    } else if (ERR?.response_code == '99') {
-                                        /* Txn no registrada */
-                                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                                        mmkvStorage.remove('PENDING_TX_DATE')
-                                        isPaymentLoadingSV.set(false)
-                                        setLoadingTextStatus('')
-                                    } else {
-                                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                                        mmkvStorage.remove('PENDING_TX_DATE')
-                                        setTimeout(() => {
-                                            isPaymentLoadingSV.set(false)
-                                            setLoadingTextStatus('')
-                                        }, 300)
-                                    }
-                                }).finally(() => {
-                                    setPrice('')
-                                    setSelectedExtra('')
-                                })
+                            handleProceedPay()
                         }, 4000)
                     }
                 })
