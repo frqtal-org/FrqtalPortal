@@ -46,6 +46,16 @@ const InsertAmount = () => {
                 }, 3000)
             }
             if (error?.message == '97') {
+                /* Txn no registrada */
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
+                isPaymentLoadingSV.set(false)
+                setLoadingTextStatus('')
+            }
+            if (error?.message == '01') {
+                /* REVERSADA */
+                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                mmkvStorage.remove('PENDING_TX_DATE')
                 isPaymentLoadingSV.set(false)
                 setLoadingTextStatus('')
             }
@@ -65,12 +75,39 @@ const InsertAmount = () => {
             setTimeout(async () => {
                 await verifyPendigTxns().then(() => {
                     handlePayAmount({ price, selectedExtra })
-                        .finally(() => {
-                            setPrice('')
-                            setSelectedExtra('')
+                        .then(() => {
                             setTimeout(() => {
                                 isPaymentLoadingSV.set(false)
+                                setLoadingTextStatus('')
                             }, 300)
+                        })
+                        .catch((err: any) => {
+                            const ERR = JSON.parse(err.message)
+                            if (ERR.suggest_query === 'true') {
+                                setLoadingTextStatus('Validando información');
+                                isPaymentLoadingSV.set(true)
+                                setTimeout(async () => {
+                                    await verifyPendigTxns()
+                                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE')
+                                    mmkvStorage.remove('PENDING_TX_DATE')
+                                    isPaymentLoadingSV.set(false)
+                                    setLoadingTextStatus('')
+                                }, 3000)
+                            } else if (ERR?.response_code == '99') {
+                                /* Txn no registrada */
+                                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                                mmkvStorage.remove('PENDING_TX_DATE')
+                                isPaymentLoadingSV.set(false)
+                                setLoadingTextStatus('')
+                            } else {
+                                setTimeout(() => {
+                                    isPaymentLoadingSV.set(false)
+                                    setLoadingTextStatus('')
+                                }, 300)
+                            }
+                        }).finally(() => {
+                            setPrice('')
+                            setSelectedExtra('')
                         })
                 }).catch((error): any => {
                     if (error?.message == '97') {
@@ -78,12 +115,39 @@ const InsertAmount = () => {
                         isPaymentLoadingSV.set(true)
                         setTimeout(() => {
                             handlePayAmount({ price, selectedExtra })
-                                .finally(() => {
-                                    setPrice('')
-                                    setSelectedExtra('')
+                                .then(() => {
                                     setTimeout(() => {
                                         isPaymentLoadingSV.set(false)
+                                        setLoadingTextStatus('')
                                     }, 300)
+                                })
+                                .catch((err: any) => {
+                                    const ERR = JSON.parse(err.message)
+                                    if (ERR.suggest_query === 'true') {
+                                        setLoadingTextStatus('Validando información');
+                                        isPaymentLoadingSV.set(true)
+                                        setTimeout(async () => {
+                                            await verifyPendigTxns()
+                                            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE')
+                                            mmkvStorage.remove('PENDING_TX_DATE')
+                                            isPaymentLoadingSV.set(false)
+                                            setLoadingTextStatus('')
+                                        }, 3000)
+                                    } else if (ERR?.response_code == '99') {
+                                        /* Txn no registrada */
+                                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                                        mmkvStorage.remove('PENDING_TX_DATE')
+                                        isPaymentLoadingSV.set(false)
+                                        setLoadingTextStatus('')
+                                    } else {
+                                        setTimeout(() => {
+                                            isPaymentLoadingSV.set(false)
+                                            setLoadingTextStatus('')
+                                        }, 300)
+                                    }
+                                }).finally(() => {
+                                    setPrice('')
+                                    setSelectedExtra('')
                                 })
                         }, 4000)
                     }

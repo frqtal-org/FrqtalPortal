@@ -32,6 +32,9 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
                 const respuestaJSON = JSON.parse(respuestaString);
 
+                console.log('respuestaJSON--')
+                console.log(respuestaJSON)
+
                 if (respuestaJSON.RESPONSE_CODE === '00') {
                     await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
 
@@ -46,11 +49,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 }
             } catch (error: any) {
                 const ERR = JSON.parse(error?.message)
-                console.error(ERR);
-                if (ERR.response_code == '97') {
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
-                }
+                console.error('ERR verify')
+                console.error(ERR)
                 throw new Error(ERR.response_code)
             }
         }
@@ -65,10 +65,7 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
             mmkvStorage.set('PENDING_TX_DATE', DATE);
 
-            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce).catch(() => {
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
-            });
+            const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
 
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
@@ -82,7 +79,9 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             }
         } catch (error: any) {
             const ERR = JSON.parse(error.message)
-            console.error(ERR);
+            console.error('ERR')
+            console.error(ERR)
+            throw new Error(error.message)
         }
     };
 
