@@ -122,7 +122,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("unique_reference", unique_reference) // Campo alfanumérico, para referenciar una única transacción.
             intent.putExtra("tip", tip) // Parámetro para indicar la propina de una venta.
             intent.putExtra("from", "FrqtalPortal") // Parámetro para indicar el nombre del aplicativo que solicita la transacción.
-            intent.putExtra("json", jsonConfigPrint) // Parámetro en formato json, del aplicativo, contiene packageName del aplicativo solicitado.
+            intent.putExtra("json", jsonConfigNoPrint) // Parámetro en formato json, del aplicativo, contiene packageName del aplicativo solicitado.
             intent.putExtra("date", date) // Parámetro para indicar la fecha del día en formato “ddmmaaaa”.
             intent.putExtra("idCommerce", idCommerce) // Parámetro para indicar el identificador de comercio que se usa durante la venta.
             intent.putExtra("userNumber", "") // Parámetro para indicar el número de usuario que se usa durante la venta.
@@ -159,7 +159,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("unique_reference", "")
             intent.putExtra("cancel", true)
             intent.putExtra("from", "FrqtalPortal")
-            intent.putExtra("json", jsonConfigPrint)
+            intent.putExtra("json", jsonConfigNoPrint)
             intent.putExtra("tip", extra)
             intent.putExtra("date", date)
             intent.putExtra("idCommerce", "")
@@ -195,7 +195,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("unique_reference", "")
             intent.putExtra("cancel", true)
             intent.putExtra("from", "FrqtalPortal")
-            intent.putExtra("json", jsonConfigPrint)
+            intent.putExtra("json", jsonConfigNoPrint)
             intent.putExtra("tip", extra)
             intent.putExtra("date", date)
             intent.putExtra("idCommerce", "")
@@ -293,8 +293,6 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
         } catch (e: Exception) { promise.reject("INTENT_ERROR", e.message) }
     }
 
-
-    
     @ReactMethod
     fun queryTransaction(reference: String, date: String, promise: Promise) {
         currentPromise = promise

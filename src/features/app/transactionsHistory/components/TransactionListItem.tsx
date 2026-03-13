@@ -60,7 +60,7 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
         const CARD = `**** ${item?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`
         const CARD_BRAND = item?.data_raw?.TAG_50
         const CARD_TYPE = item?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
-        const AUTH_TYPE = item?.data_raw?.CARD_TYPE == '07' ? 'Contactless' : 'Chip'
+        const AUTH_TYPE = item?.data_raw?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
         const IMPRESSION_TYPE = 'Reimpresión'
         const AMOUNT = parseFloat(formatPriceFromDigits(item?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
         const EXTRA = parseFloat(formatPriceFromDigits(item?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })

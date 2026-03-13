@@ -65,7 +65,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             myPrinter.printText("Id: ${ID}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printText("Tarjeta: ${Card}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printText("Marca: ${CardBrand}", PrnTool.PRT_ALIGNLEFT, isBold = false)
-            myPrinter.printText("Tipo: ${CardType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
+            /* myPrinter.printText("Tipo: ${CardType}", PrnTool.PRT_ALIGNLEFT, isBold = false) */
             myPrinter.printText("Autarización: ${AuthType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printText("Impresión: ${ImpressionType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printLineFeed()
@@ -86,7 +86,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             }
             
             // --- DATOS TÉCNICOS ---
-            myPrinter.printText("Banco: ${Bank}", PrnTool.PRT_ALIGNLEFT, isBold = false) 
+            /* myPrinter.printText("Banco: ${Bank}", PrnTool.PRT_ALIGNLEFT, isBold = false)  */
             myPrinter.printText("Afiliación: ${AfiliationNumber}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printText("No. Referencia: ${Reference}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printText("Código de aprobación: ${AUT}", PrnTool.PRT_ALIGNLEFT, isBold = false)
