@@ -11,15 +11,17 @@ import { toTitleCase } from '../../utils/titleCase'
 import { formatPriceFromDigits } from '../../utils/priceFormater'
 import { sumarMontosExactos } from '../../utils/sumarMontosExactos'
 import { getExtraPercentage } from '../../utils/getExtraPercentage'
-import { isTodayTransactionDate, parseDateToDate, transactionDate } from '../../utils/transactionDate'
+import { isTodayTransactionDate, parseDateToDate, transactionDate, transactionDateDate, transactionDateTime } from '../../utils/transactionDate'
 import { useMMKVString } from 'react-native-mmkv'
 import StorageKey from '../../utils/store/keysStore'
 import { mmkvStorage } from '../../store/principalStore'
 import { useTransactionRegister } from '../../api/transactionRegister'
 import { TransactionsHistoryContext } from '../../../features/app/transactionsHistory/context'
 import { useNetInfo } from '@react-native-community/netinfo'
+import { printTicket } from '../../utils/printTicket'
 
 const { SmartWrapperModule } = NativeModules;
+
 
 const ListItem = ({ listKey, listValue, greenText }: { listKey: string, listValue: string, greenText?: string }) => {
     return <View style={[{ flexDirection: 'row', alignItems: 'center' }]} >
@@ -62,13 +64,65 @@ const Divider = ({ text }: { text: string }) => {
 
 const TransactionBottomSheet = () => {
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
+    const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
+    const [locationAdress, setLocationAdress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
     const { transactionBottomSheetRef, transactionSelected, setTransactionSelected } = useContext(BottomSheetsContext)
     const transactionRegisterMutator = useTransactionRegister()
     const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { isConnected } = useNetInfo();
 
-    async function printTicket() {
-        await SmartWrapperModule.reprintTicket(transactionSelected?.data_raw?.SG_REFERENCE);
+    async function handlePrintTicket() {
+        try {
+            const DATE = transactionDateDate(transactionSelected?.data_raw?.TXN_DATE)
+            const TIME = transactionDateTime(transactionSelected?.data_raw?.TXN_TIME)
+            const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
+            const CARD = `**** ${transactionSelected?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`
+            const CARD_BRAND = transactionSelected?.data_raw?.TAG_50
+            const CARD_TYPE = transactionSelected?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
+            const AUTH_TYPE = transactionSelected?.data_raw?.CARD_TYPE == '07' ? 'Contactless' : 'Chip'
+            const IMPRESSION_TYPE = 'Reimpresión'
+            const AMOUNT = parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+            const EXTRA = parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+            const TOTAL = transactionSelected?.data_raw?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)), parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT
+            const BANK = transactionSelected?.data_raw?.CARD_NAME
+            const AFILIATION_NUMBER = transactionSelected?.data_raw?.MERCHANT_ID
+            const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
+            const AUT = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
+            const AID = transactionSelected?.data_raw?.AID
+            const ARQC = transactionSelected?.data_raw?.ARQC
+            const CVM = transactionSelected?.data_raw?.TAG_9F34
+            const TVR = transactionSelected?.data_raw?.TAG_95
+            const TSI = transactionSelected?.data_raw?.TAG_9B
+            const TXN_TYPE = transactionSelected?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+
+            printTicket({
+                TICKET_IMAGE: logo64,
+                ADDRESS: locationAdress,
+                DATE,
+                TIME,
+                ID,
+                CARD,
+                CARD_BRAND,
+                CARD_TYPE,
+                AUTH_TYPE,
+                IMPRESSION_TYPE,
+                AMOUNT,
+                EXTRA,
+                TOTAL,
+                BANK,
+                AFILIATION_NUMBER,
+                REFERENCE,
+                AUT,
+                AID,
+                ARQC,
+                CVM,
+                TVR,
+                TSI,
+                TXN_TYPE,
+            })
+        } catch (err) {
+            console.error(err)
+        }
     }
 
     async function handleRefund() {
@@ -86,7 +140,7 @@ const TransactionBottomSheet = () => {
                 if (RESP_JSON.RESPONSE_CODE === '00') {
                     await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(() => {
                         mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
-                        setTransactionSelected({ event_name: 'cancel', data_raw: RESP_JSON })
+                        setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                         setRefetchData(true)
                     })
                 }
@@ -97,6 +151,7 @@ const TransactionBottomSheet = () => {
                 if (RESP_JSON.RESPONSE_CODE === '00') {
                     await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(() => {
                         mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
+                        setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                         setRefetchData(true)
                     })
                 }
@@ -119,7 +174,7 @@ const TransactionBottomSheet = () => {
                 setTimeout(async () => {
                     await transactionRegisterMutator.mutateAsync({ ...PENDING_CANCELATION }).then(() => {
                         mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
-                        setTransactionSelected({ event_name: 'cancel', data_raw: PENDING_CANCELATION })
+                        setTransactionSelected({ event_name: 'cancel', data_raw: { ...PENDING_CANCELATION } })
                         setRefetchData(true)
                     })
                 })
@@ -138,7 +193,7 @@ const TransactionBottomSheet = () => {
                 <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.3), alignItems: 'center' }]} >
                     <Typography variant='title01Bold' >{txnName[transactionSelected?.event_name]}</Typography>
                     <Typography variant='subtitle02Regular' color='textEleventh' >{transactionDate(transactionSelected?.data_raw?.TXN_DATE, transactionSelected?.data_raw?.TXN_TIME)}</Typography>
-                    <Pressable onPress={printTicket} hitSlop={{ right: sizeToDp(APP_PADDING * 2), left: sizeToDp(APP_PADDING * 2) }} style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.2), paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} >
+                    <Pressable onPress={handlePrintTicket} hitSlop={{ right: sizeToDp(APP_PADDING * 2), left: sizeToDp(APP_PADDING * 2) }} style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.2), paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} >
                         <Typography variant='subtitle02Medium' color='brand200' >Imprimir</Typography>
                         <FastImage
                             source={require('../../assets/images/print200.png')}
@@ -151,8 +206,11 @@ const TransactionBottomSheet = () => {
 
             <Divider text='Transacción' />
             <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.5), paddingHorizontal: sizeToDp(APP_PADDING * 1), marginBottom: sizeToDp(APP_PADDING * 0.8) }]} >
+                {transactionSelected?.data_raw?.TXN_UNIQUE_REF && <ListItem listKey='Id' listValue={`${transactionSelected?.data_raw?.TXN_UNIQUE_REF}`} />}
                 <ListItem listKey='Tarjeta' listValue={`**** ${transactionSelected?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`} />
-                <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected?.data_raw?.BRAND_NAME)} />
+                <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected?.data_raw?.TAG_50)} />
+                <ListItem listKey='Tipo' listValue={transactionSelected?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'} />
+                <ListItem listKey='Autarización' listValue={transactionSelected?.data_raw?.CARD_TYPE == '07' ? 'Contactless' : 'Chip'} />
                 {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Consumo' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />}
                 {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Extra' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} greenText={`${getExtraPercentage({ montoBase: transactionSelected?.data_raw?.AMOUNT, montoExtra: transactionSelected?.data_raw?.TIP })}`} />}
                 {
@@ -164,6 +222,7 @@ const TransactionBottomSheet = () => {
 
             <Divider text='Información bancaria' />
             <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING * 1), rowGap: sizeToDp(APP_PADDING * 0.5) }]} >
+                <ListItem listKey='Banco' listValue={transactionSelected?.data_raw?.CARD_NAME} />
                 <ListItem listKey='Referencia' listValue={transactionSelected?.data_raw?.SG_REFERENCE} />
                 <ListItem listKey='Código de aprovación' listValue={transactionSelected?.data_raw?.TXN_APPROVAL_CODE} />
             </View>

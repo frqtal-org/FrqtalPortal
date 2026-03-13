@@ -28,7 +28,7 @@ export const queryClient = new QueryClient({
   },
 })
 
-export const configurarSensoresKiosco = () => {
+export const handleListenNetwork = () => {
   onlineManager.setEventListener((setOnline) => {
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       setOnline(!!state.isConnected);

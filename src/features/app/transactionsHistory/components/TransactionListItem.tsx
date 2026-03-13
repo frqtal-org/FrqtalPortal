@@ -6,10 +6,15 @@ import { Typography } from '../../../../core/components/Typography.tsx';
 import { formatPriceFromDigits } from '../../../../core/utils/priceFormater.ts';
 import { APP_PADDING } from '../../../../core/utils/constants.ts';
 import theme from '../../../../core/utils/styles/styles.ts';
-import { transactionDate } from '../../../../core/utils/transactionDate.ts';
+import { transactionDate, transactionDateDate, transactionDateTime } from '../../../../core/utils/transactionDate.ts';
 import { BottomSheetsContext } from '../../../../core/components/bottomSheets/context.tsx';
 import { toTitleCase } from '../../../../core/utils/titleCase.ts';
 import { getExtraPercentage } from '../../../../core/utils/getExtraPercentage.ts';
+import { sumarMontosExactos } from '../../../../core/utils/sumarMontosExactos.ts';
+import { printTicket } from '../../../../core/utils/printTicket.ts';
+import { useMMKVString } from 'react-native-mmkv';
+import StorageKey from '../../../../core/utils/store/keysStore.ts';
+import { mmkvStorage } from '../../../../core/store/principalStore.ts';
 
 const statusToImageMap: Record<string, any> = {
   cancel: require('../../../../core/assets/images/error.webp'),
@@ -25,6 +30,9 @@ const { SmartWrapperModule } = NativeModules;
 
 const Transaction = ({ onBack, onVerify, ...item }: any) => {
   const { transactionBottomSheetRef, setTransactionSelected } = useContext(BottomSheetsContext)
+
+  const [locationAdress, setLocationAdress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
+  const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
 
   const {
     ACCOUNT_NUMBER,
@@ -43,9 +51,59 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
     })
   }
 
-  function printTicket() {
+  function handlePrintTicket() {
     onVerify(async () => {
-      await SmartWrapperModule.reprintTicket(SG_REFERENCE);
+      try {
+        const DATE = transactionDateDate(item?.data_raw?.TXN_DATE)
+        const TIME = transactionDateTime(item?.data_raw?.TXN_TIME)
+        const ID = item?.data_raw?.TXN_UNIQUE_REF
+        const CARD = `**** ${item?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`
+        const CARD_BRAND = item?.data_raw?.TAG_50
+        const CARD_TYPE = item?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
+        const AUTH_TYPE = item?.data_raw?.CARD_TYPE == '07' ? 'Contactless' : 'Chip'
+        const IMPRESSION_TYPE = 'Reimpresión'
+        const AMOUNT = parseFloat(formatPriceFromDigits(item?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+        const EXTRA = parseFloat(formatPriceFromDigits(item?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+        const TOTAL = item?.data_raw?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(item?.data_raw?.AMOUNT)), parseFloat(formatPriceFromDigits(item?.data_raw?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT
+        const BANK = item?.data_raw?.CARD_NAME
+        const AFILIATION_NUMBER = item?.data_raw?.MERCHANT_ID
+        const REFERENCE = item?.data_raw?.SG_REFERENCE
+        const AUT = item?.data_raw?.TXN_APPROVAL_CODE
+        const AID = item?.data_raw?.AID
+        const ARQC = item?.data_raw?.ARQC
+        const CVM = item?.data_raw?.TAG_9F34
+        const TVR = item?.data_raw?.TAG_95
+        const TSI = item?.data_raw?.TAG_9B
+        const TXN_TYPE = item?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+
+        printTicket({
+          TICKET_IMAGE: logo64,
+          ADDRESS: locationAdress,
+          DATE,
+          TIME,
+          ID,
+          CARD,
+          CARD_BRAND,
+          CARD_TYPE,
+          AUTH_TYPE,
+          IMPRESSION_TYPE,
+          AMOUNT,
+          EXTRA,
+          TOTAL,
+          BANK,
+          AFILIATION_NUMBER,
+          REFERENCE,
+          AUT,
+          AID,
+          ARQC,
+          CVM,
+          TVR,
+          TSI,
+          TXN_TYPE,
+        })
+      } catch (err) {
+        console.error(err)
+      }
     })
   }
 
@@ -54,7 +112,7 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
       <Pressable
         style={[STYLES.itemListWrapper]}
         onPress={handleViewTransaction}
-        onLongPress={printTicket}
+        onLongPress={handlePrintTicket}
       >
         <View style={[STYLES.itemListContainer]}>
           <FastImage

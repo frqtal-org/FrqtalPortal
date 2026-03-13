@@ -1,4 +1,4 @@
-export function sumarMontosExactos(monto1: number, monto2: number) {
+export function sumarMontosExactos(monto1: number | string, monto2: number | string) {
   // 1. Asegurarnos de que sean números (por si llegan como strings del input)
   const num1 = Number(monto1);
   const num2 = Number(monto2);

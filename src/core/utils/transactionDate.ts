@@ -6,8 +6,28 @@ export function transactionDate(dateStr: any, timeStr: any) {
 
   const hora = timeStr.substring(0, 2);
   const minuto = timeStr.substring(2, 4);
+  const segundos = timeStr.substring(4, 6);
 
-  return `${dia}/${mes}/${año} ${hora}:${minuto}`;
+  return `${dia}/${mes}/${año} ${hora}:${minuto}:${segundos}`;
+}
+
+export function transactionDateDate(dateStr: any) {
+  if (!dateStr) return
+  const año = "20" + dateStr.substring(0, 2);
+  const mes = dateStr.substring(2, 4);
+  const dia = dateStr.substring(4, 6);
+
+  return `${dia}/${mes}/${año}`;
+}
+
+export function transactionDateTime(timeStr: any) {
+  if (!timeStr) return
+
+  const hora = timeStr.substring(0, 2);
+  const minuto = timeStr.substring(2, 4);
+  const segundos = timeStr.substring(4, 6);
+
+  return `${hora}:${minuto}:${segundos}`;
 }
 
 export function isTodayTransactionDate(dateStr: any) {

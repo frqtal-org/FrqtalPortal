@@ -8,7 +8,6 @@ import com.facebook.react.uimanager.ViewManager
 class ScreenStatePackage : ReactPackage {
     
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        // Aquí registramos nuestro módulo
         return listOf(ScreenStateModule(reactContext))
     }
 

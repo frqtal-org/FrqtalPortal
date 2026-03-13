@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ICarouselInstance } from 'react-native-reanimated-carousel';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { NativeEventEmitter, NativeModules, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import TransactionBottomSheet from '../../../core/components/bottomSheets/TransactionBottomSheet';
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen';
 import { useLogout } from '../../../core/api/logout';
@@ -13,14 +13,10 @@ import AppCarousel from './components/AppCarousel';
 import Settings from '../settings/Settings';
 import InsertAmount from '../insertAmount/InsertAmount';
 import TransactionsHistory from '../transactionsHistory/TransactionsHistory';
-import { configurarSensoresKiosco } from '../../../core/utils/queryClientConfiguration';
-
-const { ScreenStateModule } = NativeModules;
-const screenStateEmitter = new NativeEventEmitter(ScreenStateModule);
+import { handleListenNetwork } from '../../../core/utils/queryClientConfiguration';
 
 let lockScreenTimeOut: number;
 let loadingLockScreenTimeOut: number;
-let lockButtonPressedScreenTO: number;
 
 const CAROUSEL_PAGES = [
     { component: () => <Settings /> },
@@ -35,7 +31,6 @@ const AppNavigation = () => {
     const [loadingText, setLoadingText] = useState('');
     const carouselRef = useRef<ICarouselInstance>(null);
     const logoutMutator = useLogout()
-
 
     const { navigate } = useNavigation<any>()
 
@@ -56,7 +51,7 @@ const AppNavigation = () => {
         }, (5 * 60 * 1000) - 3000)
     }
 
-    function onPressPaginationDot(targetIndex: number) {
+    function onPressButton(targetIndex: number) {
         const currentIndex = Math.round(progressSV.value);
         const difference = targetIndex - currentIndex;
 
@@ -73,31 +68,7 @@ const AppNavigation = () => {
 
     /* ------- Effects ------- */
     useEffect(() => {
-        configurarSensoresKiosco();
-    }, []);
-
-    useEffect(() => {
-        ScreenStateModule.startListening();
-
-        const subscription = screenStateEmitter.addListener('ScreenStateEvent', (state) => {
-            if (state === 'ScreenOff') {
-                /* 'LA PANTALLA SE APAGÓ FÍSICAMENTE' */
-                lockButtonPressedScreenTO && clearTimeout(lockButtonPressedScreenTO)
-                lockButtonPressedScreenTO = setTimeout(async () => {
-                    navigate('Login');
-                    await logoutMutator.mutateAsync()
-                    deleteToken()
-                }, 5000)
-            } else if (state === 'ScreenOn') {
-                /* 'LA PANTALLA SE ENCENDIÓ' */
-                lockButtonPressedScreenTO && clearTimeout(lockButtonPressedScreenTO)
-            }
-        });
-
-        return () => {
-            subscription.remove();
-            ScreenStateModule.stopListening();
-        };
+        handleListenNetwork();
     }, []);
 
     useFocusEffect(useCallback(() => {
@@ -113,7 +84,7 @@ const AppNavigation = () => {
     return (
         <>
             <BasicScreenWrapper noHeader onTouchStart={resetLockScreen} >
-                <AppPagination pages={CAROUSEL_PAGES} progressSV={progressSV} onPress={(index: number) => onPressPaginationDot(index)} />
+                <AppPagination pages={CAROUSEL_PAGES} progressSV={progressSV} onPress={(index: number) => onPressButton(index)} />
                 <AppCarousel ref={carouselRef} pages={CAROUSEL_PAGES} progressSV={progressSV} />
             </BasicScreenWrapper>
 

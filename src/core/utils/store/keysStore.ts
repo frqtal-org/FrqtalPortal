@@ -1,4 +1,7 @@
 const StorageKey = {
+  LOGO_64: '@logo-base-64',
+  LOCATION_ADRESS: '@location-adress',
+
   DEVICE_SERIAL_NUMBER: '@device-serial-number',
 
   APP_VERSION_NAME: '@app-build-number',

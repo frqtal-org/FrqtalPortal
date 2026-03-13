@@ -6,12 +6,11 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.uimanager.ViewManager
 
 class SmartWrapperPackage : ReactPackage {
-    @Suppress("OVERRIDE_DEPRECATION")
+
     override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> {
-        return listOf(SmartWrapperModule(reactContext) as NativeModule)
+        return listOf(SmartWrapperModule(reactContext))
     }
 
-    @Suppress("OVERRIDE_DEPRECATION")
     override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
         return emptyList()
     }
