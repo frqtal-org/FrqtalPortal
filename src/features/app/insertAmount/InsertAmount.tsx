@@ -10,12 +10,20 @@ import LoadingScreen from '../../../core/components/Loading/LoadingScreen'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
 import { mmkvStorage } from '../../../core/store/principalStore'
-import { useNetInfo } from "@react-native-community/netinfo";
+import { useNetInfo, fetch } from "@react-native-community/netinfo";
+import { transactionDateDate, transactionDateTime } from '../../../core/utils/transactionDate'
+import { formatPriceFromDigits } from '../../../core/utils/priceFormater'
+import { sumarMontosExactos } from '../../../core/utils/sumarMontosExactos'
+import StorageKey from '../../../core/utils/store/keysStore'
+import { useMMKVString } from 'react-native-mmkv'
+import { printTicket } from '../../../core/utils/printTicket'
 
 const InsertAmount = () => {
     /*  */
     const INSETS = useContext(InsetsContext)
     const { handlePayAmount, verifyPendingTransaction } = useContext(InsertAmountContext)
+    const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
+    const [locationAddress, setLocationAddress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
     /*  */
     const [selectedExtra, setSelectedExtra] = useState<string>('');
     const [loadingTextStatus, setLoadingTextStatus] = useState('')
@@ -33,12 +41,65 @@ const InsertAmount = () => {
 
     async function verifyPendigTxns() {
         try {
-            await verifyPendingTransaction();
-            isPaymentLoadingSV.set(false)
-            setLoadingTextStatus('')
+            await verifyPendingTransaction().then(async (res: any) => {
+                if (res) {
+                    isPaymentLoadingSV.set(true)
+                    setLoadingTextStatus('Imprimiendo ticket')
+                    setPrice('')
+                    setSelectedExtra('')
+
+                    const DATE2 = transactionDateDate(res?.TXN_DATE)
+                    const TIME = transactionDateTime(res?.TXN_TIME)
+                    const ID = res?.TXN_UNIQUE_REF
+                    const CARD = `**** ${res?.ACCOUNT_NUMBER?.slice(-4)}`
+                    const CARD_BRAND = res?.TAG_50
+                    const CARD_TYPE = res?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
+                    const AUTH_TYPE = res?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
+                    const IMPRESSION_TYPE = 'Original'
+                    const AMOUNT2 = parseFloat(formatPriceFromDigits(res?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                    const EXTRA2 = parseFloat(formatPriceFromDigits(res?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                    const TOTAL2 = res?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(res?.AMOUNT)), parseFloat(formatPriceFromDigits(res?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
+                    const BANK = res?.CARD_NAME
+                    const AFILIATION_NUMBER = res?.MERCHANT_ID
+                    const REFERENCE = res?.SG_REFERENCE
+                    const AUT = res?.TXN_APPROVAL_CODE
+                    const AID = res?.AID
+                    const ARQC = res?.ARQC
+                    const CVM = res?.TAG_9F34
+                    const TVR = res?.TAG_95
+                    const TSI = res?.TAG_9B
+                    const TXN_TYPE = res?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+
+                    await printTicket({
+                        TICKET_IMAGE: logo64,
+                        ADDRESS: locationAddress,
+                        DATE: DATE2,
+                        TIME,
+                        ID,
+                        CARD,
+                        CARD_BRAND,
+                        CARD_TYPE,
+                        AUTH_TYPE,
+                        IMPRESSION_TYPE,
+                        AMOUNT: AMOUNT2,
+                        EXTRA: EXTRA2,
+                        TOTAL: TOTAL2,
+                        BANK,
+                        AFILIATION_NUMBER,
+                        REFERENCE,
+                        AUT,
+                        AID,
+                        ARQC,
+                        CVM,
+                        TVR,
+                        TSI,
+                        TXN_TYPE,
+                    })
+                }
+            });
         } catch (error: any) {
             if (error?.message == '99') {
-                setLoadingTextStatus('Transacción en proceso, porfavor espere un momento')
+                setLoadingTextStatus('Porfavor espere un momento')
                 isPaymentLoadingSV.set(true)
                 setTimeout(() => {
                     isPaymentLoadingSV.set(false)
@@ -51,6 +112,7 @@ const InsertAmount = () => {
                 mmkvStorage.remove('PENDING_TX_DATE')
                 isPaymentLoadingSV.set(false)
                 setLoadingTextStatus('')
+                /* TODO: PRINT NO EXISTE REGISTRO */
             }
             if (error?.message == '01') {
                 /* REVERSADA */
@@ -58,6 +120,7 @@ const InsertAmount = () => {
                 mmkvStorage.remove('PENDING_TX_DATE')
                 isPaymentLoadingSV.set(false)
                 setLoadingTextStatus('')
+                /* TODO: PRINT REVERSADA */
             }
 
             throw new Error(error?.message)
@@ -66,41 +129,104 @@ const InsertAmount = () => {
 
     function handleProceedPay() {
         handlePayAmount({ price, selectedExtra })
-            .then(() => {
-                setTimeout(() => {
-                    isPaymentLoadingSV.set(false)
-                    setLoadingTextStatus('')
-                }, 300)
+            .then(async (res: any) => {
+
+                isPaymentLoadingSV.set(true)
+                setLoadingTextStatus('Imprimiendo ticket')
+                setPrice('')
+                setSelectedExtra('')
+
+                const DATE2 = transactionDateDate(res?.TXN_DATE)
+                const TIME = transactionDateTime(res?.TXN_TIME)
+                const ID = res?.TXN_UNIQUE_REF
+                const CARD = `**** ${res?.ACCOUNT_NUMBER?.slice(-4)}`
+                const CARD_BRAND = res?.TAG_50
+                const CARD_TYPE = res?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
+                const AUTH_TYPE = res?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
+                const IMPRESSION_TYPE = 'Original'
+                const AMOUNT2 = parseFloat(formatPriceFromDigits(res?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                const EXTRA2 = parseFloat(formatPriceFromDigits(res?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+                const TOTAL2 = res?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(res?.AMOUNT)), parseFloat(formatPriceFromDigits(res?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
+                const BANK = res?.CARD_NAME
+                const AFILIATION_NUMBER = res?.MERCHANT_ID
+                const REFERENCE = res?.SG_REFERENCE
+                const AUT = res?.TXN_APPROVAL_CODE
+                const AID = res?.AID
+                const ARQC = res?.ARQC
+                const CVM = res?.TAG_9F34
+                const TVR = res?.TAG_95
+                const TSI = res?.TAG_9B
+                const TXN_TYPE = res?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+
+                await printTicket({
+                    TICKET_IMAGE: logo64,
+                    ADDRESS: locationAddress,
+                    DATE: DATE2,
+                    TIME,
+                    ID,
+                    CARD,
+                    CARD_BRAND,
+                    CARD_TYPE,
+                    AUTH_TYPE,
+                    IMPRESSION_TYPE,
+                    AMOUNT: AMOUNT2,
+                    EXTRA: EXTRA2,
+                    TOTAL: TOTAL2,
+                    BANK,
+                    AFILIATION_NUMBER,
+                    REFERENCE,
+                    AUT,
+                    AID,
+                    ARQC,
+                    CVM,
+                    TVR,
+                    TSI,
+                    TXN_TYPE,
+                })
+
+                isPaymentLoadingSV.set(false)
+                setLoadingTextStatus('')
             })
             .catch((err: any) => {
                 const ERR = JSON.parse(err.message)
-                if (ERR.suggest_query === 'true') {
-                    setLoadingTextStatus('Validando información');
-                    isPaymentLoadingSV.set(true)
-                    setTimeout(async () => {
-                        await verifyPendigTxns()
-                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE')
+
+                setPrice('')
+                setSelectedExtra('')
+
+                fetch().then(state => {
+
+
+                    if (!state.isConnected) {
+                        isPaymentLoadingSV.set(false)
+                        setLoadingTextStatus('')
+                        return null
+                    }
+
+
+                    if (ERR.suggest_query === 'true') {
+                        setLoadingTextStatus('Validando información');
+                        isPaymentLoadingSV.set(true)
+
+                        setTimeout(async () => {
+                            await verifyPendigTxns().then(() => {
+                                isPaymentLoadingSV.set(false)
+                                setLoadingTextStatus('')
+                            })
+                        }, 3000)
+                    } else if (ERR?.response_code == '99') {
+                        /* Txn no registrada */
+                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                         mmkvStorage.remove('PENDING_TX_DATE')
                         isPaymentLoadingSV.set(false)
                         setLoadingTextStatus('')
-                    }, 3000)
-                } else if (ERR?.response_code == '99') {
-                    /* Txn no registrada */
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
-                    isPaymentLoadingSV.set(false)
-                    setLoadingTextStatus('')
-                } else {
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
-                    setTimeout(() => {
+                    } else {
+                        /* Cancelado por el usuario */
+                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                        mmkvStorage.remove('PENDING_TX_DATE')
                         isPaymentLoadingSV.set(false)
                         setLoadingTextStatus('')
-                    }, 300)
-                }
-            }).finally(() => {
-                setPrice('')
-                setSelectedExtra('')
+                    }
+                });
             })
     }
 
@@ -109,22 +235,15 @@ const InsertAmount = () => {
             if (price.length === 0) return
             const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
             const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+
             setLoadingTextStatus((pendingRef && pendingDate) ? 'Validando información' : 'Iniciando cobro')
             isPaymentLoadingSV.set(true)
 
             setTimeout(async () => {
                 await verifyPendigTxns().then(() => {
-                    handleProceedPay()
-                }).catch((error): any => {
-                    if (error?.message == '97') {
-                        setLoadingTextStatus('Iniciando cobro')
-                        isPaymentLoadingSV.set(true)
-                        setTimeout(() => {
-                            handleProceedPay()
-                        }, 4000)
-                    }
-                })
-            }, (pendingRef && pendingDate) ? 3000 : 0)
+                    handleProceedPay();
+                });
+            }, (pendingRef && pendingDate) ? 3000 : 1500)
         } else {
             setLoadingTextStatus('Sin conexión')
             isPaymentLoadingSV.set(true)
@@ -158,7 +277,10 @@ const InsertAmount = () => {
                 setLoadingTextStatus('Verificando transacción inconclusa')
                 isPaymentLoadingSV.set(true)
                 setTimeout(async () => {
-                    await verifyPendigTxns();
+                    await verifyPendigTxns().then(() => {
+                        isPaymentLoadingSV.set(false)
+                        setLoadingTextStatus('')
+                    });
                 }, 3000)
             }
         }

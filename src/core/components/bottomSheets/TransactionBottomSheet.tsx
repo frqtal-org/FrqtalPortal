@@ -358,7 +358,7 @@ const TransactionBottomSheet = () => {
                 {transactionSelected?.data_raw?.TXN_UNIQUE_REF && <ListItem listKey='Id' listValue={`${transactionSelected?.data_raw?.TXN_UNIQUE_REF}`} />}
                 <ListItem listKey='Tarjeta' listValue={`**** ${transactionSelected?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`} />
                 <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected?.data_raw?.TAG_50)} />
-                <ListItem listKey='Tipo' listValue={transactionSelected?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'} />
+                {/* <ListItem listKey='Tipo' listValue={transactionSelected?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'} /> */}
                 <ListItem listKey='Autarización' listValue={transactionSelected?.data_raw?.CARD_TYPE == '07' ? 'Contactless' : 'Chip'} />
                 {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Consumo' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />}
                 {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Extra' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} greenText={`${getExtraPercentage({ montoBase: transactionSelected?.data_raw?.AMOUNT, montoExtra: transactionSelected?.data_raw?.TIP })}`} />}
@@ -371,7 +371,7 @@ const TransactionBottomSheet = () => {
 
             <Divider text='Información bancaria' />
             <View style={[{ paddingHorizontal: sizeToDp(APP_PADDING * 1), rowGap: sizeToDp(APP_PADDING * 0.5) }]} >
-                <ListItem listKey='Banco' listValue={transactionSelected?.data_raw?.CARD_NAME} />
+                {/* <ListItem listKey='Banco' listValue={transactionSelected?.data_raw?.CARD_NAME} /> */}
                 <ListItem listKey='Referencia' listValue={transactionSelected?.data_raw?.SG_REFERENCE} />
                 <ListItem listKey='Código de aprovación' listValue={transactionSelected?.data_raw?.TXN_APPROVAL_CODE} />
             </View>

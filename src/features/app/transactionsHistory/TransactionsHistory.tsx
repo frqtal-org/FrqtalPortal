@@ -86,7 +86,7 @@ const TransactionsHistory = () => {
       setLoadingTextStatus('')
     } catch (error: any) {
       if (error?.message == '99') {
-        setLoadingTextStatus('Transacción en proceso, porfavor espere un momento')
+        setLoadingTextStatus('Porfavor espere un momento')
         isLoadingSV.set(true)
         setTimeout(() => {
           isLoadingSV.set(false)
