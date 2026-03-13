@@ -9,9 +9,6 @@ import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
 import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
 import StorageKey from "../../../core/utils/store/keysStore";
 import { TransactionsHistoryContext } from "../transactionsHistory/context";
-import { printTicket } from "../../../core/utils/printTicket";
-import { transactionDateDate, transactionDateTime } from "../../../core/utils/transactionDate";
-import { sumarMontosExactos } from "../../../core/utils/sumarMontosExactos";
 
 const InsertAmountContext = createContext<any>({});
 
@@ -23,8 +20,6 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
 
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
-    const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
-    const [locationAddress, setLocationAddress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
 
     const transactionRegisterMutator = useTransactionRegister()
 
