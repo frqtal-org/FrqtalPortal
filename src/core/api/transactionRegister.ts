@@ -22,6 +22,7 @@ export const useTransactionRegister = () => {
     },
     onError: (error) => {
       console.log("Error al registrar la transacción en el servidor", error);
+      return error
     }
   });
 };

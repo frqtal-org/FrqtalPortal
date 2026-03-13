@@ -45,7 +45,7 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
 
                     setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
                     setRefetchData(true)
-                    
+
                     return respuestaJSON
                 }
             } catch (error: any) {
@@ -72,11 +72,17 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
-                setRefetchData(true)
+                .then(() => {
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
+                    setRefetchData(true)
+                })
+                .catch(error => {
+                    console.error('ERR-222')
+                    console.error(error)
+                })
 
+                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
                 return respuestaJSON
             }
         } catch (error: any) {

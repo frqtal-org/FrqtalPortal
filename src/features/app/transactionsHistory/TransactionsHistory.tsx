@@ -11,12 +11,12 @@ import theme from "../../../core/utils/styles/styles.ts";
 import { Filters } from "./components/Filters.tsx";
 import TransactionListItem from "./components/TransactionListItem.tsx";
 import { TransactionsHistoryContext } from './context.tsx';
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import LoadingScreen from '../../../core/components/Loading/LoadingScreen.tsx';
+import { useAnimatedStyle } from 'react-native-reanimated';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
 import { mmkvStorage } from '../../../core/store/principalStore.ts';
 import { InsertAmountContext } from '../insertAmount/context.tsx';
+import { AppNavigationContext } from '../appNavigation/context.tsx';
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -26,15 +26,14 @@ const TransactionsHistory = () => {
   const { setRefetchData, refetchData, handleGetHistorial } = useContext(TransactionsHistoryContext)
   const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
   const { verifyPendingTransaction } = useContext(InsertAmountContext)
+  const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
   /*  */
   const listRef = useRef<FlatList<any>>(null)
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [TXNs, setTXNs] = useState<any>([])
-  const [loadingTextStatus, setLoadingTextStatus] = useState('')
   const [totalAmounts, setTotalAmounts] = useState({ totalExtraToday: null, totalToday: null, totalPages: 0 })
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoadingTxns, setIsLoadingTxns] = useState(false)
-  const isLoadingSV = useSharedValue(false)
   const { isConnected } = useNetInfo();
 
   /* ------- Functions ------- */
@@ -44,7 +43,7 @@ const TransactionsHistory = () => {
       const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
 
       if (pendingRef && pendingDate) {
-        setLoadingTextStatus('Verificando transacción inconclusa')
+        setLoadingText('Verificando transacción inconclusa')
         isLoadingSV.set(true)
         setTimeout(async () => {
           await verifyPendigTxns();
@@ -53,11 +52,11 @@ const TransactionsHistory = () => {
         await SmartWrapperModule.getBalance();
       }
     } else {
-      setLoadingTextStatus('Sin conexión')
+      setLoadingText('Sin conexión')
       isLoadingSV.set(true)
       setTimeout(() => {
         isLoadingSV.set(false)
-        setLoadingTextStatus('')
+        setLoadingText('')
       }, 3000)
     }
   }
@@ -83,19 +82,19 @@ const TransactionsHistory = () => {
     try {
       await verifyPendingTransaction();
       isLoadingSV.set(false)
-      setLoadingTextStatus('')
+      setLoadingText('')
     } catch (error: any) {
       if (error?.message == '99') {
-        setLoadingTextStatus('Porfavor espere un momento')
+        setLoadingText('Porfavor espere un momento')
         isLoadingSV.set(true)
         setTimeout(() => {
           isLoadingSV.set(false)
-          setLoadingTextStatus('')
+          setLoadingText('')
         }, 3000)
       }
       if (error?.message == '97') {
         isLoadingSV.set(false)
-        setLoadingTextStatus('')
+        setLoadingText('')
       }
 
       throw new Error(error?.message)
@@ -168,11 +167,11 @@ const TransactionsHistory = () => {
                 if (isConnected) {
                   onAction()
                 } else {
-                  setLoadingTextStatus('Sin conexión')
+                  setLoadingText('Sin conexión')
                   isLoadingSV.set(true)
                   setTimeout(() => {
                     isLoadingSV.set(false)
-                    setLoadingTextStatus('')
+                    setLoadingText('')
                   }, 3000)
                 }
               }}
@@ -197,7 +196,7 @@ const TransactionsHistory = () => {
                 const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
 
                 if (pendingRef && pendingDate) {
-                  setLoadingTextStatus('Verificando transacción inconclusa')
+                  setLoadingText('Verificando transacción inconclusa')
                   isLoadingSV.set(true)
                   setTimeout(async () => {
                     await verifyPendigTxns();
@@ -206,11 +205,11 @@ const TransactionsHistory = () => {
                   onAction()
                 }
               } else {
-                setLoadingTextStatus('Sin conexión')
+                setLoadingText('Sin conexión')
                 isLoadingSV.set(true)
                 setTimeout(() => {
                   isLoadingSV.set(false)
-                  setLoadingTextStatus('')
+                  setLoadingText('')
                 }, 3000)
               }
             }}
@@ -222,10 +221,6 @@ const TransactionsHistory = () => {
           onEndReached={(totalAmounts.totalPages <= 1 || isLoadingTxns) ? () => { } : (isConnected ? handleNextPage : () => { })}
         />
       </BasicScreenWrapper>
-
-      <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-        <LoadingScreen text={loadingTextStatus} />
-      </Animated.View>
     </>
   );
 };

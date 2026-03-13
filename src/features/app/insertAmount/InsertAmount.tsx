@@ -5,8 +5,7 @@ import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
 import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad'
 import GradientButton from '../../../core/components/buttons/GradientButton'
-import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated'
-import LoadingScreen from '../../../core/components/Loading/LoadingScreen'
+import { useAnimatedStyle } from 'react-native-reanimated'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
 import { mmkvStorage } from '../../../core/store/principalStore'
@@ -17,19 +16,19 @@ import { sumarMontosExactos } from '../../../core/utils/sumarMontosExactos'
 import StorageKey from '../../../core/utils/store/keysStore'
 import { useMMKVString } from 'react-native-mmkv'
 import { printTicket } from '../../../core/utils/printTicket'
+import { AppNavigationContext } from '../appNavigation/context'
 
 const InsertAmount = () => {
     /*  */
     const INSETS = useContext(InsetsContext)
     const { handlePayAmount, verifyPendingTransaction } = useContext(InsertAmountContext)
+    const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext) 
     const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
     const [locationAddress, setLocationAddress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
     /*  */
     const [selectedExtra, setSelectedExtra] = useState<string>('');
-    const [loadingTextStatus, setLoadingTextStatus] = useState('')
     const [price, setPrice] = useState<string>('');
     /*  */
-    const isPaymentLoadingSV = useSharedValue(false)
     const { isConnected } = useNetInfo();
 
     /* ------- Functions ------- */
@@ -43,8 +42,8 @@ const InsertAmount = () => {
         try {
             await verifyPendingTransaction().then(async (res: any) => {
                 if (res) {
-                    isPaymentLoadingSV.set(true)
-                    setLoadingTextStatus('Imprimiendo ticket')
+                    isLoadingSV.set(true)
+                    setLoadingText('Imprimiendo ticket')
                     setPrice('')
                     setSelectedExtra('')
 
@@ -99,27 +98,27 @@ const InsertAmount = () => {
             });
         } catch (error: any) {
             if (error?.message == '99') {
-                setLoadingTextStatus('Porfavor espere un momento')
-                isPaymentLoadingSV.set(true)
+                setLoadingText('Porfavor espere un momento')
+                isLoadingSV.set(true)
                 setTimeout(() => {
-                    isPaymentLoadingSV.set(false)
-                    setLoadingTextStatus('')
+                    isLoadingSV.set(false)
+                    setLoadingText('')
                 }, 3000)
             }
             if (error?.message == '97') {
                 /* Txn no registrada */
                 mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                 mmkvStorage.remove('PENDING_TX_DATE')
-                isPaymentLoadingSV.set(false)
-                setLoadingTextStatus('')
+                isLoadingSV.set(false)
+                setLoadingText('')
                 /* TODO: PRINT NO EXISTE REGISTRO */
             }
             if (error?.message == '01') {
                 /* REVERSADA */
                 mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                 mmkvStorage.remove('PENDING_TX_DATE')
-                isPaymentLoadingSV.set(false)
-                setLoadingTextStatus('')
+                isLoadingSV.set(false)
+                setLoadingText('')
                 /* TODO: PRINT REVERSADA */
             }
 
@@ -131,8 +130,8 @@ const InsertAmount = () => {
         handlePayAmount({ price, selectedExtra })
             .then(async (res: any) => {
 
-                isPaymentLoadingSV.set(true)
-                setLoadingTextStatus('Imprimiendo ticket')
+                isLoadingSV.set(true)
+                setLoadingText('Imprimiendo ticket')
                 setPrice('')
                 setSelectedExtra('')
 
@@ -184,8 +183,8 @@ const InsertAmount = () => {
                     TXN_TYPE,
                 })
 
-                isPaymentLoadingSV.set(false)
-                setLoadingTextStatus('')
+                isLoadingSV.set(false)
+                setLoadingText('')
             })
             .catch((err: any) => {
                 const ERR = JSON.parse(err.message)
@@ -197,34 +196,34 @@ const InsertAmount = () => {
 
 
                     if (!state.isConnected) {
-                        isPaymentLoadingSV.set(false)
-                        setLoadingTextStatus('')
+                        isLoadingSV.set(false)
+                        setLoadingText('')
                         return null
                     }
 
 
                     if (ERR.suggest_query === 'true') {
-                        setLoadingTextStatus('Validando información');
-                        isPaymentLoadingSV.set(true)
+                        setLoadingText('Validando información');
+                        isLoadingSV.set(true)
 
                         setTimeout(async () => {
                             await verifyPendigTxns().then(() => {
-                                isPaymentLoadingSV.set(false)
-                                setLoadingTextStatus('')
+                                isLoadingSV.set(false)
+                                setLoadingText('')
                             })
                         }, 3000)
                     } else if (ERR?.response_code == '99') {
                         /* Txn no registrada */
                         mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                         mmkvStorage.remove('PENDING_TX_DATE')
-                        isPaymentLoadingSV.set(false)
-                        setLoadingTextStatus('')
+                        isLoadingSV.set(false)
+                        setLoadingText('')
                     } else {
                         /* Cancelado por el usuario */
                         mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                         mmkvStorage.remove('PENDING_TX_DATE')
-                        isPaymentLoadingSV.set(false)
-                        setLoadingTextStatus('')
+                        isLoadingSV.set(false)
+                        setLoadingText('')
                     }
                 });
             })
@@ -236,8 +235,8 @@ const InsertAmount = () => {
             const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
             const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
 
-            setLoadingTextStatus((pendingRef && pendingDate) ? 'Validando información' : 'Iniciando cobro')
-            isPaymentLoadingSV.set(true)
+            setLoadingText((pendingRef && pendingDate) ? 'Validando información' : 'Iniciando cobro')
+            isLoadingSV.set(true)
 
             setTimeout(async () => {
                 await verifyPendigTxns().then(() => {
@@ -245,11 +244,11 @@ const InsertAmount = () => {
                 });
             }, (pendingRef && pendingDate) ? 3000 : 1500)
         } else {
-            setLoadingTextStatus('Sin conexión')
-            isPaymentLoadingSV.set(true)
+            setLoadingText('Sin conexión')
+            isLoadingSV.set(true)
             setTimeout(() => {
-                isPaymentLoadingSV.set(false)
-                setLoadingTextStatus('')
+                isLoadingSV.set(false)
+                setLoadingText('')
             }, 3000)
         }
     }
@@ -262,8 +261,8 @@ const InsertAmount = () => {
 
     /* ------- Animations ------- */
     const isLoadingStyle = useAnimatedStyle(() => ({
-        opacity: isPaymentLoadingSV.get() ? 1 : 0,
-        pointerEvents: isPaymentLoadingSV.get() ? 'auto' : 'none',
+        opacity: isLoadingSV.get() ? 1 : 0,
+        pointerEvents: isLoadingSV.get() ? 'auto' : 'none',
     }))
     /* ------- END Animations ------- */
 
@@ -274,12 +273,12 @@ const InsertAmount = () => {
 
         if (isConnected) {
             if (pendingRef && pendingDate) {
-                setLoadingTextStatus('Verificando transacción inconclusa')
-                isPaymentLoadingSV.set(true)
+                setLoadingText('Verificando transacción inconclusa')
+                isLoadingSV.set(true)
                 setTimeout(async () => {
                     await verifyPendigTxns().then(() => {
-                        isPaymentLoadingSV.set(false)
-                        setLoadingTextStatus('')
+                        isLoadingSV.set(false)
+                        setLoadingText('')
                     });
                 }, 3000)
             }
@@ -311,9 +310,6 @@ const InsertAmount = () => {
                 </View>
 
             </View>
-            <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
-                <LoadingScreen text={loadingTextStatus} />
-            </Animated.View>
         </>
     )
 }

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ICarouselInstance } from 'react-native-reanimated-carousel';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
@@ -14,6 +14,7 @@ import Settings from '../settings/Settings';
 import InsertAmount from '../insertAmount/InsertAmount';
 import TransactionsHistory from '../transactionsHistory/TransactionsHistory';
 import { handleListenNetwork } from '../../../core/utils/queryClientConfiguration';
+import { AppNavigationContext } from './context';
 
 let lockScreenTimeOut: number;
 let loadingLockScreenTimeOut: number;
@@ -25,10 +26,11 @@ const CAROUSEL_PAGES = [
 ]
 
 const AppNavigation = () => {
-    /* */
+    /*  */
+    const { isLoadingSV, setLoadingText, loadingText } = useContext(AppNavigationContext) 
+    /*  */
     const progressSV = useSharedValue<number>(0);
-    const isLoadingSV = useSharedValue(false)
-    const [loadingText, setLoadingText] = useState('');
+
     const carouselRef = useRef<ICarouselInstance>(null);
     const logoutMutator = useLogout()
 
