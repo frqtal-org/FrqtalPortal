@@ -105,9 +105,21 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
           TSI,
           TXN_TYPE,
         })
+          .then(() => {
+            setLoadingText('')
+            isLoadingSV.set(false)
+          })
+          .catch((err) => {
+            console.error('err printing')
+            console.error(err)
+            isLoadingSV.set(true)
+            setLoadingText(err.message)
+            setTimeout(() => {
+              setLoadingText('')
+              isLoadingSV.set(false)
+            }, 3000)
+          })
 
-        setLoadingText('')
-        isLoadingSV.set(false)
       } catch (err) {
         console.error(err)
       }

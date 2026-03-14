@@ -30,7 +30,9 @@ export async function printTicket(ticketData: any) {
             ticketData.TXN_TYPE,
         );
         console.log(resultado);
-    } catch (error) {
-        console.log("Error al imprimir:", error);
+    } catch (error: any) {
+        console.log(error)
+        console.log(error?.message)
+        throw new Error(error?.message)
     }
 }

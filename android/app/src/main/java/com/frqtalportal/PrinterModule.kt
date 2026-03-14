@@ -119,10 +119,13 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
 
             val status = myPrinter.printAll()
 
-            if (status == 0x00) {
-                promise.resolve("Impresión exitosa")
-            } else {
-                promise.reject("PRINTER_ERROR", "La impresora devolvió el código de error: $status")
+            when (status) {
+                0 -> promise.resolve("Impresión exitosa")
+                3 -> promise.reject("NO_PAPER", "La impresora no tiene papel")
+                20 -> promise.reject("COVER_OPEN", "La tapa de la impresora está abierta")
+                2 -> promise.reject("OVER_TEMP", "La impresora se está sobrecalentando")
+                -128 -> promise.reject("COMMUNICATION_ERROR", "Error de comunicación con la impresora")
+                else -> promise.reject("UNKNOWN_ERROR", "Código de error desconocido: $status")
             }
 
         } catch (e: Exception) {
