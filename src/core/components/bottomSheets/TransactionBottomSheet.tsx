@@ -125,9 +125,20 @@ const TransactionBottomSheet = () => {
                 TSI,
                 TXN_TYPE,
             })
-
-            setLoadingText('')
-            isLoadingSV.set(false)
+                .then(() => {
+                    setLoadingText('')
+                    isLoadingSV.set(false)
+                })
+                .catch((err) => {
+                    console.error('err printing')
+                    console.error(err)
+                    isLoadingSV.set(true)
+                    setLoadingText(err.message)
+                    setTimeout(() => {
+                        setLoadingText('')
+                        isLoadingSV.set(false)
+                    }, 3000)
+                })
         } catch (err) {
             console.error(err)
         }
@@ -203,9 +214,20 @@ const TransactionBottomSheet = () => {
                             TSI,
                             TXN_TYPE,
                         })
-
-                        setLoadingText('')
-                        isLoadingSV.set(false)
+                            .then(() => {
+                                setLoadingText('')
+                                isLoadingSV.set(false)
+                            })
+                            .catch((err) => {
+                                console.error('err printing')
+                                console.error(err)
+                                isLoadingSV.set(true)
+                                setLoadingText(err.message)
+                                setTimeout(() => {
+                                    setLoadingText('')
+                                    isLoadingSV.set(false)
+                                }, 3000)
+                            })
                     })
 
                 }
@@ -271,9 +293,20 @@ const TransactionBottomSheet = () => {
                             TSI,
                             TXN_TYPE,
                         })
-
-                        setLoadingText('')
-                        isLoadingSV.set(false)
+                            .then(() => {
+                                setLoadingText('')
+                                isLoadingSV.set(false)
+                            })
+                            .catch((err) => {
+                                console.error('err printing')
+                                console.error(err)
+                                isLoadingSV.set(true)
+                                setLoadingText(err.message)
+                                setTimeout(() => {
+                                    setLoadingText('')
+                                    isLoadingSV.set(false)
+                                }, 3000)
+                            })
                     })
                 }
             }
@@ -345,6 +378,20 @@ const TransactionBottomSheet = () => {
                             TSI,
                             TXN_TYPE,
                         })
+                            .then(() => {
+                                setLoadingText('')
+                                isLoadingSV.set(false)
+                            })
+                            .catch((err) => {
+                                console.error('err printing')
+                                console.error(err)
+                                isLoadingSV.set(true)
+                                setLoadingText(err.message)
+                                setTimeout(() => {
+                                    setLoadingText('')
+                                    isLoadingSV.set(false)
+                                }, 3000)
+                            })
                     })
                 })
             }

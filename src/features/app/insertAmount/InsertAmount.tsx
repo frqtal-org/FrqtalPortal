@@ -93,9 +93,20 @@ const InsertAmount = () => {
                         TSI,
                         TXN_TYPE,
                     })
-
-                    setLoadingText('')
-                    isLoadingSV.set(false)
+                        .then(() => {
+                            setLoadingText('')
+                            isLoadingSV.set(false)
+                        })
+                        .catch((err) => {
+                            console.error('err printing')
+                            console.error(err)
+                            isLoadingSV.set(true)
+                            setLoadingText(err.message)
+                            setTimeout(() => {
+                                setLoadingText('')
+                                isLoadingSV.set(false)
+                            }, 3000)
+                        })
                 }
             });
         } catch (error: any) {
@@ -111,7 +122,7 @@ const InsertAmount = () => {
                 /* Txn no registrada */
                 isLoadingSV.set(false)
                 setLoadingText('')
-                
+
                 if (price != '') {
                     isLoadingSV.set(true)
                     setLoadingText('Iniciando cobro')
@@ -193,9 +204,20 @@ const InsertAmount = () => {
                     TSI,
                     TXN_TYPE,
                 })
-
-                isLoadingSV.set(false)
-                setLoadingText('')
+                    .then(() => {
+                        setLoadingText('')
+                        isLoadingSV.set(false)
+                    })
+                    .catch((err) => {
+                        console.error('err printing')
+                        console.error(err)
+                        isLoadingSV.set(true)
+                        setLoadingText(err.message)
+                        setTimeout(() => {
+                            setLoadingText('')
+                            isLoadingSV.set(false)
+                        }, 3000)
+                    })
             })
             .catch((err: any) => {
                 const ERR = JSON.parse(err.message)
@@ -224,7 +246,7 @@ const InsertAmount = () => {
                         mmkvStorage.remove('PENDING_TX_DATE')
                         isLoadingSV.set(false)
                         setLoadingText('')
-                    } 
+                    }
                 });
             })
     }

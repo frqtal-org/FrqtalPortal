@@ -67,7 +67,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             myPrinter.printText("Marca: ${CardBrand}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             /* myPrinter.printText("Tipo: ${CardType}", PrnTool.PRT_ALIGNLEFT, isBold = false) */
             myPrinter.printText("Autarización: ${AuthType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
-            myPrinter.printText("Impresión: ${ImpressionType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
+            /* myPrinter.printText("Impresión: ${ImpressionType}", PrnTool.PRT_ALIGNLEFT, isBold = false) */
             myPrinter.printLineFeed()
             
             // --- TOTALES ---
