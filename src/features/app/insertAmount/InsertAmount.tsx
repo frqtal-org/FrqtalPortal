@@ -335,6 +335,9 @@ const InsertAmount = () => {
                                     isLoadingSV.set(false)
                                 }, 3000)
                             })
+                    } else {
+                        isLoadingSV.set(false)
+                        setLoadingText('')
                     }
                 });
             })
