@@ -99,6 +99,7 @@ const TransactionBottomSheet = () => {
             const TVR = transactionSelected?.data_raw?.TAG_95
             const TSI = transactionSelected?.data_raw?.TAG_9B
             const TXN_TYPE = transactionSelected?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+            const FIRMA = transactionSelected?.data_raw?.SIGNATURE_BYTES
 
             await printTicket({
                 TICKET_IMAGE: logo64,
@@ -124,6 +125,7 @@ const TransactionBottomSheet = () => {
                 TVR,
                 TSI,
                 TXN_TYPE,
+                FIRMA,
             })
                 .then(() => {
                     setLoadingText('')
@@ -188,6 +190,7 @@ const TransactionBottomSheet = () => {
                         const TVR = RESP_JSON?.TAG_95
                         const TSI = RESP_JSON?.TAG_9B
                         const TXN_TYPE = RESP_JSON?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+                        const FIRMA = RESP_JSON?.SIGNATURE_BYTES
 
                         await printTicket({
                             TICKET_IMAGE: logo64,
@@ -213,6 +216,7 @@ const TransactionBottomSheet = () => {
                             TVR,
                             TSI,
                             TXN_TYPE,
+                            FIRMA,
                         })
                             .then(() => {
                                 setLoadingText('')
@@ -264,6 +268,7 @@ const TransactionBottomSheet = () => {
                         const TVR = RESP_JSON?.TAG_95
                         const TSI = RESP_JSON?.TAG_9B
                         const TXN_TYPE = RESP_JSON?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+                        const FIRMA = RESP_JSON?.SIGNATURE_BYTES
 
                         isLoadingSV.set(true)
                         setLoadingText('Imprimiendo ticket')
@@ -292,6 +297,7 @@ const TransactionBottomSheet = () => {
                             TVR,
                             TSI,
                             TXN_TYPE,
+                            FIRMA,
                         })
                             .then(() => {
                                 setLoadingText('')
@@ -352,6 +358,7 @@ const TransactionBottomSheet = () => {
                         const TVR = PENDING_CANCELATION?.TAG_95
                         const TSI = PENDING_CANCELATION?.TAG_9B
                         const TXN_TYPE = PENDING_CANCELATION?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+                        const FIRMA = PENDING_CANCELATION?.SIGNATURE_BYTES
 
                         await printTicket({
                             TICKET_IMAGE: logo64,
@@ -377,6 +384,7 @@ const TransactionBottomSheet = () => {
                             TVR,
                             TSI,
                             TXN_TYPE,
+                            FIRMA,
                         })
                             .then(() => {
                                 setLoadingText('')

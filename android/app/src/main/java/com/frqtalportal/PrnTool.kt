@@ -322,7 +322,7 @@ class PrnTool (private val context: Context){
                 val gray = (Color.red(pixel) + Color.green(pixel) + Color.blue(pixel)) / 3 // Convertir a escala de grises
 
                 // Aplicar umbral (si el gris es menor que 128, es negro; si no, es blanco)
-                val newPixel = if (gray < 128) Color.BLACK else Color.WHITE
+                val newPixel = if (gray < 60) Color.BLACK else Color.WHITE
                 bwBitmap.setPixel(x, y, newPixel)
             }
         }

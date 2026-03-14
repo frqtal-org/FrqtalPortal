@@ -38,6 +38,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
         TVR: String?,
         TSI: String?,
         txnType: String?,
+        firma: String?,
         promise: Promise,
     ) {
         try {
@@ -102,6 +103,14 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
                 myPrinter.printText("TSI: ${TSI}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             }
             myPrinter.printLineFeed()
+             if (firma != null && firma.isNotEmpty()) {
+                val cleanBase64 = firma.replace(Regex("^data:image\\/[a-zA-Z]+;base64,"), "")
+                val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
+                val firmaBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                
+                myPrinter.printImageFromBitmap(firmaBitmap, 220) 
+                myPrinter.printText("Firma del cliente", PrnTool.PRT_ALIGNCENTER, isBold = true)
+            }
             myPrinter.printLineFeed()
             
             // --- PIE DE PÁGINA Y LEGALES ---            

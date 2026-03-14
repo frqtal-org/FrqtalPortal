@@ -78,6 +78,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
 
             const respuestaJSON = JSON.parse(respuestaSale);
+            console.log('respuestaJSON')
+            console.log(respuestaJSON)
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
                     .then(() => {

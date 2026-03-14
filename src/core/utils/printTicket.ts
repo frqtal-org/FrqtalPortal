@@ -28,6 +28,7 @@ export async function printTicket(ticketData: any) {
             ticketData.TVR,
             ticketData.TSI,
             ticketData.TXN_TYPE,
+            ticketData.FIRMA,
         );
     } catch (error: any) {
         console.error(error)

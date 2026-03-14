@@ -67,6 +67,7 @@ const InsertAmount = () => {
                     const TVR = res?.TAG_95
                     const TSI = res?.TAG_9B
                     const TXN_TYPE = res?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+                    const FIRMA = res?.SIGNATURE_BYTES
 
                     await printTicket({
                         TICKET_IMAGE: logo64,
@@ -92,6 +93,7 @@ const InsertAmount = () => {
                         TVR,
                         TSI,
                         TXN_TYPE,
+                        FIRMA,
                     })
                         .then(() => {
                             setLoadingText('')
@@ -241,6 +243,7 @@ const InsertAmount = () => {
                 const TVR = res?.TAG_95
                 const TSI = res?.TAG_9B
                 const TXN_TYPE = res?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+                const FIRMA = res?.SIGNATURE_BYTES
 
                 await printTicket({
                     TICKET_IMAGE: logo64,
@@ -266,6 +269,7 @@ const InsertAmount = () => {
                     TVR,
                     TSI,
                     TXN_TYPE,
+                    FIRMA,
                 })
                     .then(() => {
                         setLoadingText('')

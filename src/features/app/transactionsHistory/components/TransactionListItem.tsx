@@ -79,6 +79,7 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
         const TVR = item?.data_raw?.TAG_95
         const TSI = item?.data_raw?.TAG_9B
         const TXN_TYPE = item?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+        const FIRMA = item?.data_raw?.SIGNATURE_BYTES
 
         await printTicket({
           TICKET_IMAGE: logo64,
@@ -104,6 +105,7 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
           TVR,
           TSI,
           TXN_TYPE,
+          FIRMA
         })
           .then(() => {
             setLoadingText('')
