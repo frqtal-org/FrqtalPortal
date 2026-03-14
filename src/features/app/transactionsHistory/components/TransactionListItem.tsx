@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { NativeModules, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { sizeToDp } from '../../../../core/utils/sizeToDP.tsx';
 import { Typography } from '../../../../core/components/Typography.tsx';
@@ -15,6 +15,7 @@ import { printTicket } from '../../../../core/utils/printTicket.ts';
 import { useMMKVString } from 'react-native-mmkv';
 import StorageKey from '../../../../core/utils/store/keysStore.ts';
 import { mmkvStorage } from '../../../../core/store/principalStore.ts';
+import { AppNavigationContext } from '../../appNavigation/context.tsx';
 
 const statusToImageMap: Record<string, any> = {
   cancel: require('../../../../core/assets/images/error.webp'),
@@ -26,10 +27,10 @@ const statusText: Record<string, any> = {
   transaction: 'Aprobada',
 };
 
-const { SmartWrapperModule } = NativeModules;
 
 const Transaction = ({ onBack, onVerify, ...item }: any) => {
   const { transactionBottomSheetRef, setTransactionSelected } = useContext(BottomSheetsContext)
+  const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
 
   const [locationAdress, setLocationAdress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
   const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
@@ -54,6 +55,9 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
   function handlePrintTicket() {
     onVerify(async () => {
       try {
+        isLoadingSV.set(true)
+        setLoadingText('Imprimiendo ticket')
+
         const DATE = transactionDateDate(item?.data_raw?.TXN_DATE)
         const TIME = transactionDateTime(item?.data_raw?.TXN_TIME)
         const ID = item?.data_raw?.TXN_UNIQUE_REF
@@ -76,7 +80,7 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
         const TSI = item?.data_raw?.TAG_9B
         const TXN_TYPE = item?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
 
-        printTicket({
+        await printTicket({
           TICKET_IMAGE: logo64,
           ADDRESS: locationAdress,
           DATE,
@@ -101,6 +105,9 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
           TSI,
           TXN_TYPE,
         })
+
+        setLoadingText('')
+        isLoadingSV.set(false)
       } catch (err) {
         console.error(err)
       }

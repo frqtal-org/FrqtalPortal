@@ -47,7 +47,20 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 const ERR = JSON.parse(error?.message)
                 console.error('ERR verify')
                 console.error(ERR)
-                throw new Error(ERR.response_code)
+
+                if (ERR?.response_code == '97') {
+                    /* Txn no registrada */
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
+                    /* TODO: PRINT NO EXISTE REGISTRO */
+                }
+                if (ERR?.response_code == '01') {
+                    /* REVERSADA */
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
+                    /* TODO: PRINT REVERSADA */
+                }
+                throw new Error(ERR?.response_code)
             }
         }
     }
@@ -67,21 +80,21 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                .then(() => {
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
-                    setRefetchData(true)
-                })
-                .catch(error => {
-                    console.error('ERR-222')
-                    console.error(error)
-                })
+                    .then(() => {
+                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                        mmkvStorage.remove('PENDING_TX_DATE')
+                        setRefetchData(true)
+                    })
+                    .catch(error => {
+                        console.error('ERR-222')
+                        console.error(error)
+                    })
 
                 setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
                 return respuestaJSON
             }
         } catch (error: any) {
-            const ERR = JSON.parse(error.message)
+            const ERR = JSON.parse(error?.message)
             console.error('ERR')
             console.error(ERR)
             throw new Error(error.message)

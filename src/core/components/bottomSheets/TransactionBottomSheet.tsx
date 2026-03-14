@@ -19,6 +19,7 @@ import { useTransactionRegister } from '../../api/transactionRegister'
 import { TransactionsHistoryContext } from '../../../features/app/transactionsHistory/context'
 import { useNetInfo } from '@react-native-community/netinfo'
 import { printTicket } from '../../utils/printTicket'
+import { AppNavigationContext } from '../../../features/app/appNavigation/context'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -70,9 +71,13 @@ const TransactionBottomSheet = () => {
     const transactionRegisterMutator = useTransactionRegister()
     const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { isConnected } = useNetInfo();
+    const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
 
     async function handlePrintTicket() {
         try {
+            isLoadingSV.set(true)
+            setLoadingText('Imprimiendo ticket')
+
             const DATE = transactionDateDate(transactionSelected?.data_raw?.TXN_DATE)
             const TIME = transactionDateTime(transactionSelected?.data_raw?.TXN_TIME)
             const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
@@ -95,7 +100,7 @@ const TransactionBottomSheet = () => {
             const TSI = transactionSelected?.data_raw?.TAG_9B
             const TXN_TYPE = transactionSelected?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
 
-            printTicket({
+            await printTicket({
                 TICKET_IMAGE: logo64,
                 ADDRESS: locationAddress,
                 DATE,
@@ -120,6 +125,9 @@ const TransactionBottomSheet = () => {
                 TSI,
                 TXN_TYPE,
             })
+
+            setLoadingText('')
+            isLoadingSV.set(false)
         } catch (err) {
             console.error(err)
         }
@@ -145,6 +153,9 @@ const TransactionBottomSheet = () => {
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                         setRefetchData(true)
 
+                        isLoadingSV.set(true)
+                        setLoadingText('Imprimiendo ticket')
+
                         const DATE2 = transactionDateDate(RESP_JSON?.TXN_DATE)
                         const TIME = transactionDateTime(RESP_JSON?.TXN_TIME)
                         const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
@@ -152,7 +163,7 @@ const TransactionBottomSheet = () => {
                         const CARD_BRAND = RESP_JSON?.TAG_50
                         const CARD_TYPE = RESP_JSON?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
                         const AUTH_TYPE = RESP_JSON?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
-                        const IMPRESSION_TYPE = 'Reimpresión'
+                        const IMPRESSION_TYPE = 'Original'
                         const AMOUNT2 = parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
                         const EXTRA2 = parseFloat(formatPriceFromDigits(RESP_JSON?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
                         const TOTAL = RESP_JSON?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)), parseFloat(formatPriceFromDigits(RESP_JSON?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
@@ -192,6 +203,9 @@ const TransactionBottomSheet = () => {
                             TSI,
                             TXN_TYPE,
                         })
+
+                        setLoadingText('')
+                        isLoadingSV.set(false)
                     })
 
                 }
@@ -214,7 +228,7 @@ const TransactionBottomSheet = () => {
                         const CARD_BRAND = RESP_JSON?.TAG_50
                         const CARD_TYPE = RESP_JSON?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
                         const AUTH_TYPE = RESP_JSON?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
-                        const IMPRESSION_TYPE = 'Reimpresión'
+                        const IMPRESSION_TYPE = 'Original'
                         const AMOUNT2 = parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
                         const EXTRA2 = parseFloat(formatPriceFromDigits(RESP_JSON?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
                         const TOTAL = RESP_JSON?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)), parseFloat(formatPriceFromDigits(RESP_JSON?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
@@ -228,6 +242,9 @@ const TransactionBottomSheet = () => {
                         const TVR = RESP_JSON?.TAG_95
                         const TSI = RESP_JSON?.TAG_9B
                         const TXN_TYPE = RESP_JSON?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+
+                        isLoadingSV.set(true)
+                        setLoadingText('Imprimiendo ticket')
 
                         await printTicket({
                             TICKET_IMAGE: logo64,
@@ -254,6 +271,9 @@ const TransactionBottomSheet = () => {
                             TSI,
                             TXN_TYPE,
                         })
+
+                        setLoadingText('')
+                        isLoadingSV.set(false)
                     })
                 }
             }
@@ -277,7 +297,7 @@ const TransactionBottomSheet = () => {
                         mmkvStorage.remove('PENDING_CANCEL_TRANSACTION')
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...PENDING_CANCELATION } })
                         setRefetchData(true)
-                        
+
                         const DATE2 = transactionDateDate(PENDING_CANCELATION?.TXN_DATE)
                         const TIME = transactionDateTime(PENDING_CANCELATION?.TXN_TIME)
                         const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
@@ -394,5 +414,3 @@ const TransactionBottomSheet = () => {
 }
 
 export default TransactionBottomSheet
-
-const styles = StyleSheet.create({})

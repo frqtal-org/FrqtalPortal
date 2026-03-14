@@ -5,7 +5,6 @@ import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
 import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad'
 import GradientButton from '../../../core/components/buttons/GradientButton'
-import { useAnimatedStyle } from 'react-native-reanimated'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
 import { mmkvStorage } from '../../../core/store/principalStore'
@@ -22,7 +21,7 @@ const InsertAmount = () => {
     /*  */
     const INSETS = useContext(InsetsContext)
     const { handlePayAmount, verifyPendingTransaction } = useContext(InsertAmountContext)
-    const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext) 
+    const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
     const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
     const [locationAddress, setLocationAddress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
     /*  */
@@ -94,6 +93,9 @@ const InsertAmount = () => {
                         TSI,
                         TXN_TYPE,
                     })
+
+                    setLoadingText('')
+                    isLoadingSV.set(false)
                 }
             });
         } catch (error: any) {
@@ -107,19 +109,28 @@ const InsertAmount = () => {
             }
             if (error?.message == '97') {
                 /* Txn no registrada */
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
                 isLoadingSV.set(false)
                 setLoadingText('')
+                
+                if (price != '') {
+                    isLoadingSV.set(true)
+                    setLoadingText('Iniciando cobro')
+                    setTimeout(() => {
+                        handleProceedPay();
+                    }, 1500)
+                }
                 /* TODO: PRINT NO EXISTE REGISTRO */
             }
             if (error?.message == '01') {
                 /* REVERSADA */
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
                 isLoadingSV.set(false)
                 setLoadingText('')
                 /* TODO: PRINT REVERSADA */
+            }
+            if (error?.message == '') {
+                /* Time out, verificar de nuevo */
+                isLoadingSV.set(false)
+                setLoadingText('')
             }
 
             throw new Error(error?.message)
@@ -194,37 +205,26 @@ const InsertAmount = () => {
 
                 fetch().then(state => {
 
-
                     if (!state.isConnected) {
                         isLoadingSV.set(false)
                         setLoadingText('')
                         return null
                     }
 
-
                     if (ERR.suggest_query === 'true') {
                         setLoadingText('Validando información');
                         isLoadingSV.set(true)
 
                         setTimeout(async () => {
-                            await verifyPendigTxns().then(() => {
-                                isLoadingSV.set(false)
-                                setLoadingText('')
-                            })
+                            await verifyPendigTxns()
                         }, 3000)
                     } else if (ERR?.response_code == '99') {
-                        /* Txn no registrada */
+                        /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
                         mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
                         mmkvStorage.remove('PENDING_TX_DATE')
                         isLoadingSV.set(false)
                         setLoadingText('')
-                    } else {
-                        /* Cancelado por el usuario */
-                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                        mmkvStorage.remove('PENDING_TX_DATE')
-                        isLoadingSV.set(false)
-                        setLoadingText('')
-                    }
+                    } 
                 });
             })
     }
@@ -242,7 +242,7 @@ const InsertAmount = () => {
                 await verifyPendigTxns().then(() => {
                     handleProceedPay();
                 });
-            }, (pendingRef && pendingDate) ? 3000 : 1500)
+            }, (pendingRef && pendingDate) ? 3000 : 1000)
         } else {
             setLoadingText('Sin conexión')
             isLoadingSV.set(true)
@@ -259,13 +259,6 @@ const InsertAmount = () => {
     }
     /* ------- END Functions ------- */
 
-    /* ------- Animations ------- */
-    const isLoadingStyle = useAnimatedStyle(() => ({
-        opacity: isLoadingSV.get() ? 1 : 0,
-        pointerEvents: isLoadingSV.get() ? 'auto' : 'none',
-    }))
-    /* ------- END Animations ------- */
-
     /* ------- Effects ------- */
     useEffect(() => {
         const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
@@ -276,10 +269,7 @@ const InsertAmount = () => {
                 setLoadingText('Verificando transacción inconclusa')
                 isLoadingSV.set(true)
                 setTimeout(async () => {
-                    await verifyPendigTxns().then(() => {
-                        isLoadingSV.set(false)
-                        setLoadingText('')
-                    });
+                    await verifyPendigTxns();
                 }, 3000)
             }
         }

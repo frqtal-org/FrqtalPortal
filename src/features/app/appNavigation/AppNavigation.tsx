@@ -30,6 +30,8 @@ const AppNavigation = () => {
     const { isLoadingSV, setLoadingText, loadingText } = useContext(AppNavigationContext) 
     /*  */
     const progressSV = useSharedValue<number>(0);
+    const isBlockingSV = useSharedValue<boolean>(false);
+    const [blockingText, setBlockingText] = useState<string>('');
 
     const carouselRef = useRef<ICarouselInstance>(null);
     const logoutMutator = useLogout()
@@ -38,8 +40,8 @@ const AppNavigation = () => {
 
     /* ------- Functions ------- */
     function resetLockScreen() {
-        isLoadingSV.set(false)
-        setLoadingText('')
+        isBlockingSV.set(false)
+        setBlockingText('')
         lockScreenTimeOut && clearTimeout(lockScreenTimeOut)
         lockScreenTimeOut = setTimeout(async () => {
             navigate('Login')
@@ -48,8 +50,8 @@ const AppNavigation = () => {
         }, 5 * 60 * 1000)
         loadingLockScreenTimeOut && clearTimeout(loadingLockScreenTimeOut)
         loadingLockScreenTimeOut = setTimeout(() => {
-            setLoadingText('Bloqueando pantalla')
-            isLoadingSV.set(true)
+            setBlockingText('Bloqueando pantalla')
+            isBlockingSV.set(true)
         }, (5 * 60 * 1000) - 3000)
     }
 
@@ -65,6 +67,11 @@ const AppNavigation = () => {
     const isLoadingStyle = useAnimatedStyle(() => ({
         opacity: isLoadingSV.get() ? 1 : 0,
         pointerEvents: isLoadingSV.get() ? 'auto' : 'none',
+    }))
+
+    const isBlockingStyle = useAnimatedStyle(() => ({
+        opacity: isBlockingSV.get() ? 1 : 0,
+        pointerEvents: isBlockingSV.get() ? 'auto' : 'none',
     }))
     /* ------- END Animations ------- */
 
@@ -92,7 +99,11 @@ const AppNavigation = () => {
 
             <TransactionBottomSheet />
 
-            <Animated.View onTouchStart={resetLockScreen} style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
+            <Animated.View onTouchStart={resetLockScreen} style={[STYLES.loadingScreenWrapper, isBlockingStyle]}>
+                <LoadingScreen text={blockingText} />
+            </Animated.View>
+
+            <Animated.View style={[STYLES.loadingScreenWrapper, isLoadingStyle]}>
                 <LoadingScreen text={loadingText} />
             </Animated.View>
         </>
