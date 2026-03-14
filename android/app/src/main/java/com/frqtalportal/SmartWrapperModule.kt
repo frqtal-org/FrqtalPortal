@@ -344,7 +344,7 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
             intent.putExtra("reference", "")
             intent.putExtra("unique_reference", uniqueReference)
             intent.putExtra("from", "FrqtalPortal")
-            intent.putExtra("json", jsonConfigPrint)
+            intent.putExtra("json", jsonConfigNoPrint)
             intent.putExtra("date", date)
             intent.putExtra("idCommerce", "")
             intent.putExtra("userNumber", "")

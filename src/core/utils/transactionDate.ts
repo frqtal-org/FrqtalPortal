@@ -52,3 +52,23 @@ export function parseDateToDate(dateStr: any) {
 
   return `${dia}${mes}${anioCompleto}`;
 }
+
+export const obtenerFechaActual = () => {
+  const fecha = new Date();
+  
+  const dia = String(fecha.getDate()).padStart(2, '0');
+  const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+  const anio = fecha.getFullYear();
+
+  return `${dia}/${mes}/${anio}`;
+};
+
+export const obtenerHoraActual = () => {
+  const fecha = new Date();
+  
+  const horas = String(fecha.getHours()).padStart(2, '0');
+  const minutos = String(fecha.getMinutes()).padStart(2, '0');
+  const segundos = String(fecha.getSeconds()).padStart(2, '0');
+
+  return `${horas}:${minutos}:${segundos}`;
+};

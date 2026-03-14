@@ -132,4 +132,64 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             promise.reject("UNKNOWN_ERROR", e.message)
         }
     }
+
+    @ReactMethod
+    fun printErrorTicket(
+        base64Logo: String?,
+        address: String,
+        Date: String,
+        Time: String,
+        txnType: String?,
+        promise: Promise,
+    ) {
+        try {
+            val myPrinter = PrnTool(reactContext)
+
+            if (base64Logo != null && base64Logo.isNotEmpty()) {
+                val cleanBase64 = base64Logo.replace(Regex("^data:image\\/[a-zA-Z]+;base64,"), "")
+                val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
+                val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                
+                myPrinter.printImageFromBitmap(bitmap, 122)
+                myPrinter.printLineFeed()
+            }
+
+            // --- ENCABEZADO ---
+            myPrinter.printText(address, PrnTool.PRT_ALIGNCENTER, isBold = false, textSize = PrnTool.PRT_SIZE_SMALL)
+            myPrinter.printLineFeed()
+            
+            // --- DATOS DE LA TRANSACCIÓN ---
+            myPrinter.printTwoColumn(Date, Time, isBold = true)
+            /* myPrinter.printText(Date + " " + Time, PrnTool.PRT_ALIGNCENTER, isBold = true) */
+            myPrinter.printLineFeed()
+            myPrinter.printText("Venta declinada", PrnTool.PRT_ALIGNCENTER, isBold = true)
+            myPrinter.printText("${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
+            myPrinter.printLineFeed()
+            
+            // --- PIE DE PÁGINA Y LEGALES ---            
+            myPrinter.printText("Powered by Frqtal", PrnTool.PRT_ALIGNCENTER, isBold = true, textSize = PrnTool.PRT_SIZE_SMALL)
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+            myPrinter.printLineFeed()
+
+            val status = myPrinter.printAll()
+
+            when (status) {
+                0 -> promise.resolve("Impresión exitosa")
+                3 -> promise.reject("NO_PAPER", "La impresora no tiene papel")
+                20 -> promise.reject("COVER_OPEN", "La tapa de la impresora está abierta")
+                2 -> promise.reject("OVER_TEMP", "La impresora se está sobrecalentando")
+                -128 -> promise.reject("COMMUNICATION_ERROR", "Error de comunicación con la impresora")
+                else -> promise.reject("UNKNOWN_ERROR", "Código de error desconocido: $status")
+            }
+
+        } catch (e: Exception) {
+            promise.reject("UNKNOWN_ERROR", e.message)
+        }
+    }
 }

@@ -9,12 +9,12 @@ import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
 import { mmkvStorage } from '../../../core/store/principalStore'
 import { useNetInfo, fetch } from "@react-native-community/netinfo";
-import { transactionDateDate, transactionDateTime } from '../../../core/utils/transactionDate'
+import { obtenerFechaActual, obtenerHoraActual, transactionDateDate, transactionDateTime } from '../../../core/utils/transactionDate'
 import { formatPriceFromDigits } from '../../../core/utils/priceFormater'
 import { sumarMontosExactos } from '../../../core/utils/sumarMontosExactos'
 import StorageKey from '../../../core/utils/store/keysStore'
 import { useMMKVString } from 'react-native-mmkv'
-import { printTicket } from '../../../core/utils/printTicket'
+import { printErrorTicket, printTicket } from '../../../core/utils/printTicket'
 import { AppNavigationContext } from '../appNavigation/context'
 
 const InsertAmount = () => {
@@ -130,18 +130,81 @@ const InsertAmount = () => {
                         handleProceedPay();
                     }, 1500)
                 }
-                /* TODO: PRINT NO EXISTE REGISTRO */
+
+                await printErrorTicket({
+                    TICKET_IMAGE: logo64,
+                    ADDRESS: locationAddress,
+                    DATE: obtenerFechaActual(),
+                    TIME: obtenerHoraActual(),
+                    TXN_TYPE: 'Transacción no existe en plataforma',
+                })
+                    .then(() => {
+                        setLoadingText('')
+                        isLoadingSV.set(false)
+                    })
+                    .catch((err) => {
+                        console.error('err printing')
+                        console.error(err)
+                        isLoadingSV.set(true)
+                        setLoadingText(err.message)
+                        setTimeout(() => {
+                            setLoadingText('')
+                            isLoadingSV.set(false)
+                        }, 3000)
+                    })
             }
             if (error?.message == '01') {
                 /* REVERSADA */
                 isLoadingSV.set(false)
                 setLoadingText('')
-                /* TODO: PRINT REVERSADA */
+
+                await printErrorTicket({
+                    TICKET_IMAGE: logo64,
+                    ADDRESS: locationAddress,
+                    DATE: obtenerFechaActual(),
+                    TIME: obtenerHoraActual(),
+                    TXN_TYPE: 'Reversada',
+                })
+                    .then(() => {
+                        setLoadingText('')
+                        isLoadingSV.set(false)
+                    })
+                    .catch((err) => {
+                        console.error('err printing')
+                        console.error(err)
+                        isLoadingSV.set(true)
+                        setLoadingText(err.message)
+                        setTimeout(() => {
+                            setLoadingText('')
+                            isLoadingSV.set(false)
+                        }, 3000)
+                    })
             }
             if (error?.message == '') {
-                /* Time out, verificar de nuevo */
                 isLoadingSV.set(false)
                 setLoadingText('')
+
+                await printErrorTicket({
+                    TICKET_IMAGE: logo64,
+                    ADDRESS: locationAddress,
+                    DATE: obtenerFechaActual(),
+                    TIME: obtenerHoraActual(),
+                    TXN_TYPE: 'Tiempo de espera agotado',
+                })
+                    .then(() => {
+                        setLoadingText('')
+                        isLoadingSV.set(false)
+                    })
+                    .catch((err) => {
+                        console.error('err printing')
+                        console.error(err)
+                        isLoadingSV.set(true)
+                        setLoadingText(err.message)
+                        setTimeout(() => {
+                            setLoadingText('')
+                            isLoadingSV.set(false)
+                        }, 3000)
+                    })
             }
 
             throw new Error(error?.message)
@@ -225,7 +288,7 @@ const InsertAmount = () => {
                 setPrice('')
                 setSelectedExtra('')
 
-                fetch().then(state => {
+                fetch().then(async state => {
 
                     if (!state.isConnected) {
                         isLoadingSV.set(false)
@@ -246,6 +309,28 @@ const InsertAmount = () => {
                         mmkvStorage.remove('PENDING_TX_DATE')
                         isLoadingSV.set(false)
                         setLoadingText('')
+
+                        await printErrorTicket({
+                            TICKET_IMAGE: logo64,
+                            ADDRESS: locationAddress,
+                            DATE: obtenerFechaActual(),
+                            TIME: obtenerHoraActual(),
+                            TXN_TYPE: ERR?.error_message,
+                        })
+                            .then(() => {
+                                setLoadingText('')
+                                isLoadingSV.set(false)
+                            })
+                            .catch((err) => {
+                                console.error('err printing')
+                                console.error(err)
+                                isLoadingSV.set(true)
+                                setLoadingText(err.message)
+                                setTimeout(() => {
+                                    setLoadingText('')
+                                    isLoadingSV.set(false)
+                                }, 3000)
+                            })
                     }
                 });
             })

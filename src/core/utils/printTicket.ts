@@ -4,7 +4,7 @@ const { PrinterModule } = NativeModules;
 
 export async function printTicket(ticketData: any) {
     try {
-        const resultado = await PrinterModule.printTicket(
+        await PrinterModule.printTicket(
             ticketData.TICKET_IMAGE,
             ticketData.ADDRESS,
             ticketData.DATE,
@@ -29,10 +29,25 @@ export async function printTicket(ticketData: any) {
             ticketData.TSI,
             ticketData.TXN_TYPE,
         );
-        console.log(resultado);
     } catch (error: any) {
-        console.log(error)
-        console.log(error?.message)
+        console.error(error)
+        console.error(error?.message)
+        throw new Error(error?.message)
+    }
+}
+
+export async function printErrorTicket(ticketData: any) {
+    try {
+        await PrinterModule.printErrorTicket(
+            ticketData.TICKET_IMAGE,
+            ticketData.ADDRESS,
+            ticketData.DATE,
+            ticketData.TIME,
+            ticketData.TXN_TYPE,
+        );
+    } catch (error: any) {
+        console.error(error)
+        console.error(error?.message)
         throw new Error(error?.message)
     }
 }
