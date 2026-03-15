@@ -264,21 +264,19 @@ class PrnTool (private val context: Context){
                 }
                 PRT_IMAGE -> {
                     try {
-                        // Si hay un bitmap dinámico lo usamos, si no, buscamos en los recursos
-                        val originalBitmap = bitmap ?: run {
+                        if (bitmap != null) {
+                            // 👇 NUEVO: Si la imagen ya viene procesada y perfecta, la imprimimos directo
+                            printer.drawImage(bitmap, 0, yPos)
+                            yPos += bitmap.height + LINE_SPACE
+                        } else {
+                            // Solo procesamos aquí si viene de resources (logo genérico)
                             val drawable = context.resources.getDrawable(imageResId, null)
                             if (drawable is android.graphics.drawable.BitmapDrawable) {
-                                drawable.bitmap
-                            } else {
-                                throw IllegalArgumentException("No es un BitmapDrawable válido")
+                                val newBitmap = createCenteredBitmap(drawable.bitmap)
+                                printer.drawImage(newBitmap, 0, yPos)
+                                yPos += newBitmap.height + LINE_SPACE
                             }
                         }
-
-                        val newBitmap = createCenteredBitmap(originalBitmap)
-                        printer.drawImage(newBitmap, 0, yPos)
-                        
-                        yPos += newBitmap.height + LINE_SPACE
-                        
                     } catch (e: Exception) {
                         android.util.Log.d("PRNMNG", String.format("Exception:%s", e.toString()))
                     }
@@ -309,20 +307,19 @@ class PrnTool (private val context: Context){
         return 0x00 // Impresión exitosa
     }
 
-    private fun convertToBlackAndWhite(originalBitmap: Bitmap): Bitmap {
+    private fun convertToBlackAndWhite(originalBitmap: Bitmap, threshold: Int = 128): Bitmap {
         val width = originalBitmap.width
         val height = originalBitmap.height
 
-        // Crear un nuevo Bitmap en blanco y negro
         val bwBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
 
         for (x in 0 until width) {
             for (y in 0 until height) {
                 val pixel = originalBitmap.getPixel(x, y)
-                val gray = (Color.red(pixel) + Color.green(pixel) + Color.blue(pixel)) / 3 // Convertir a escala de grises
+                val gray = (Color.red(pixel) + Color.green(pixel) + Color.blue(pixel)) / 3 
 
-                // Aplicar umbral (si el gris es menor que 128, es negro; si no, es blanco)
-                val newPixel = if (gray < 80) Color.BLACK else Color.WHITE
+                // 👇 NUEVO: Usa el umbral que le mandemos
+                val newPixel = if (gray < threshold) Color.BLACK else Color.WHITE
                 bwBitmap.setPixel(x, y, newPixel)
             }
         }
@@ -416,10 +413,50 @@ class PrnTool (private val context: Context){
 
     }
 
+    private fun normalizeUserLogo(originalBitmap: Bitmap, threshold: Int): Bitmap {
+        val PAPER_WIDTH = 384
+        val originalWidth = originalBitmap.width.toFloat()
+        val originalHeight = originalBitmap.height.toFloat()
+
+        var finalWidth: Int
+        var finalHeight: Int
+        val ratio = originalWidth / originalHeight
+
+        if (ratio > 1.2f) {
+            finalWidth = PAPER_WIDTH
+            finalHeight = (PAPER_WIDTH / ratio).toInt()
+            if (finalHeight > 200) {
+                finalHeight = 200
+                finalWidth = (finalHeight * ratio).toInt()
+            }
+        } else if (ratio >= 0.8f && ratio <= 1.2f) {
+            finalHeight = 150 
+            finalWidth = (finalHeight * ratio).toInt()
+        } else {
+            finalHeight = 200
+            finalWidth = (finalHeight * ratio).toInt()
+        }
+
+        // 👇 NUEVO: 1. Escalamos la imagen MIENTRAS TIENE COLOR (cuida las líneas delgadas)
+        val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, finalWidth, finalHeight, true)
+
+        // 2. Creamos el lienzo final
+        val paddedBitmap = Bitmap.createBitmap(PAPER_WIDTH, finalHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(paddedBitmap)
+        canvas.drawColor(android.graphics.Color.WHITE)
+
+        // 3. Estampamos la imagen centrada
+        val xOffset = (PAPER_WIDTH - finalWidth) / 2f
+        canvas.drawBitmap(scaledBitmap, xOffset, 0f, null)
+
+        // 👇 NUEVO: 4. AHORA SÍ convertimos a Blanco y Negro pasando el umbral correcto
+        return convertToBlackAndWhite(paddedBitmap, threshold)
+    }
+
     /**
      * Agrega una imagen dinámica desde un Bitmap en memoria.
      */
-    fun printImageFromBitmap(bitmap: Bitmap, desiredWidth: Int = 0) {
+    /* fun printImageFromBitmap(bitmap: Bitmap, desiredWidth: Int = 0) {
         // Si nos mandan un ancho deseado, y es menor que el original, encogemos la imagen
         val finalBitmap = if (desiredWidth > 0 && desiredWidth < bitmap.width) {
             // Calculamos la altura proporcional para que no se deforme
@@ -432,6 +469,14 @@ class PrnTool (private val context: Context){
         }
 
         linesToPrint.add(PrintLine(type = PRT_IMAGE, bitmap = finalBitmap, width = finalBitmap.width, height = finalBitmap.height))
+    } */
+   fun printImageFromBitmap(bitmap: Bitmap, isSignature: Boolean = false) {
+        // 👇 NUEVO: 60 para firmas (borra la marca de agua), 135 para logos (mantiene líneas finas)
+        val threshold = if (isSignature) 60 else 135 
+        
+        val perfectLogo = normalizeUserLogo(bitmap, threshold)
+        
+        linesToPrint.add(PrintLine(type = PRT_IMAGE, bitmap = perfectLogo, width = perfectLogo.width, height = perfectLogo.height))
     }
 
    private fun getDrawableDimensions(imageResId: Int): Pair<Int, Int>? {

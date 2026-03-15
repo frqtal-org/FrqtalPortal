@@ -49,7 +49,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
                 val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 
-                myPrinter.printImageFromBitmap(bitmap, 122)
+                myPrinter.printImageFromBitmap(bitmap/* , 122 */)
                 myPrinter.printLineFeed()
                 myPrinter.printLineFeed()
             }
@@ -103,12 +103,13 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
                 myPrinter.printText("TSI: ${TSI}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             }
             myPrinter.printLineFeed()
-             if (firma != null && firma.isNotEmpty()) {
+            if (firma != null && firma.isNotEmpty()) {
                 val cleanBase64 = firma.replace(Regex("^data:image\\/[a-zA-Z]+;base64,"), "")
                 val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
                 val firmaBitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 
-                myPrinter.printImageFromBitmap(firmaBitmap, 220) 
+                // 👇 NUEVO: Le avisamos que es firma para que use el umbral agresivo
+                myPrinter.printImageFromBitmap(firmaBitmap, isSignature = true) 
                 myPrinter.printText("Firma del cliente", PrnTool.PRT_ALIGNCENTER, isBold = true)
             }
             myPrinter.printLineFeed()
@@ -159,7 +160,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
                 val decodedBytes = Base64.decode(cleanBase64, Base64.DEFAULT)
                 val bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
                 
-                myPrinter.printImageFromBitmap(bitmap, 122)
+                myPrinter.printImageFromBitmap(bitmap/* , 122 */)
                 myPrinter.printLineFeed()
             }
 
