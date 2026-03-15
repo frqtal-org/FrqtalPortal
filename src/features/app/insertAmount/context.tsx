@@ -36,12 +36,16 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 mmkvStorage.remove('PENDING_TX_DATE')
 
                 if (respuestaJSON.RESPONSE_CODE === '00') {
-                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-
-                    setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
-                    setRefetchData(true)
-
-                    return respuestaJSON
+                    try {
+                        await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                        setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                        setRefetchData(true)
+                        return respuestaJSON
+                    } catch (err: any) {
+                        console.error('ERR-222-')
+                        console.error(err)
+                        throw new Error(err)
+                    }
                 }
             } catch (error: any) {
                 const ERR = JSON.parse(error?.message)
@@ -79,20 +83,18 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
 
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
-                await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                    .then(() => {
-                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                        mmkvStorage.remove('PENDING_TX_DATE')
-                        setRefetchData(true)
-                    })
-                    .catch(error => {
-                        console.error('ERR-222')
-                        console.error(error)
-                        throw new Error(error)
-                    })
-
-                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
-                return respuestaJSON
+                try {
+                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
+                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                    mmkvStorage.remove('PENDING_TX_DATE')
+                    setRefetchData(true)
+                    setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                    return respuestaJSON
+                } catch (err: any) {
+                    console.error('ERR-222')
+                    console.error(err)
+                    throw new Error(err)
+                }
             }
         } catch (error: any) {
             const ERR = JSON.parse(error?.message)

@@ -287,59 +287,101 @@ const InsertAmount = () => {
                     })
             })
             .catch((err: any) => {
-                const ERR = JSON.parse(err.message)
+                console.log('ERR-222-2')
+                console.log(err)
+                console.log(err?.message)
+                console.log('err')
 
                 setPrice('')
                 setSelectedExtra('')
 
-                fetch().then(async state => {
+                try {
+                    const ERR = JSON.parse(err?.message);
 
-                    if (!state.isConnected) {
-                        isLoadingSV.set(false)
-                        setLoadingText('')
-                        return null
-                    }
+                    fetch().then(async state => {
 
-                    if (ERR.suggest_query === 'true') {
-                        setLoadingText('Validando información');
-                        isLoadingSV.set(true)
+                        if (!state.isConnected) {
+                            isLoadingSV.set(false)
+                            setLoadingText('')
 
-                        setTimeout(async () => {
-                            await verifyPendigTxns()
-                        }, 3000)
-                    } else if (ERR?.response_code == '99') {
-                        /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
-                        mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                        mmkvStorage.remove('PENDING_TX_DATE')
-                        isLoadingSV.set(false)
-                        setLoadingText('')
 
-                        await printErrorTicket({
-                            TICKET_IMAGE: logo64,
-                            ADDRESS: locationAddress,
-                            DATE: obtenerFechaActual(),
-                            TIME: obtenerHoraActual(),
-                            TXN_TYPE: ERR?.error_message,
-                        })
-                            .then(() => {
-                                setLoadingText('')
-                                isLoadingSV.set(false)
+                            if (ERR?.response_code/* '99' */ /* 1049 */) {
+                                /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
+
+                                await printErrorTicket({
+                                    TICKET_IMAGE: logo64,
+                                    ADDRESS: locationAddress,
+                                    DATE: obtenerFechaActual(),
+                                    TIME: obtenerHoraActual(),
+                                    TXN_TYPE: ERR?.error_message,
+                                })
+                                    .then(() => {
+                                        setLoadingText('')
+                                        isLoadingSV.set(false)
+                                    })
+                                    .catch((err) => {
+                                        console.error('err printing')
+                                        console.error(err)
+                                        isLoadingSV.set(true)
+                                        setLoadingText(err.message)
+                                        setTimeout(() => {
+                                            setLoadingText('')
+                                            isLoadingSV.set(false)
+                                        }, 3000)
+                                    })
+                            }
+
+                            return null
+                        }
+
+                        if (ERR.suggest_query === 'true') {
+                            setLoadingText('Validando información');
+                            isLoadingSV.set(true)
+
+                            setTimeout(async () => {
+                                await verifyPendigTxns()
+                            }, 3000)
+                        } else if (ERR?.response_code/* '99' */ /* 1049 */) {
+                            /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
+                            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
+                            mmkvStorage.remove('PENDING_TX_DATE')
+                            isLoadingSV.set(false)
+                            setLoadingText('')
+
+                            await printErrorTicket({
+                                TICKET_IMAGE: logo64,
+                                ADDRESS: locationAddress,
+                                DATE: obtenerFechaActual(),
+                                TIME: obtenerHoraActual(),
+                                TXN_TYPE: ERR?.error_message,
                             })
-                            .catch((err) => {
-                                console.error('err printing')
-                                console.error(err)
-                                isLoadingSV.set(true)
-                                setLoadingText(err.message)
-                                setTimeout(() => {
+                                .then(() => {
                                     setLoadingText('')
                                     isLoadingSV.set(false)
-                                }, 3000)
-                            })
-                    } else {
-                        isLoadingSV.set(false)
-                        setLoadingText('')
-                    }
-                });
+                                })
+                                .catch((err) => {
+                                    console.error('err printing')
+                                    console.error(err)
+                                    isLoadingSV.set(true)
+                                    setLoadingText(err.message)
+                                    setTimeout(() => {
+                                        setLoadingText('')
+                                        isLoadingSV.set(false)
+                                    }, 3000)
+                                })
+                        } else {
+                            isLoadingSV.set(false)
+                            setLoadingText('')
+                        }
+                    });
+                } catch (err: any) {
+                    console.log('ERR-222-3')
+                    console.log(err)
+                    console.log(err?.message)
+                    console.log('err')
+                    isLoadingSV.set(false)
+                    setLoadingText('')
+                }
             })
     }
 

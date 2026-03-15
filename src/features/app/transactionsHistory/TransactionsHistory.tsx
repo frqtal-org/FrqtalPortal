@@ -37,6 +37,29 @@ const TransactionsHistory = () => {
   const { isConnected } = useNetInfo();
 
   /* ------- Functions ------- */
+  async function verifyPendigTxns() {
+    try {
+      await verifyPendingTransaction();
+      isLoadingSV.set(false)
+      setLoadingText('')
+    } catch (error: any) {
+      if (error?.message == '99') {
+        setLoadingText('Porfavor espere un momento')
+        isLoadingSV.set(true)
+        setTimeout(() => {
+          isLoadingSV.set(false)
+          setLoadingText('')
+        }, 3000)
+      }
+      if (error?.message == '97') {
+        isLoadingSV.set(false)
+        setLoadingText('')
+      }
+
+      throw new Error(error?.message)
+    }
+  }
+  
   async function goToReports() {
     if (isConnected) {
       const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
@@ -76,29 +99,6 @@ const TransactionsHistory = () => {
     setIsLoadingTxns(true)
     handleGetData({ status: selectedFilter, page: currentPage + 1 })
     setCurrentPage(currentPage + 1)
-  }
-
-  async function verifyPendigTxns() {
-    try {
-      await verifyPendingTransaction();
-      isLoadingSV.set(false)
-      setLoadingText('')
-    } catch (error: any) {
-      if (error?.message == '99') {
-        setLoadingText('Porfavor espere un momento')
-        isLoadingSV.set(true)
-        setTimeout(() => {
-          isLoadingSV.set(false)
-          setLoadingText('')
-        }, 3000)
-      }
-      if (error?.message == '97') {
-        isLoadingSV.set(false)
-        setLoadingText('')
-      }
-
-      throw new Error(error?.message)
-    }
   }
   /* ------- END Functions ------- */
 
@@ -152,14 +152,14 @@ const TransactionsHistory = () => {
                 equivalentBalanceColor={'notificationGreen'}
                 equivalentMiniText='Extra:'
               />
-              <Pressable onPress={goToReports} style={[{ marginLeft: 'auto', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.3), paddingBottom: sizeToDp(APP_PADDING * 0.2), right: sizeToDp(APP_PADDING * 0.2), paddingTop: sizeToDp(APP_PADDING) }]} >
+              {/* <Pressable onPress={goToReports} style={[{ marginLeft: 'auto', flexDirection: 'row', columnGap: sizeToDp(APP_PADDING * 0.3), paddingBottom: sizeToDp(APP_PADDING * 0.2), right: sizeToDp(APP_PADDING * 0.2), paddingTop: sizeToDp(APP_PADDING) }]} >
                 <Typography variant="text01Medium" color="brand200" >Reportes</Typography>
                 <FastImage
                   source={require('../../../core/assets/images/report200.png')}
                   style={[{ width: sizeToDp(APP_PADDING * 1.2), aspectRatio: 1 }]}
                   resizeMode='contain'
                 />
-              </Pressable>
+              </Pressable> */}
             </View>
 
             <Filters
