@@ -2,8 +2,8 @@ import React, { createContext, useEffect } from 'react';
 import { useLogin } from '../../../core/api/login';
 import { useSharedValue } from 'react-native-reanimated';
 import { NativeModules } from 'react-native';
-import { getItemWithExpiry, mmkvStorage, setItemWithExpiry } from '../../../core/store/principalStore';
-import StorageKey from '../../../core/utils/store/keysStore';
+import { getItemWithExpiry, mmkvStorage, mmkvStorageTemporal, setItemWithExpiry } from '../../../core/store/principalStore';
+import StorageKey, { TemporalStorageKey } from '../../../core/utils/store/keysStore';
 import { deleteToken, getToken, saveToken } from '../../../core/store/tokenKeyChainStore';
 import { useRefreshToken } from '../../../core/api/refreshToken';
 import { useLogout } from '../../../core/api/logout';
@@ -19,7 +19,7 @@ const NO_TOKEN_ERROR_CODES = [403, 401];
 let REFRESH_TOKEN_TIMEOUT_ID: number;
 
 export function LoginProvider({ children }: { children: React.ReactNode }) {
-    
+
     const [SPApiKey, setSPApiKey] = useMMKVString(StorageKey.SP_API_KEY, mmkvStorage)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
     const [SPIdIntegrator, setSPIdIntegrator] = useMMKVString(StorageKey.SP_ID_INTEGRATOR, mmkvStorage)
@@ -36,7 +36,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     function autenticarTerminal({ onLogin, invoice_id }: { onLogin: () => void, SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, invoice_id: string }) {
         return new Promise(async (res, rej) => {
             try {
-                const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
+                const token = getItemWithExpiry(TemporalStorageKey.SESSION_AUTH_TOKEN);
                 if (token) {
                     res('ok')
                 } else {
@@ -46,7 +46,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
                     const RESPONSE_PARSED = JSON.parse(response)
                     if (RESPONSE_PARSED.response_code != 200) rej(RESPONSE_PARSED)
 
-                    setItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN, true);
+                    setItemWithExpiry(TemporalStorageKey.SESSION_AUTH_TOKEN, true);
                     res('ok')
                 }
             } catch (err) {
@@ -72,6 +72,13 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         })
     };
 
+    function handleLogout() {
+        logoutMutator.mutateAsync().finally(() => {
+            deleteToken()
+            mmkvStorageTemporal.clearAll()
+        })
+    };
+
     async function handleRefreshToken({ url }: any) {
         const TOKEN = await getToken()
         clearTimeout(REFRESH_TOKEN_TIMEOUT_ID);
@@ -91,8 +98,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             .then(async (newTokenResponse: any) => {
                 if (newTokenResponse === '') {
                     navigate('Login')
-                    await logoutMutator.mutateAsync()
-                    deleteToken()
+                    handleLogout()
                 } else {
                     await saveToken(newTokenResponse.data.authToken)
                 }
@@ -100,8 +106,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             .catch(async (err: any) => {
                 console.error(err)
                 navigate('Login')
-                await logoutMutator.mutateAsync()
-                deleteToken()
+                handleLogout()
             });
     };
     /* ------- END Functions ------- */
@@ -126,7 +131,8 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         <LoginContext.Provider
             value={{
                 isAuthenticationLoadingSV,
-                handleLogin
+                handleLogin,
+                handleLogout,
             }}>
             {children}
         </LoginContext.Provider>

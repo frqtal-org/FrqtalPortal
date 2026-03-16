@@ -7,12 +7,12 @@ import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad'
 import GradientButton from '../../../core/components/buttons/GradientButton'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
-import { mmkvStorage } from '../../../core/store/principalStore'
+import { mmkvStorage, mmkvStorageTemporal } from '../../../core/store/principalStore'
 import { useNetInfo, fetch } from "@react-native-community/netinfo";
 import { obtenerFechaActual, obtenerHoraActual, transactionDateDate, transactionDateTime } from '../../../core/utils/transactionDate'
 import { formatPriceFromDigits } from '../../../core/utils/priceFormater'
 import { sumarMontosExactos } from '../../../core/utils/sumarMontosExactos'
-import StorageKey from '../../../core/utils/store/keysStore'
+import StorageKey, { TemporalStorageKey } from '../../../core/utils/store/keysStore'
 import { useMMKVString } from 'react-native-mmkv'
 import { printErrorTicket, printTicket } from '../../../core/utils/printTicket'
 import { AppNavigationContext } from '../appNavigation/context'
@@ -343,8 +343,8 @@ const InsertAmount = () => {
                             }, 3000)
                         } else if (ERR?.response_code/* '99' */ /* 1049 */) {
                             /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
-                            mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                            mmkvStorage.remove('PENDING_TX_DATE')
+                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
                             isLoadingSV.set(false)
                             setLoadingText('')
 
@@ -388,8 +388,8 @@ const InsertAmount = () => {
     async function handlePay() {
         if (isConnected) {
             if (price.length === 0) return
-            const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-            const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+            const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+            const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
 
             setLoadingText((pendingRef && pendingDate) ? 'Validando información' : 'Iniciando cobro')
             isLoadingSV.set(true)
@@ -417,8 +417,8 @@ const InsertAmount = () => {
 
     /* ------- Effects ------- */
     useEffect(() => {
-        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+        const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+        const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
 
         if (isConnected) {
             if (pendingRef && pendingDate) {

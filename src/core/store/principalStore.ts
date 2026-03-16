@@ -1,5 +1,6 @@
 import { createMMKV } from 'react-native-mmkv';
 export const mmkvStorage = createMMKV({ id: 'frqtalPortal' });
+export const mmkvStorageTemporal = createMMKV({ id: 'frqtalPortalTemporal' });
 
 const TWELVE_HOURS_MS = 43200000; 
 export const setItemWithExpiry = (key: string, value: boolean) => {

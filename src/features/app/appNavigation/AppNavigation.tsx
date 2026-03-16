@@ -1,20 +1,18 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useRef, useState } from 'react';
 import { ICarouselInstance } from 'react-native-reanimated-carousel';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 import { StyleSheet } from 'react-native';
 import TransactionBottomSheet from '../../../core/components/bottomSheets/TransactionBottomSheet';
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen';
-import { useLogout } from '../../../core/api/logout';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import { deleteToken } from '../../../core/store/tokenKeyChainStore';
 import AppPagination from './components/AppPagination';
 import AppCarousel from './components/AppCarousel';
 import Settings from '../settings/Settings';
 import InsertAmount from '../insertAmount/InsertAmount';
 import TransactionsHistory from '../transactionsHistory/TransactionsHistory';
-import { handleListenNetwork } from '../../../core/utils/queryClientConfiguration';
 import { AppNavigationContext } from './context';
+import { LoginContext } from '../../accessManagement/Login/context';
 
 let lockScreenTimeOut: number;
 let loadingLockScreenTimeOut: number;
@@ -28,13 +26,13 @@ const CAROUSEL_PAGES = [
 const AppNavigation = () => {
     /*  */
     const { isLoadingSV, setLoadingText, loadingText } = useContext(AppNavigationContext) 
+    const { handleLogout } = useContext(LoginContext)
     /*  */
     const progressSV = useSharedValue<number>(0);
     const isBlockingSV = useSharedValue<boolean>(false);
     const [blockingText, setBlockingText] = useState<string>('');
 
     const carouselRef = useRef<ICarouselInstance>(null);
-    const logoutMutator = useLogout()
 
     const { navigate } = useNavigation<any>()
 
@@ -45,8 +43,7 @@ const AppNavigation = () => {
         lockScreenTimeOut && clearTimeout(lockScreenTimeOut)
         lockScreenTimeOut = setTimeout(async () => {
             navigate('Login')
-            await logoutMutator.mutateAsync()
-            deleteToken()
+            handleLogout()
         }, 5 * 60 * 1000)
         loadingLockScreenTimeOut && clearTimeout(loadingLockScreenTimeOut)
         loadingLockScreenTimeOut = setTimeout(() => {
@@ -76,10 +73,6 @@ const AppNavigation = () => {
     /* ------- END Animations ------- */
 
     /* ------- Effects ------- */
-    useEffect(() => {
-        handleListenNetwork();
-    }, []);
-
     useFocusEffect(useCallback(() => {
         resetLockScreen();
 

@@ -4,10 +4,10 @@ import { useMMKVString } from "react-native-mmkv";
 import uuid from 'react-native-uuid';
 import { useTransactionRegister } from "../../../core/api/transactionRegister";
 import { BottomSheetsContext } from "../../../core/components/bottomSheets/context";
-import { mmkvStorage } from "../../../core/store/principalStore";
+import { mmkvStorage, mmkvStorageTemporal } from "../../../core/store/principalStore";
 import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
 import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
-import StorageKey from "../../../core/utils/store/keysStore";
+import StorageKey, { TemporalStorageKey } from "../../../core/utils/store/keysStore";
 import { TransactionsHistoryContext } from "../transactionsHistory/context";
 
 const InsertAmountContext = createContext<any>({});
@@ -24,16 +24,16 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
     const transactionRegisterMutator = useTransactionRegister()
 
     async function verifyPendingTransaction() {
-        const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-        const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+        const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+        const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
 
         if (pendingRef && pendingDate) {
             try {
                 const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
                 const respuestaJSON = JSON.parse(respuestaString);
 
-                mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                mmkvStorage.remove('PENDING_TX_DATE')
+                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
 
                 if (respuestaJSON.RESPONSE_CODE === '00') {
                     try {
@@ -54,14 +54,14 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
 
                 if (ERR?.response_code == '97') {
                     /* Txn no registrada */
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
                     /* TODO: PRINT NO EXISTE REGISTRO */
                 }
                 if (ERR?.response_code == '01') {
                     /* REVERSADA */
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
                     /* TODO: PRINT REVERSADA */
                 }
                 throw new Error(ERR?.response_code)
@@ -76,8 +76,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             const DATE = getCurrentDateDDMMAAAA();
             const UNIQUE_REFERENCE = `frq${uuid.v4().replaceAll('-', '').slice(-16)}`;
 
-            mmkvStorage.set('PENDING_TX_UNIQUE_REFERENCE', UNIQUE_REFERENCE);
-            mmkvStorage.set('PENDING_TX_DATE', DATE);
+            mmkvStorageTemporal.set(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE, UNIQUE_REFERENCE);
+            mmkvStorageTemporal.set(TemporalStorageKey.PENDING_TX_DATE, DATE);
 
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
 
@@ -85,8 +85,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 try {
                     await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                    mmkvStorage.remove('PENDING_TX_UNIQUE_REFERENCE');
-                    mmkvStorage.remove('PENDING_TX_DATE')
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
                     setRefetchData(true)
                     setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
                     return respuestaJSON

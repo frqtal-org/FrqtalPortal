@@ -1,18 +1,17 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import React, { useContext } from 'react'
 import SettingsItems from './SettingsItems'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { useNavigation } from '@react-navigation/native'
-import { deleteToken } from '../../../core/store/tokenKeyChainStore'
-import { useLogout } from '../../../core/api/logout'
+import { LoginContext } from '../../accessManagement/Login/context'
 
 const Settings = () => {
     const INSETS = useContext(InsetsContext)
+    const { handleLogout } = useContext(LoginContext)
 
     const { navigate } = useNavigation<any>()
-    const logoutMutator = useLogout()
 
     return (
         <View style={[{ flex: 1, marginTop: INSETS.top, marginBottom: sizeToDp(APP_PADDING * 0.2) }]} >
@@ -37,8 +36,7 @@ const Settings = () => {
                 description={'Ir al inicio'}
                 onPress={async () => {
                     navigate('Login');
-                    await logoutMutator.mutateAsync()
-                    deleteToken()
+                    handleLogout()
                 }}
             />
         </View>

@@ -14,9 +14,10 @@ import { TransactionsHistoryContext } from './context.tsx';
 import { useAnimatedStyle } from 'react-native-reanimated';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
-import { mmkvStorage } from '../../../core/store/principalStore.ts';
+import { mmkvStorage, mmkvStorageTemporal } from '../../../core/store/principalStore.ts';
 import { InsertAmountContext } from '../insertAmount/context.tsx';
 import { AppNavigationContext } from '../appNavigation/context.tsx';
+import { TemporalStorageKey } from '../../../core/utils/store/keysStore.ts';
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -62,8 +63,8 @@ const TransactionsHistory = () => {
   
   async function goToReports() {
     if (isConnected) {
-      const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-      const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+      const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+      const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
 
       if (pendingRef && pendingDate) {
         setLoadingText('Verificando transacción inconclusa')
@@ -192,8 +193,8 @@ const TransactionsHistory = () => {
           renderItem={({ item }) => <TransactionListItem
             onVerify={(onAction: () => void) => {
               if (isConnected) {
-                const pendingRef = mmkvStorage.getString('PENDING_TX_UNIQUE_REFERENCE');
-                const pendingDate = mmkvStorage.getString('PENDING_TX_DATE');
+                const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
 
                 if (pendingRef && pendingDate) {
                   setLoadingText('Verificando transacción inconclusa')
