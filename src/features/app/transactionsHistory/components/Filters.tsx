@@ -43,8 +43,8 @@ export const Filters = ({ style = [{}], onPress, onVerify }: any) => {
   function handlePressFilterBadge({ selectionValue }: any) {
     onVerify(() => {
       if (selectedFilter === selectionValue) return
-      setSelectedFilter(selectionValue);
       onPress(selectionValue)
+      setSelectedFilter(selectionValue);
     })
   }
   /* ------- END FUNCTIONS ------- */

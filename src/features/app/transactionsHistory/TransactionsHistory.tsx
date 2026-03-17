@@ -12,10 +12,10 @@ import TransactionListItem from "./components/TransactionListItem.tsx";
 import { TransactionsHistoryContext } from './context.tsx';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
-import { mmkvStorageTemporal } from '../../../core/store/principalStore.ts';
+import { mmkvStorage } from '../../../core/store/principalStore.ts';
 import { InsertAmountContext } from '../insertAmount/context.tsx';
 import { AppNavigationContext } from '../appNavigation/context.tsx';
-import { TemporalStorageKey } from '../../../core/utils/store/keysStore.ts';
+import StorageKey from '../../../core/utils/store/keysStore.ts';
 import { useFocusEffect } from '@react-navigation/native';
 
 const { SmartWrapperModule } = NativeModules;
@@ -35,12 +35,13 @@ const TransactionsHistory = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoadingTxns, setIsLoadingTxns] = useState(false)
   const { isConnected } = useNetInfo();
+  const abortControllerRef = useRef<AbortController>(null);
 
   /* ------- Functions ------- */
   async function goToReports() {
     if (isConnected) {
-      const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-      const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
+      const pendingRef = mmkvStorage.getString(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+      const pendingDate = mmkvStorage.getString(StorageKey.PENDING_TX_DATE);
 
       setLoadingText('Verificando transacción inconclusa')
       isLoadingSV.set(true)
@@ -61,13 +62,39 @@ const TransactionsHistory = () => {
   }
 
   function handleGetData(props: any) {
-    handleGetHistorial(props).then((resp: any) => {
+    if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+    const currentSignal = abortControllerRef.current.signal;
+
+    handleGetHistorial({ ...props, signal: currentSignal }).then((resp: any) => {
+      if (currentSignal.aborted) {
+        console.log("Ignorando respuesta de petición abortada.");
+        return; 
+      }
+
       setTotalAmounts({ totalExtraToday: resp.extraToday, totalToday: resp.totalToday, totalPages: resp.totalPages })
-      setTXNs((prev: any) => [...prev, ...resp.data])
-    }).finally(() => {
+      setTXNs((prev: any) => {
+        if (props.page === 1) {
+          return resp.data;
+        }
+        return [...prev, ...resp.data];
+      });
+
       setRefetchData(false)
       setIsLoadingTxns(false)
-    })
+      
+    }).catch((error: any) => {
+          if (error.name === 'CanceledError' || error.name === 'AbortError' || currentSignal.aborted) {
+              console.log("Petición anterior abortada por cambio de filtro.");
+              return;
+          }
+          console.error("Error real en la petición:", error);
+          setRefetchData(false)
+          setIsLoadingTxns(false)
+      });
   }
 
   function handleNextPage() {
@@ -86,13 +113,13 @@ const TransactionsHistory = () => {
       setTotalAmounts((prev: any) => { return { ...prev, totalPages: 0 } })
       filterTO && clearTimeout(filterTO)
       filterTO = setTimeout(() => {
-        handleGetData({ status: selectedFilter, page: currentPage })
-      }, 700)
+        handleGetData({ status: selectedFilter, page: 1 })
+      })
     }
   }, [selectedFilter])
 
   useEffect(() => {
-    if(isScreenFocused) {
+    if (isScreenFocused) {
       setIsFirstScreenRendered(isScreenFocused)
     }
   }, [isScreenFocused])
@@ -160,6 +187,7 @@ const TransactionsHistory = () => {
                 }
               }}
               onPress={(filter: any) => {
+                abortControllerRef.current?.abort()
                 setCurrentPage(1)
                 setSelectedFilter(filter)
               }} style={{ paddingTop: sizeToDp(APP_PADDING * 0.7), paddingBottom: sizeToDp(APP_PADDING * 0.8) }} />

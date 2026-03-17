@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { customInstance } from './customInstance';
 
-export const getAllTransactions = ({ data, serialNumber }: any) => {
+export const getAllTransactions = ({ data, serialNumber, signal }: any) => {
     return customInstance({
         url: `/terminal/webhooks/${serialNumber}`,
         method: 'get',
@@ -10,6 +10,7 @@ export const getAllTransactions = ({ data, serialNumber }: any) => {
             ...data,
             quantity: 15,
         },
+        signal
     });
 };
 

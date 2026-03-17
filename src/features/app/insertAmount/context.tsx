@@ -4,10 +4,10 @@ import { useMMKVString } from "react-native-mmkv";
 import uuid from 'react-native-uuid';
 import { useTransactionRegister } from "../../../core/api/transactionRegister";
 import { BottomSheetsContext } from "../../../core/components/bottomSheets/context";
-import { mmkvStorage, mmkvStorageTemporal } from "../../../core/store/principalStore";
+import { mmkvStorage } from "../../../core/store/principalStore";
 import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
 import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
-import StorageKey, { TemporalStorageKey } from "../../../core/utils/store/keysStore";
+import StorageKey from "../../../core/utils/store/keysStore";
 import { TransactionsHistoryContext } from "../transactionsHistory/context";
 import { AppNavigationContext } from "../appNavigation/context";
 import { printErrorTicketAUX, printTicketAUX } from "../../../core/utils/printTicket";
@@ -70,8 +70,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
     }
 
     async function verifyPendingTransaction() {
-        const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-        const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
+        const pendingRef = mmkvStorage.getString(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+        const pendingDate = mmkvStorage.getString(StorageKey.PENDING_TX_DATE);
 
         if (pendingRef && pendingDate) {
             try {
@@ -84,8 +84,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 if (respuestaJSON.RESPONSE_CODE === '00') {
                     try {
                         await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId }).then(async () => {
-                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                            mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                            mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                             await handlePrintTicket(respuestaJSON)
                         }).finally(() => {
                             setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
@@ -115,20 +115,20 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 }
                 if (ERR?.response_code == '97') {
                     /* Txn no registrada */
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                    mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                     await handlePrintErrorTicket('Transacción no existe en plataforma')
                 }
                 if (ERR?.response_code == '01') {
                     /* REVERSADA */
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                    mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                     await handlePrintErrorTicket('Reversada')
                 }
                 if (ERR?.response_code == '') {
                     /* Timeout */
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                    mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                     await handlePrintErrorTicket('Tiempo de espera agotado')
                 }
                 throw new Error(ERR?.response_code)
@@ -143,8 +143,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             const DATE = getCurrentDateDDMMAAAA();
             const UNIQUE_REFERENCE = `frq${uuid.v4().replaceAll('-', '').slice(-16)}`;
 
-            mmkvStorageTemporal.set(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE, UNIQUE_REFERENCE);
-            mmkvStorageTemporal.set(TemporalStorageKey.PENDING_TX_DATE, DATE);
+            mmkvStorage.set(StorageKey.PENDING_TX_UNIQUE_REFERENCE, UNIQUE_REFERENCE);
+            mmkvStorage.set(StorageKey.PENDING_TX_DATE, DATE);
 
             console.log('LLAMADO SALE')
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
@@ -153,8 +153,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 try {
                     await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId }).then(async () => {
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                        mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                        mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                         await handlePrintTicket(respuestaJSON)
                     }).finally(() => {
                         setRefetchData(true)
@@ -191,8 +191,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                         }, 3000)
                     } else if (ERR?.response_code) {
                         /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                        mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                        mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                         isLoadingSV.set(false)
                         setLoadingText('')
                         await handlePrintErrorTicket(ERR?.error_message)

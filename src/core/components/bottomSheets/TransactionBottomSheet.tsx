@@ -13,8 +13,8 @@ import { sumarMontosExactos } from '../../utils/sumarMontosExactos'
 import { getExtraPercentage } from '../../utils/getExtraPercentage'
 import { isTodayTransactionDate, parseDateToDate, transactionDate } from '../../utils/transactionDate'
 import { useMMKVString } from 'react-native-mmkv'
-import StorageKey, { TemporalStorageKey } from '../../utils/store/keysStore'
-import { mmkvStorage, mmkvStorageTemporal } from '../../store/principalStore'
+import StorageKey from '../../utils/store/keysStore'
+import { mmkvStorage } from '../../store/principalStore'
 import { useTransactionRegister } from '../../api/transactionRegister'
 import { TransactionsHistoryContext } from '../../../features/app/transactionsHistory/context'
 import { useNetInfo } from '@react-native-community/netinfo'
@@ -111,12 +111,12 @@ const TransactionBottomSheet = () => {
                     if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
                         const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
                         const RESP_JSON = JSON.parse(resp);
-                        mmkvStorageTemporal.set(TemporalStorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
+                        mmkvStorage.set(StorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
 
                         if (RESP_JSON.RESPONSE_CODE === '00') {
 
                             await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(async () => {
-                                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
+                                mmkvStorage.remove(StorageKey.PENDING_CANCEL_TRANSACTION)
                                 setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                                 setRefetchData(true)
                                 const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
@@ -129,10 +129,10 @@ const TransactionBottomSheet = () => {
                     } else {
                         const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
                         const RESP_JSON = JSON.parse(resp);
-                        mmkvStorageTemporal.set(TemporalStorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
+                        mmkvStorage.set(StorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
                         if (RESP_JSON.RESPONSE_CODE === '00') {
                             await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(async () => {
-                                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
+                                mmkvStorage.remove(StorageKey.PENDING_CANCEL_TRANSACTION)
                                 setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                                 setRefetchData(true)
                                 const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
@@ -160,13 +160,13 @@ const TransactionBottomSheet = () => {
     }
 
     useEffect(() => {
-        const pendingCancelation = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_CANCEL_TRANSACTION);
+        const pendingCancelation = mmkvStorage.getString(StorageKey.PENDING_CANCEL_TRANSACTION);
         if (isConnected) {
             if (pendingCancelation) {
                 const PENDING_CANCELATION = JSON.parse(pendingCancelation)
                 setTimeout(async () => {
                     await transactionRegisterMutator.mutateAsync({ ...PENDING_CANCELATION }).then(async () => {
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
+                        mmkvStorage.remove(StorageKey.PENDING_CANCEL_TRANSACTION)
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...PENDING_CANCELATION } })
                         setRefetchData(true)
                         const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF

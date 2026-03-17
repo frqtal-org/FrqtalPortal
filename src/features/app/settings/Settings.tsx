@@ -35,8 +35,9 @@ const Settings = () => {
                 label={'Cerrar sesión'}
                 description={'Ir al inicio'}
                 onPress={async () => {
-                    navigate('Login');
-                    await handleLogout()
+                    await handleLogout().finally(() => {
+                        navigate('Login');
+                    })
                 }}
             />
         </View>

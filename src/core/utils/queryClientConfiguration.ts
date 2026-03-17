@@ -28,7 +28,7 @@ export const queryClient = new QueryClient({
   },
 })
 
-export const handleListenNetwork = () => {
+export const handleListenNetwork = (onScreenLock: any) => {
   onlineManager.setEventListener((setOnline) => {
     const unsubscribeNetInfo = NetInfo.addEventListener((state) => {
       setOnline(!!state.isConnected);
@@ -44,11 +44,12 @@ export const handleListenNetwork = () => {
 
     const subscription = screenStateEmitter.addListener(
       'ScreenStateEvent',
-      (event) => {
+      async (event) => {
         if (event === 'ScreenOn') {
           console.log("React Query: Pantalla encendida. Refrescando...");
           handleFocus(true); 
         } else if (event === 'ScreenOff') {
+          await onScreenLock?.()
           console.log("React Query: Pantalla apagada. Pausando...");
           handleFocus(false);
         }

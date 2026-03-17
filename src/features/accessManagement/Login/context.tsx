@@ -2,14 +2,15 @@ import React, { createContext, useEffect } from 'react';
 import { useLogin } from '../../../core/api/login';
 import { useSharedValue } from 'react-native-reanimated';
 import { NativeModules } from 'react-native';
-import { getItemWithExpiry, mmkvStorage, mmkvStorageTemporal, setItemWithExpiry } from '../../../core/store/principalStore';
-import StorageKey, { TemporalStorageKey } from '../../../core/utils/store/keysStore';
+import { getItemWithExpiry, mmkvStorage, setItemWithExpiry } from '../../../core/store/principalStore';
+import StorageKey from '../../../core/utils/store/keysStore';
 import { deleteToken, getToken, saveToken } from '../../../core/store/tokenKeyChainStore';
 import { useRefreshToken } from '../../../core/api/refreshToken';
 import { useLogout } from '../../../core/api/logout';
 import { useNavigation } from '@react-navigation/native';
 import { AXIOS_INSTANCE } from '../../../core/api/customInstance';
 import { useMMKVString } from 'react-native-mmkv';
+import { handleListenNetwork } from '../../../core/utils/queryClientConfiguration';
 
 const LoginContext = createContext<any>({});
 const { SmartWrapperModule } = NativeModules;
@@ -17,6 +18,7 @@ const { SmartWrapperModule } = NativeModules;
 const NO_TOKEN_ERROR_CODES = [403, 401];
 
 let REFRESH_TOKEN_TIMEOUT_ID: number;
+let lockButtonPressedScreenTO: number;
 
 export function LoginProvider({ children }: { children: React.ReactNode }) {
 
@@ -36,7 +38,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     function autenticarTerminal({ onLogin, invoice_id }: { onLogin: () => void, SPApiKey: string, SPIdCemmerce: string, SPIdIntegrator: string, invoice_id: string }) {
         return new Promise(async (res, rej) => {
             try {
-                const token = getItemWithExpiry(TemporalStorageKey.SESSION_AUTH_TOKEN);
+                const token = getItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN);
                 if (token) {
                     res('ok')
                 } else {
@@ -46,7 +48,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
                     const RESPONSE_PARSED = JSON.parse(response)
                     if (RESPONSE_PARSED.response_code != 200) rej(RESPONSE_PARSED)
 
-                    setItemWithExpiry(TemporalStorageKey.SESSION_AUTH_TOKEN, true);
+                    setItemWithExpiry(StorageKey.SESSION_AUTH_TOKEN, true);
                     res('ok')
                 }
             } catch (err) {
@@ -73,10 +75,15 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     };
 
     async function handleLogout() {
-        await logoutMutator.mutateAsync().finally(async () => {
-            await deleteToken()
-            mmkvStorageTemporal.clearAll()
-        })
+        try {
+
+            await logoutMutator.mutateAsync().finally(async () => {
+                await deleteToken()
+            })
+        } catch (err: any) {
+            console.error(err);
+            throw new Error(err)
+        }
     };
 
     async function handleRefreshToken({ url }: any) {
@@ -97,22 +104,31 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         refreshTokenMutator.mutateAsync({ auth_token_login: TOKEN })
             .then(async (newTokenResponse: any) => {
                 if (newTokenResponse === '') {
-                    navigate('Login')
-                    await handleLogout()
+                    await handleLogout().finally(() => {
+                        navigate('Login')
+                    })
                 } else {
                     await saveToken(newTokenResponse.data.authToken)
                 }
             })
             .catch(async (err: any) => {
                 console.error(err)
-                navigate('Login')
-                await handleLogout()
+                await handleLogout().finally(() => {
+                    navigate('Login')
+                })
             });
     };
     /* ------- END Functions ------- */
 
     /* ------- Effects ------- */
     useEffect(() => {
+        handleListenNetwork(async () => {
+            await handleLogout().finally(() => {
+                console.log('aoeaoeao----2')
+                navigate('Login');
+            });
+        });
+
         AXIOS_INSTANCE.interceptors.response.use(
             resp => {
                 handleRefreshToken({ url: resp.config.url });

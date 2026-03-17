@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
@@ -9,6 +9,7 @@ import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
 import { useNetInfo } from "@react-native-community/netinfo";
 import { AppNavigationContext } from '../appNavigation/context'
+import { useFocusEffect } from '@react-navigation/native'
 
 const InsertAmount = () => {
     /*  */
@@ -59,13 +60,13 @@ const InsertAmount = () => {
     /* ------- END Functions ------- */
 
     /* ------- Effects ------- */
-    useEffect(() => {
+    useFocusEffect(useCallback(() => {
         if (isConnected) {
             (async () => {
                 await verifyPendingTransaction();
             })()
         }
-    }, [isConnected])
+    }, [isConnected]))
     /* ------- END Effects ------- */
 
     return (

@@ -42,8 +42,9 @@ const AppNavigation = () => {
         setBlockingText('')
         lockScreenTimeOut && clearTimeout(lockScreenTimeOut)
         lockScreenTimeOut = setTimeout(async () => {
-            navigate('Login')
-            await handleLogout()
+            await handleLogout().finally(() => {
+                navigate('Login')
+            })
         }, 5 * 60 * 1000)
         loadingLockScreenTimeOut && clearTimeout(loadingLockScreenTimeOut)
         loadingLockScreenTimeOut = setTimeout(() => {

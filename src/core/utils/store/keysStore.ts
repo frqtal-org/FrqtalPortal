@@ -9,13 +9,11 @@ const StorageKey = {
   SP_API_KEY: '@smart-payments-api-key',
   SP_ID_COMMECRE: '@smart-payments-id-commerce',
   SP_ID_INTEGRATOR: '@smart-payments-id-integrator',
-};
-
-export const TemporalStorageKey = {
-  SESSION_AUTH_TOKEN: '@session-auth-token',
+  
   PENDING_CANCEL_TRANSACTION: '@pending-cancel-transaction',
   PENDING_TX_UNIQUE_REFERENCE: '@pending-tx-reference',
   PENDING_TX_DATE: '@pending-tx-date',
+  SESSION_AUTH_TOKEN: '@session-auth-token',
 };
 
 export default StorageKey;
