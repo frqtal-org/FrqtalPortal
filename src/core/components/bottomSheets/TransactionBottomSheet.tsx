@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View, NativeModules } from 'react-native'
+import { Pressable, View, NativeModules } from 'react-native'
 import React, { useContext, useEffect } from 'react'
 import GeneralBottomSheet from './GeneralBottomSheet'
 import { BottomSheetsContext } from './context'
@@ -11,14 +11,14 @@ import { toTitleCase } from '../../utils/titleCase'
 import { formatPriceFromDigits } from '../../utils/priceFormater'
 import { sumarMontosExactos } from '../../utils/sumarMontosExactos'
 import { getExtraPercentage } from '../../utils/getExtraPercentage'
-import { isTodayTransactionDate, parseDateToDate, transactionDate, transactionDateDate, transactionDateTime } from '../../utils/transactionDate'
+import { isTodayTransactionDate, parseDateToDate, transactionDate } from '../../utils/transactionDate'
 import { useMMKVString } from 'react-native-mmkv'
 import StorageKey, { TemporalStorageKey } from '../../utils/store/keysStore'
 import { mmkvStorage, mmkvStorageTemporal } from '../../store/principalStore'
 import { useTransactionRegister } from '../../api/transactionRegister'
 import { TransactionsHistoryContext } from '../../../features/app/transactionsHistory/context'
 import { useNetInfo } from '@react-native-community/netinfo'
-import { printTicket } from '../../utils/printTicket'
+import { printTicketAUX } from '../../utils/printTicket'
 import { AppNavigationContext } from '../../../features/app/appNavigation/context'
 
 const { SmartWrapperModule } = NativeModules;
@@ -65,68 +65,18 @@ const Divider = ({ text }: { text: string }) => {
 
 const TransactionBottomSheet = () => {
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
-    const [logo64, setLogo64] = useMMKVString(StorageKey.LOGO_64, mmkvStorage)
-    const [locationAddress, setLocationAdress] = useMMKVString(StorageKey.LOCATION_ADRESS, mmkvStorage)
     const { transactionBottomSheetRef, transactionSelected, setTransactionSelected } = useContext(BottomSheetsContext)
     const transactionRegisterMutator = useTransactionRegister()
     const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { isConnected } = useNetInfo();
     const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
 
-    async function handlePrintTicket() {
+    async function handlePrintTicket(ticketData: any) {
         try {
             isLoadingSV.set(true)
             setLoadingText('Imprimiendo ticket')
 
-            const DATE = transactionDateDate(transactionSelected?.data_raw?.TXN_DATE)
-            const TIME = transactionDateTime(transactionSelected?.data_raw?.TXN_TIME)
-            const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-            const CARD = `**** ${transactionSelected?.data_raw?.ACCOUNT_NUMBER?.slice(-4)}`
-            const CARD_BRAND = transactionSelected?.data_raw?.TAG_50
-            const CARD_TYPE = transactionSelected?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
-            const AUTH_TYPE = transactionSelected?.data_raw?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
-            const IMPRESSION_TYPE = 'Reimpresión'
-            const AMOUNT = parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-            const EXTRA = parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-            const TOTAL = transactionSelected?.data_raw?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)), parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT
-            const BANK = transactionSelected?.data_raw?.CARD_NAME
-            const AFILIATION_NUMBER = transactionSelected?.data_raw?.MERCHANT_ID
-            const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
-            const AUT = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
-            const AID = transactionSelected?.data_raw?.AID
-            const ARQC = transactionSelected?.data_raw?.ARQC
-            const CVM = transactionSelected?.data_raw?.TAG_9F34
-            const TVR = transactionSelected?.data_raw?.TAG_95
-            const TSI = transactionSelected?.data_raw?.TAG_9B
-            const TXN_TYPE = transactionSelected?.data_raw?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
-            const FIRMA = transactionSelected?.data_raw?.SIGNATURE_BYTES
-
-            await printTicket({
-                TICKET_IMAGE: logo64,
-                ADDRESS: locationAddress,
-                DATE,
-                TIME,
-                ID,
-                CARD,
-                CARD_BRAND,
-                CARD_TYPE,
-                AUTH_TYPE,
-                IMPRESSION_TYPE,
-                AMOUNT,
-                EXTRA,
-                TOTAL,
-                BANK,
-                AFILIATION_NUMBER,
-                REFERENCE,
-                AUT,
-                AID,
-                ARQC,
-                CVM,
-                TVR,
-                TSI,
-                TXN_TYPE,
-                FIRMA,
-            })
+            await printTicketAUX(ticketData)
                 .then(() => {
                     setLoadingText('')
                     isLoadingSV.set(false)
@@ -165,73 +115,8 @@ const TransactionBottomSheet = () => {
                         mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                         setRefetchData(true)
-
-                        isLoadingSV.set(true)
-                        setLoadingText('Imprimiendo ticket')
-
-                        const DATE2 = transactionDateDate(RESP_JSON?.TXN_DATE)
-                        const TIME = transactionDateTime(RESP_JSON?.TXN_TIME)
                         const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-                        const CARD = `**** ${RESP_JSON?.ACCOUNT_NUMBER?.slice(-4)}`
-                        const CARD_BRAND = RESP_JSON?.TAG_50
-                        const CARD_TYPE = RESP_JSON?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
-                        const AUTH_TYPE = RESP_JSON?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
-                        const IMPRESSION_TYPE = 'Original'
-                        const AMOUNT2 = parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                        const EXTRA2 = parseFloat(formatPriceFromDigits(RESP_JSON?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                        const TOTAL = RESP_JSON?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)), parseFloat(formatPriceFromDigits(RESP_JSON?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
-                        const BANK = RESP_JSON?.CARD_NAME
-                        const AFILIATION_NUMBER = RESP_JSON?.MERCHANT_ID
-                        const REFERENCE2 = RESP_JSON?.SG_REFERENCE
-                        const AUT = RESP_JSON?.TXN_APPROVAL_CODE
-                        const AID = RESP_JSON?.AID
-                        const ARQC = RESP_JSON?.ARQC
-                        const CVM = RESP_JSON?.TAG_9F34
-                        const TVR = RESP_JSON?.TAG_95
-                        const TSI = RESP_JSON?.TAG_9B
-                        const TXN_TYPE = RESP_JSON?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
-                        const FIRMA = RESP_JSON?.SIGNATURE_BYTES
-
-                        await printTicket({
-                            TICKET_IMAGE: logo64,
-                            ADDRESS: locationAddress,
-                            DATE: DATE2,
-                            TIME,
-                            ID,
-                            CARD,
-                            CARD_BRAND,
-                            CARD_TYPE,
-                            AUTH_TYPE,
-                            IMPRESSION_TYPE,
-                            AMOUNT: AMOUNT2,
-                            EXTRA: EXTRA2,
-                            TOTAL,
-                            BANK,
-                            AFILIATION_NUMBER,
-                            REFERENCE: REFERENCE2,
-                            AUT,
-                            AID,
-                            ARQC,
-                            CVM,
-                            TVR,
-                            TSI,
-                            TXN_TYPE,
-                            FIRMA,
-                        })
-                            .then(() => {
-                                setLoadingText('')
-                                isLoadingSV.set(false)
-                            })
-                            .catch((err) => {
-                                console.error('err printing')
-                                console.error(err)
-                                isLoadingSV.set(true)
-                                setLoadingText(err.message)
-                                setTimeout(() => {
-                                    setLoadingText('')
-                                    isLoadingSV.set(false)
-                                }, 3000)
-                            })
+                        await handlePrintTicket({ ...RESP_JSON, ID })
                     })
 
                 }
@@ -246,73 +131,8 @@ const TransactionBottomSheet = () => {
                         mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                         setRefetchData(true)
-
-                        const DATE2 = transactionDateDate(RESP_JSON?.TXN_DATE)
-                        const TIME = transactionDateTime(RESP_JSON?.TXN_TIME)
                         const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-                        const CARD = `**** ${RESP_JSON?.ACCOUNT_NUMBER?.slice(-4)}`
-                        const CARD_BRAND = RESP_JSON?.TAG_50
-                        const CARD_TYPE = RESP_JSON?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
-                        const AUTH_TYPE = RESP_JSON?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
-                        const IMPRESSION_TYPE = 'Original'
-                        const AMOUNT2 = parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                        const EXTRA2 = parseFloat(formatPriceFromDigits(RESP_JSON?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                        const TOTAL = RESP_JSON?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(RESP_JSON?.AMOUNT)), parseFloat(formatPriceFromDigits(RESP_JSON?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
-                        const BANK = RESP_JSON?.CARD_NAME
-                        const AFILIATION_NUMBER = RESP_JSON?.MERCHANT_ID
-                        const REFERENCE2 = RESP_JSON?.SG_REFERENCE
-                        const AUT = RESP_JSON?.TXN_APPROVAL_CODE
-                        const AID = RESP_JSON?.AID
-                        const ARQC = RESP_JSON?.ARQC
-                        const CVM = RESP_JSON?.TAG_9F34
-                        const TVR = RESP_JSON?.TAG_95
-                        const TSI = RESP_JSON?.TAG_9B
-                        const TXN_TYPE = RESP_JSON?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
-                        const FIRMA = RESP_JSON?.SIGNATURE_BYTES
-
-                        isLoadingSV.set(true)
-                        setLoadingText('Imprimiendo ticket')
-
-                        await printTicket({
-                            TICKET_IMAGE: logo64,
-                            ADDRESS: locationAddress,
-                            DATE: DATE2,
-                            TIME,
-                            ID,
-                            CARD,
-                            CARD_BRAND,
-                            CARD_TYPE,
-                            AUTH_TYPE,
-                            IMPRESSION_TYPE,
-                            AMOUNT: AMOUNT2,
-                            EXTRA: EXTRA2,
-                            TOTAL,
-                            BANK,
-                            AFILIATION_NUMBER,
-                            REFERENCE: REFERENCE2,
-                            AUT,
-                            AID,
-                            ARQC,
-                            CVM,
-                            TVR,
-                            TSI,
-                            TXN_TYPE,
-                            FIRMA,
-                        })
-                            .then(() => {
-                                setLoadingText('')
-                                isLoadingSV.set(false)
-                            })
-                            .catch((err) => {
-                                console.error('err printing')
-                                console.error(err)
-                                isLoadingSV.set(true)
-                                setLoadingText(err.message)
-                                setTimeout(() => {
-                                    setLoadingText('')
-                                    isLoadingSV.set(false)
-                                }, 3000)
-                            })
+                        await handlePrintTicket({ ...RESP_JSON, ID })
                     })
                 }
             }
@@ -336,70 +156,8 @@ const TransactionBottomSheet = () => {
                         mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...PENDING_CANCELATION } })
                         setRefetchData(true)
-
-                        const DATE2 = transactionDateDate(PENDING_CANCELATION?.TXN_DATE)
-                        const TIME = transactionDateTime(PENDING_CANCELATION?.TXN_TIME)
                         const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-                        const CARD = `**** ${PENDING_CANCELATION?.ACCOUNT_NUMBER?.slice(-4)}`
-                        const CARD_BRAND = PENDING_CANCELATION?.TAG_50
-                        const CARD_TYPE = PENDING_CANCELATION?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
-                        const AUTH_TYPE = PENDING_CANCELATION?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
-                        const IMPRESSION_TYPE = 'Reimpresión'
-                        const AMOUNT2 = parseFloat(formatPriceFromDigits(PENDING_CANCELATION?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                        const EXTRA2 = parseFloat(formatPriceFromDigits(PENDING_CANCELATION?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-                        const TOTAL = PENDING_CANCELATION?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(PENDING_CANCELATION?.AMOUNT)), parseFloat(formatPriceFromDigits(PENDING_CANCELATION?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT2
-                        const BANK = PENDING_CANCELATION?.CARD_NAME
-                        const AFILIATION_NUMBER = PENDING_CANCELATION?.MERCHANT_ID
-                        const REFERENCE2 = PENDING_CANCELATION?.SG_REFERENCE
-                        const AUT = PENDING_CANCELATION?.TXN_APPROVAL_CODE
-                        const AID = PENDING_CANCELATION?.AID
-                        const ARQC = PENDING_CANCELATION?.ARQC
-                        const CVM = PENDING_CANCELATION?.TAG_9F34
-                        const TVR = PENDING_CANCELATION?.TAG_95
-                        const TSI = PENDING_CANCELATION?.TAG_9B
-                        const TXN_TYPE = PENDING_CANCELATION?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
-                        const FIRMA = PENDING_CANCELATION?.SIGNATURE_BYTES
-
-                        await printTicket({
-                            TICKET_IMAGE: logo64,
-                            ADDRESS: locationAddress,
-                            DATE: DATE2,
-                            TIME,
-                            ID,
-                            CARD,
-                            CARD_BRAND,
-                            CARD_TYPE,
-                            AUTH_TYPE,
-                            IMPRESSION_TYPE,
-                            AMOUNT: AMOUNT2,
-                            EXTRA: EXTRA2,
-                            TOTAL,
-                            BANK,
-                            AFILIATION_NUMBER,
-                            REFERENCE: REFERENCE2,
-                            AUT,
-                            AID,
-                            ARQC,
-                            CVM,
-                            TVR,
-                            TSI,
-                            TXN_TYPE,
-                            FIRMA,
-                        })
-                            .then(() => {
-                                setLoadingText('')
-                                isLoadingSV.set(false)
-                            })
-                            .catch((err) => {
-                                console.error('err printing')
-                                console.error(err)
-                                isLoadingSV.set(true)
-                                setLoadingText(err.message)
-                                setTimeout(() => {
-                                    setLoadingText('')
-                                    isLoadingSV.set(false)
-                                }, 3000)
-                            })
+                        await handlePrintTicket({ ...PENDING_CANCELATION, ID })
                     })
                 })
             }
@@ -417,7 +175,7 @@ const TransactionBottomSheet = () => {
                 <View style={[{ rowGap: sizeToDp(APP_PADDING * 0.3), alignItems: 'center' }]} >
                     <Typography variant='title01Bold' >{txnName[transactionSelected?.event_name]}</Typography>
                     <Typography variant='subtitle02Regular' color='textEleventh' >{transactionDate(transactionSelected?.data_raw?.TXN_DATE, transactionSelected?.data_raw?.TXN_TIME)}</Typography>
-                    <Pressable onPress={handlePrintTicket} hitSlop={{ right: sizeToDp(APP_PADDING * 2), left: sizeToDp(APP_PADDING * 2) }} style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.2), paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} >
+                    <Pressable onPress={() => handlePrintTicket(transactionSelected?.data_raw)} hitSlop={{ right: sizeToDp(APP_PADDING * 2), left: sizeToDp(APP_PADDING * 2) }} style={[{ flexDirection: 'row', alignItems: 'center', columnGap: sizeToDp(APP_PADDING * 0.3), paddingTop: sizeToDp(APP_PADDING * 0.2), paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} >
                         <Typography variant='subtitle02Medium' color='brand200' >Imprimir</Typography>
                         <FastImage
                             source={require('../../assets/images/print200.png')}

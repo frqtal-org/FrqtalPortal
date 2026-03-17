@@ -9,6 +9,9 @@ import { getCurrentDateDDMMAAAA } from "../../../core/utils/getDateDDMMAAAA";
 import { calculateExtraAmount, formatPriceFromDigits } from "../../../core/utils/priceFormater";
 import StorageKey, { TemporalStorageKey } from "../../../core/utils/store/keysStore";
 import { TransactionsHistoryContext } from "../transactionsHistory/context";
+import { AppNavigationContext } from "../appNavigation/context";
+import { printErrorTicketAUX, printTicketAUX } from "../../../core/utils/printTicket";
+import { fetch } from "@react-native-community/netinfo";
 
 const InsertAmountContext = createContext<any>({});
 
@@ -17,11 +20,54 @@ const { SmartWrapperModule } = NativeModules;
 export function InsertAmountContextProvider({ children }: { children: React.ReactNode }) {
     const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { setTransactionSelected } = useContext(BottomSheetsContext)
+    const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
 
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const [SPIdCemmerce, setSPIdCemmerce] = useMMKVString(StorageKey.SP_ID_COMMECRE, mmkvStorage)
 
     const transactionRegisterMutator = useTransactionRegister()
+
+    async function handlePrintTicket(ticketData: any) {
+        isLoadingSV.set(true)
+        setLoadingText('Imprimiendo ticket')
+
+        await printTicketAUX(ticketData)
+            .then(() => {
+                setLoadingText('')
+                isLoadingSV.set(false)
+            })
+            .catch((err) => {
+                console.error('err printing')
+                console.error(err)
+                isLoadingSV.set(true)
+                setLoadingText(err.message)
+                setTimeout(() => {
+                    setLoadingText('')
+                    isLoadingSV.set(false)
+                }, 3000)
+            })
+    }
+
+    async function handlePrintErrorTicket(text: any) {
+        isLoadingSV.set(true)
+        setLoadingText('Imprimiendo ticket')
+
+        await printErrorTicketAUX(text)
+            .then(() => {
+                setLoadingText('')
+                isLoadingSV.set(false)
+            })
+            .catch((err) => {
+                console.error('err printing')
+                console.error(err)
+                isLoadingSV.set(true)
+                setLoadingText(err.message)
+                setTimeout(() => {
+                    setLoadingText('')
+                    isLoadingSV.set(false)
+                }, 3000)
+            })
+    }
 
     async function verifyPendingTransaction() {
         const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
@@ -32,14 +78,16 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
                 const respuestaJSON = JSON.parse(respuestaString);
 
-                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
-
                 if (respuestaJSON.RESPONSE_CODE === '00') {
                     try {
-                        await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                        setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
-                        setRefetchData(true)
+                        await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId }).then(async () => {
+                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                            await handlePrintTicket(respuestaJSON)
+                        }).finally(() => {
+                            setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                            setRefetchData(true)
+                        })
                         return respuestaJSON
                     } catch (err: any) {
                         console.error('ERR-222-')
@@ -52,17 +100,31 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 console.error('ERR verify')
                 console.error(ERR)
 
+                if (ERR?.response_code == '99') {
+                    setLoadingText('Porfavor espere un momento')
+                    isLoadingSV.set(true)
+                    setTimeout(() => {
+                        isLoadingSV.set(false)
+                        setLoadingText('')
+                    }, 3000)
+                }
                 if (ERR?.response_code == '97') {
                     /* Txn no registrada */
                     mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
                     mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
-                    /* TODO: PRINT NO EXISTE REGISTRO */
+                    await handlePrintErrorTicket('Transacción no existe en plataforma')
                 }
                 if (ERR?.response_code == '01') {
                     /* REVERSADA */
                     mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
                     mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
-                    /* TODO: PRINT REVERSADA */
+                    await handlePrintErrorTicket('Reversada')
+                }
+                if (ERR?.response_code == '') {
+                    /* Timeout */
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                    await handlePrintErrorTicket('Tiempo de espera agotado')
                 }
                 throw new Error(ERR?.response_code)
             }
@@ -84,11 +146,14 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             const respuestaJSON = JSON.parse(respuestaSale);
             if (respuestaJSON.RESPONSE_CODE === '00') {
                 try {
-                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId })
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                    mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
-                    setRefetchData(true)
-                    setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                    await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId }).then(async () => {
+                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                        await handlePrintTicket(respuestaJSON)
+                    }).finally(() => {
+                        setRefetchData(true)
+                        setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                    })
                     return respuestaJSON
                 } catch (err: any) {
                     console.error('ERR-222')
@@ -97,9 +162,48 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 }
             }
         } catch (error: any) {
-            const ERR = JSON.parse(error?.message)
-            console.error('ERR')
-            console.error(ERR)
+            try {
+                const ERR = JSON.parse(error?.message)
+                console.error('ERR')
+                console.error(ERR)
+
+                fetch().then(async state => {
+                    if (!state.isConnected) {
+                        isLoadingSV.set(false)
+                        setLoadingText('')
+                        if (ERR?.response_code) {
+                            await handlePrintErrorTicket(ERR?.error_message)
+                        }
+                        return null
+                    }
+
+                    if (ERR.suggest_query === 'true') {
+                        setLoadingText('Validando información');
+                        isLoadingSV.set(true)
+                        setTimeout(async () => {
+                            await verifyPendingTransaction()
+                        }, 3000)
+                    } else if (ERR?.response_code) {
+                        /* Txn no registrada, retirada por el user, cancelada por el user, Imposible conectarse al servidor */
+                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                        isLoadingSV.set(false)
+                        setLoadingText('')
+                        await handlePrintErrorTicket(ERR?.error_message)
+                    } else {
+                        isLoadingSV.set(false)
+                        setLoadingText('')
+                    }
+                });
+            } catch (err: any) {
+                console.log('ERR-222-3')
+                console.log(err)
+                console.log(err?.message)
+                console.log('err')
+                isLoadingSV.set(false)
+                setLoadingText('')
+            }
+
             throw new Error(error.message)
         }
     };
