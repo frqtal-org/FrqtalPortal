@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { FlatList, NativeModules, Pressable, StyleSheet, View } from 'react-native';
 import BalanceHeaderInfo from "../../../core/components/headers/BalanceHeaderInfo.tsx";
 import LoadingListLoader from "../../../core/components/LoadingListLoader.tsx";
@@ -10,7 +10,6 @@ import theme from "../../../core/utils/styles/styles.ts";
 import { Filters } from "./components/Filters.tsx";
 import TransactionListItem from "./components/TransactionListItem.tsx";
 import { TransactionsHistoryContext } from './context.tsx';
-import { useAnimatedStyle } from 'react-native-reanimated';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
 import { mmkvStorageTemporal } from '../../../core/store/principalStore.ts';
@@ -23,7 +22,7 @@ const { SmartWrapperModule } = NativeModules;
 let filterTO: number;
 
 const TransactionsHistory = () => {
-  const { setRefetchData, refetchData, handleGetHistorial } = useContext(TransactionsHistoryContext)
+  const { setRefetchData, refetchData, handleGetHistorial, isScreenFocused } = useContext(TransactionsHistoryContext)
   const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
   const { verifyPendingTransaction } = useContext(InsertAmountContext)
   const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
@@ -80,13 +79,15 @@ const TransactionsHistory = () => {
 
   /* ------- Effects ------- */
   useEffect(() => {
-    setIsLoadingTxns(true)
-    setTXNs([])
-    setTotalAmounts((prev: any) => { return { ...prev, totalPages: 0 } })
-    filterTO && clearTimeout(filterTO)
-    filterTO = setTimeout(() => {
-      handleGetData({ status: selectedFilter, page: currentPage })
-    }, 700)
+    if (isScreenFocused) {
+      setIsLoadingTxns(true)
+      setTXNs([])
+      setTotalAmounts((prev: any) => { return { ...prev, totalPages: 0 } })
+      filterTO && clearTimeout(filterTO)
+      filterTO = setTimeout(() => {
+        handleGetData({ status: selectedFilter, page: currentPage })
+      }, 700)
+    }
   }, [selectedFilter])
 
   useEffect(() => {
