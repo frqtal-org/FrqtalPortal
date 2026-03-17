@@ -39,10 +39,8 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
   } = item.data_raw;
 
   function handleViewTransaction() {
-    onVerify(async () => {
-      setTransactionSelected(item)
-      transactionBottomSheetRef.current.expand()
-    })
+    setTransactionSelected(item)
+    transactionBottomSheetRef.current.expand()
   }
 
   function handlePrintTicket() {

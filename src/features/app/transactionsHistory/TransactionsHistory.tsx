@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FlatList, NativeModules, Pressable, StyleSheet, View } from 'react-native';
-import FastImage from "react-native-fast-image";
 import BalanceHeaderInfo from "../../../core/components/headers/BalanceHeaderInfo.tsx";
 import LoadingListLoader from "../../../core/components/LoadingListLoader.tsx";
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper.tsx';
@@ -14,7 +13,7 @@ import { TransactionsHistoryContext } from './context.tsx';
 import { useAnimatedStyle } from 'react-native-reanimated';
 import { useNetInfo } from '@react-native-community/netinfo';
 import { BottomSheetsContext } from '../../../core/components/bottomSheets/context.tsx';
-import { mmkvStorage, mmkvStorageTemporal } from '../../../core/store/principalStore.ts';
+import { mmkvStorageTemporal } from '../../../core/store/principalStore.ts';
 import { InsertAmountContext } from '../insertAmount/context.tsx';
 import { AppNavigationContext } from '../appNavigation/context.tsx';
 import { TemporalStorageKey } from '../../../core/utils/store/keysStore.ts';
@@ -38,43 +37,19 @@ const TransactionsHistory = () => {
   const { isConnected } = useNetInfo();
 
   /* ------- Functions ------- */
-  async function verifyPendigTxns() {
-    try {
-      await verifyPendingTransaction();
-      isLoadingSV.set(false)
-      setLoadingText('')
-    } catch (error: any) {
-      if (error?.message == '99') {
-        setLoadingText('Porfavor espere un momento')
-        isLoadingSV.set(true)
-        setTimeout(() => {
-          isLoadingSV.set(false)
-          setLoadingText('')
-        }, 3000)
-      }
-      if (error?.message == '97') {
-        isLoadingSV.set(false)
-        setLoadingText('')
-      }
-
-      throw new Error(error?.message)
-    }
-  }
-  
   async function goToReports() {
     if (isConnected) {
       const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
       const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
 
-      if (pendingRef && pendingDate) {
-        setLoadingText('Verificando transacción inconclusa')
-        isLoadingSV.set(true)
-        setTimeout(async () => {
-          await verifyPendigTxns();
-        }, 3000)
-      } else {
-        await SmartWrapperModule.getBalance();
-      }
+      setLoadingText('Verificando transacción inconclusa')
+      isLoadingSV.set(true)
+      setTimeout(async () => {
+        await verifyPendingTransaction().then(async () => {
+          await SmartWrapperModule.getBalance();
+        });
+      }, (pendingRef && pendingDate) ? 3000 : 0)
+
     } else {
       setLoadingText('Sin conexión')
       isLoadingSV.set(true)
@@ -102,12 +77,6 @@ const TransactionsHistory = () => {
     setCurrentPage(currentPage + 1)
   }
   /* ------- END Functions ------- */
-
-
-  const isLoadingStyle = useAnimatedStyle(() => ({
-    opacity: isLoadingSV.get() ? 1 : 0,
-    pointerEvents: isLoadingSV.get() ? 'auto' : 'none',
-  }))
 
   /* ------- Effects ------- */
   useEffect(() => {
@@ -191,28 +160,10 @@ const TransactionsHistory = () => {
           data={TXNs}
           onEndReachedThreshold={2}
           renderItem={({ item }) => <TransactionListItem
-            onVerify={(onAction: () => void) => {
-              if (isConnected) {
-                const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
-
-                if (pendingRef && pendingDate) {
-                  setLoadingText('Verificando transacción inconclusa')
-                  isLoadingSV.set(true)
-                  setTimeout(async () => {
-                    await verifyPendigTxns();
-                  }, 3000)
-                } else {
-                  onAction()
-                }
-              } else {
-                setLoadingText('Sin conexión')
-                isLoadingSV.set(true)
-                setTimeout(() => {
-                  isLoadingSV.set(false)
-                  setLoadingText('')
-                }, 3000)
-              }
+            onVerify={async (onAction: () => void) => {
+              await verifyPendingTransaction().then(() => {
+                onAction()
+              });
             }}
             {...item}
           />}

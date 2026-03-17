@@ -20,6 +20,7 @@ import { TransactionsHistoryContext } from '../../../features/app/transactionsHi
 import { useNetInfo } from '@react-native-community/netinfo'
 import { printTicketAUX } from '../../utils/printTicket'
 import { AppNavigationContext } from '../../../features/app/appNavigation/context'
+import { InsertAmountContext } from '../../../features/app/insertAmount/context'
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -70,6 +71,7 @@ const TransactionBottomSheet = () => {
     const { setRefetchData } = useContext(TransactionsHistoryContext)
     const { isConnected } = useNetInfo();
     const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
+    const { verifyPendingTransaction } = useContext(InsertAmountContext)
 
     async function handlePrintTicket(ticketData: any) {
         try {
@@ -97,52 +99,63 @@ const TransactionBottomSheet = () => {
     }
 
     async function handleRefund() {
-        const AMOUNT = formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)
-        const EXTRA = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
-        const DATE = parseDateToDate(transactionSelected?.data_raw?.TXN_DATE)
-        const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
-        const APPROVAL_CODE = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
+        if (isConnected) {
+            await verifyPendingTransaction().then(async () => {
+                const AMOUNT = formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)
+                const EXTRA = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
+                const DATE = parseDateToDate(transactionSelected?.data_raw?.TXN_DATE)
+                const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
+                const APPROVAL_CODE = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
 
-        try {
-            if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
-                const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
-                const RESP_JSON = JSON.parse(resp);
-                mmkvStorageTemporal.set(TemporalStorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
+                try {
+                    if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
+                        const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
+                        const RESP_JSON = JSON.parse(resp);
+                        mmkvStorageTemporal.set(TemporalStorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
 
-                if (RESP_JSON.RESPONSE_CODE === '00') {
+                        if (RESP_JSON.RESPONSE_CODE === '00') {
 
-                    await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(async () => {
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
-                        setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
-                        setRefetchData(true)
-                        const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-                        await handlePrintTicket({ ...RESP_JSON, ID })
-                    })
+                            await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(async () => {
+                                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
+                                setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
+                                setRefetchData(true)
+                                const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
+                                await handlePrintTicket({ ...RESP_JSON, ID })
+                            })
 
+                        }
+
+
+                    } else {
+                        const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
+                        const RESP_JSON = JSON.parse(resp);
+                        mmkvStorageTemporal.set(TemporalStorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
+                        if (RESP_JSON.RESPONSE_CODE === '00') {
+                            await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(async () => {
+                                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
+                                setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
+                                setRefetchData(true)
+                                const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
+                                await handlePrintTicket({ ...RESP_JSON, ID })
+                            })
+                        }
+                    }
+                } catch (error: any) {
+                    const ERR = JSON.parse(error?.message)
+                    console.error(ERR);
+                    if (ERR.response_code == '67') {
+                        /* Txn cancelada previamente - NO HAY FORMA DE VERIFICAR O GARDAR LA DATA PENDIENTE */
+                    }
+                    throw new Error(ERR.response_code)
                 }
-
-
-            } else {
-                const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
-                const RESP_JSON = JSON.parse(resp);
-                mmkvStorageTemporal.set(TemporalStorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
-                if (RESP_JSON.RESPONSE_CODE === '00') {
-                    await transactionRegisterMutator.mutateAsync({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }).then(async () => {
-                        mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_CANCEL_TRANSACTION)
-                        setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
-                        setRefetchData(true)
-                        const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-                        await handlePrintTicket({ ...RESP_JSON, ID })
-                    })
-                }
-            }
-        } catch (error: any) {
-            const ERR = JSON.parse(error?.message)
-            console.error(ERR);
-            if (ERR.response_code == '67') {
-                /* Txn cancelada previamente - NO HAY FORMA DE VERIFICAR O GARDAR LA DATA PENDIENTE */
-            }
-            throw new Error(ERR.response_code)
+            })
+        } else {
+            setLoadingText('Sin conexión')
+            isLoadingSV.set(true)
+            setTimeout(() => {
+                isLoadingSV.set(false)
+                setLoadingText('')
+            }, 3000)
         }
     }
 

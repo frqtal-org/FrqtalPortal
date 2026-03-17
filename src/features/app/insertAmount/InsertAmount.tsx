@@ -7,9 +7,7 @@ import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad'
 import GradientButton from '../../../core/components/buttons/GradientButton'
 import { InsetsContext } from '../../../core/utils/styles/insets'
 import { InsertAmountContext } from './context'
-import { mmkvStorageTemporal } from '../../../core/store/principalStore'
 import { useNetInfo } from "@react-native-community/netinfo";
-import { TemporalStorageKey } from '../../../core/utils/store/keysStore'
 import { AppNavigationContext } from '../appNavigation/context'
 
 const InsertAmount = () => {
@@ -41,17 +39,9 @@ const InsertAmount = () => {
     async function handlePay() {
         if (isConnected) {
             if (price.length === 0) return
-            const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-            const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
-
-            setLoadingText((pendingRef && pendingDate) ? 'Validando información' : 'Iniciando cobro')
-            isLoadingSV.set(true)
-
-            setTimeout(async () => {
-                await verifyPendingTransaction().then(() => {
-                    handleProceedPay();
-                });
-            }, (pendingRef && pendingDate) ? 3000 : 1000)
+            await verifyPendingTransaction().then(() => {
+                handleProceedPay();
+            });
         } else {
             setLoadingText('Sin conexión')
             isLoadingSV.set(true)
@@ -70,17 +60,10 @@ const InsertAmount = () => {
 
     /* ------- Effects ------- */
     useEffect(() => {
-        const pendingRef = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-        const pendingDate = mmkvStorageTemporal.getString(TemporalStorageKey.PENDING_TX_DATE);
-
         if (isConnected) {
-            if (pendingRef && pendingDate) {
-                setLoadingText('Verificando transacción inconclusa')
-                isLoadingSV.set(true)
-                setTimeout(async () => {
-                    await verifyPendingTransaction();
-                }, 3000)
-            }
+            (async () => {
+                await verifyPendingTransaction();
+            })()
         }
     }, [isConnected])
     /* ------- END Effects ------- */
