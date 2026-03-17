@@ -16,13 +16,14 @@ import { mmkvStorageTemporal } from '../../../core/store/principalStore.ts';
 import { InsertAmountContext } from '../insertAmount/context.tsx';
 import { AppNavigationContext } from '../appNavigation/context.tsx';
 import { TemporalStorageKey } from '../../../core/utils/store/keysStore.ts';
+import { useFocusEffect } from '@react-navigation/native';
 
 const { SmartWrapperModule } = NativeModules;
 
 let filterTO: number;
 
 const TransactionsHistory = () => {
-  const { setRefetchData, refetchData, handleGetHistorial, isScreenFocused } = useContext(TransactionsHistoryContext)
+  const { setRefetchData, refetchData, handleGetHistorial, isScreenFocused, setIsFirstScreenRendered } = useContext(TransactionsHistoryContext)
   const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
   const { verifyPendingTransaction } = useContext(InsertAmountContext)
   const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
@@ -91,6 +92,12 @@ const TransactionsHistory = () => {
   }, [selectedFilter])
 
   useEffect(() => {
+    if(isScreenFocused) {
+      setIsFirstScreenRendered(isScreenFocused)
+    }
+  }, [isScreenFocused])
+
+  useEffect(() => {
     if (refetchData) {
       setIsLoadingTxns(true)
       setTXNs([])
@@ -104,6 +111,12 @@ const TransactionsHistory = () => {
     if (isConnected) handleNextPage()
     else transactionBottomSheetRef.current.close()
   }, [isConnected])
+
+  useFocusEffect(useCallback(() => {
+    return () => {
+      setIsFirstScreenRendered(false)
+    }
+  }, []))
   /* ------- END Effects ------- */
 
   return (

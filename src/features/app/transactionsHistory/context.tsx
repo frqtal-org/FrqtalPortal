@@ -9,6 +9,7 @@ const TransactionsHistoryContext = createContext<any>({});
 export function TransactionsHistoryContextProvider({ children }: { children: React.ReactNode }) {
     const [refetchData, setRefetchData] = useState(false);
     const [isScreenFocused, setIsScreenFocused] = useState(false);
+    const [isFirstScreenRendered, setIsFirstScreenRendered] = useState(false)
 
     const [deviceId, setDeviceId] = useMMKVString(StorageKey.DEVICE_SERIAL_NUMBER, mmkvStorage)
     const getAllTransactionsMutator = useGetAllTransactions()
@@ -23,7 +24,7 @@ export function TransactionsHistoryContextProvider({ children }: { children: Rea
     }
 
     return (
-        <TransactionsHistoryContext.Provider value={{ refetchData, setRefetchData, handleGetHistorial, isScreenFocused, setIsScreenFocused }} >
+        <TransactionsHistoryContext.Provider value={{ refetchData, setRefetchData, handleGetHistorial, isScreenFocused, setIsScreenFocused, setIsFirstScreenRendered, isFirstScreenRendered }} >
             {children}
         </TransactionsHistoryContext.Provider>
     )

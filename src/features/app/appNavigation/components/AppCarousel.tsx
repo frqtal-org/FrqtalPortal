@@ -1,20 +1,24 @@
 import { Dimensions } from 'react-native'
-import React, { useContext } from 'react'
+import React, { useCallback, useContext } from 'react'
 import Carousel from 'react-native-reanimated-carousel'
 import { InsetsContext } from '../../../../core/utils/styles/insets';
 import { PanGesture } from 'react-native-gesture-handler';
 import { TransactionsHistoryContext } from '../../transactionsHistory/context';
+import { useFocusEffect } from '@react-navigation/native';
 
 const CAROUSEL_WIDTH = Dimensions.get('window').width;
 const CAROUSEL_HEIGHT = Dimensions.get('window').height;
 
 const AppCarousel = ({ ref, pages, progressSV }: any) => {
     const INSETS = useContext(InsetsContext)
-    const { setIsScreenFocused, setRefetchData } = useContext(TransactionsHistoryContext)
+    const { setIsScreenFocused, setRefetchData, isFirstScreenRendered } = useContext(TransactionsHistoryContext)
 
     function checkIndex() {
-        setRefetchData(ref?.current?.getCurrentIndex?.() === 2)
-        setIsScreenFocused(ref?.current?.getCurrentIndex?.() === 2)
+        if(!isFirstScreenRendered) {
+            const BOOL = ref?.current?.getCurrentIndex?.() === 2
+            setRefetchData(BOOL)
+            setIsScreenFocused(BOOL)
+        }
     }
 
     /* ------- Animations ------- */
@@ -23,6 +27,13 @@ const AppCarousel = ({ ref, pages, progressSV }: any) => {
         gesture.activeOffsetX([-30, 30]);
     }
     /* ------- END Animations ------- */
+
+    useFocusEffect(useCallback(() => {
+        return () => {
+            setRefetchData(false)
+            setIsScreenFocused(false)
+        }
+    }, []))
 
     return <Carousel
         loop={false}
