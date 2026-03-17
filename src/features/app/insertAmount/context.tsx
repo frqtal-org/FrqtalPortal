@@ -78,28 +78,27 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 setLoadingText('Verificando transacción inconclusa')
                 isLoadingSV.set(true)
 
-                setTimeout(async () => {
-                    const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
-                    const respuestaJSON = JSON.parse(respuestaString);
+                const respuestaString = await SmartWrapperModule.queryUniqueTransaction(pendingRef, pendingDate);
+                const respuestaJSON = JSON.parse(respuestaString);
 
-                    if (respuestaJSON.RESPONSE_CODE === '00') {
-                        try {
-                            await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId }).then(async () => {
-                                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                                mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
-                                await handlePrintTicket(respuestaJSON)
-                            }).finally(() => {
-                                setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
-                                setRefetchData(true)
-                            })
-                            return respuestaJSON
-                        } catch (err: any) {
-                            console.error('ERR-222-')
-                            console.error(err)
-                            throw new Error(err)
-                        }
+                if (respuestaJSON.RESPONSE_CODE === '00') {
+                    try {
+                        await transactionRegisterMutator.mutateAsync({ ...respuestaJSON, device_id: deviceId }).then(async () => {
+                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                            mmkvStorageTemporal.remove(TemporalStorageKey.PENDING_TX_DATE)
+                            await handlePrintTicket(respuestaJSON)
+                        }).finally(() => {
+                            setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                            setRefetchData(true)
+                        })
+                        return respuestaJSON
+                    } catch (err: any) {
+                        console.error('ERR-222-')
+                        console.error(err)
+                        throw new Error(err)
                     }
-                }, 3000)
+                }
+
 
             } catch (error: any) {
                 const ERR = JSON.parse(error?.message)
