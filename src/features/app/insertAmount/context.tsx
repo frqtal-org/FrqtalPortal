@@ -28,8 +28,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
     const transactionRegisterMutator = useTransactionRegister()
 
     async function handlePrintTicket(ticketData: any) {
-        isLoadingSV.set(true)
         setLoadingText('Imprimiendo ticket')
+        isLoadingSV.set(true)
 
         await printTicketAUX(ticketData)
             .then(() => {
@@ -39,8 +39,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             .catch((err) => {
                 console.error('err printing')
                 console.error(err)
-                isLoadingSV.set(true)
                 setLoadingText(err.message)
+                isLoadingSV.set(true)
                 setTimeout(() => {
                     setLoadingText('')
                     isLoadingSV.set(false)
@@ -49,8 +49,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
     }
 
     async function handlePrintErrorTicket(text: any) {
-        isLoadingSV.set(true)
         setLoadingText('Imprimiendo ticket')
+        isLoadingSV.set(true)
 
         await printErrorTicketAUX(text)
             .then(() => {
@@ -60,8 +60,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             .catch((err) => {
                 console.error('err printing')
                 console.error(err)
-                isLoadingSV.set(true)
                 setLoadingText(err.message)
+                isLoadingSV.set(true)
                 setTimeout(() => {
                     setLoadingText('')
                     isLoadingSV.set(false)
@@ -146,6 +146,7 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             mmkvStorageTemporal.set(TemporalStorageKey.PENDING_TX_UNIQUE_REFERENCE, UNIQUE_REFERENCE);
             mmkvStorageTemporal.set(TemporalStorageKey.PENDING_TX_DATE, DATE);
 
+            console.log('LLAMADO SALE')
             const respuestaSale = await SmartWrapperModule.sale(AMOUNT_TO_PAY.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, UNIQUE_REFERENCE, SPIdCemmerce);
 
             const respuestaJSON = JSON.parse(respuestaSale);

@@ -75,8 +75,8 @@ const TransactionBottomSheet = () => {
 
     async function handlePrintTicket(ticketData: any) {
         try {
-            isLoadingSV.set(true)
             setLoadingText('Imprimiendo ticket')
+            isLoadingSV.set(true)
 
             await printTicketAUX(ticketData)
                 .then(() => {
@@ -86,8 +86,8 @@ const TransactionBottomSheet = () => {
                 .catch((err) => {
                     console.error('err printing')
                     console.error(err)
-                    isLoadingSV.set(true)
                     setLoadingText(err.message)
+                    isLoadingSV.set(true)
                     setTimeout(() => {
                         setLoadingText('')
                         isLoadingSV.set(false)

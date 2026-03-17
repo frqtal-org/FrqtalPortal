@@ -46,9 +46,9 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
   function handlePrintTicket() {
     onVerify(async () => {
       try {
-        isLoadingSV.set(true)
         setLoadingText('Imprimiendo ticket')
-
+        isLoadingSV.set(true)
+        
         await printTicketAUX(item?.data_raw)
           .then(() => {
             setLoadingText('')
@@ -57,8 +57,8 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
           .catch((err) => {
             console.error('err printing')
             console.error(err)
-            isLoadingSV.set(true)
             setLoadingText(err.message)
+            isLoadingSV.set(true)
             setTimeout(() => {
               setLoadingText('')
               isLoadingSV.set(false)
