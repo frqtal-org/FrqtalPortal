@@ -72,9 +72,9 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         })
     };
 
-    function handleLogout() {
-        logoutMutator.mutateAsync().finally(() => {
-            deleteToken()
+    async function handleLogout() {
+        await logoutMutator.mutateAsync().finally(async () => {
+            await deleteToken()
             mmkvStorageTemporal.clearAll()
         })
     };
@@ -98,7 +98,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             .then(async (newTokenResponse: any) => {
                 if (newTokenResponse === '') {
                     navigate('Login')
-                    handleLogout()
+                    await handleLogout()
                 } else {
                     await saveToken(newTokenResponse.data.authToken)
                 }
@@ -106,7 +106,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             .catch(async (err: any) => {
                 console.error(err)
                 navigate('Login')
-                handleLogout()
+                await handleLogout()
             });
     };
     /* ------- END Functions ------- */
