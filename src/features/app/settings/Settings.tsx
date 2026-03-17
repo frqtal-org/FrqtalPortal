@@ -36,7 +36,7 @@ const Settings = () => {
                 description={'Ir al inicio'}
                 onPress={async () => {
                     navigate('Login');
-                    handleLogout()
+                    await handleLogout()
                 }}
             />
         </View>

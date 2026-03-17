@@ -52,8 +52,8 @@ export function TerminalDeviceContextProvider({ children }: { children: React.Re
                 /* 'LA PANTALLA SE APAGÓ FÍSICAMENTE' */
                 lockButtonPressedScreenTO && clearTimeout(lockButtonPressedScreenTO)
                 lockButtonPressedScreenTO = setTimeout(async () => {
+                    await handleLogout();
                     navigate('Login');
-                    handleLogout();
                 }, 5000)
             } else if (state === 'ScreenOn') {
                 /* 'LA PANTALLA SE ENCENDIÓ' */
