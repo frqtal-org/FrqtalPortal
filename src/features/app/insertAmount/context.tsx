@@ -106,6 +106,7 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 console.error(ERR)
 
                 if (ERR?.response_code == '99') {
+                    await handlePrintErrorTicket(ERR?.error_message)
                     setLoadingText('Porfavor espere un momento')
                     isLoadingSV.set(true)
                     setTimeout(() => {
@@ -113,23 +114,28 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                         setLoadingText('')
                     }, 3000)
                 }
-                if (ERR?.response_code == '97') {
-                    /* Txn no registrada */
+                if (ERR?.response_code != '' && ERR?.response_code != '99') {
+                    mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
+                    await handlePrintErrorTicket(ERR?.error_message)
+                }
+                /* if (ERR?.response_code == '97') {
+                    // Txn no registrada
                     mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
                     mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                     await handlePrintErrorTicket('Transacción no existe en plataforma')
-                }
-                if (ERR?.response_code == '01') {
-                    /* REVERSADA */
+                } */
+                /* if (ERR?.response_code == '01') {
+                    // REVERSADA
                     mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
                     mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
                     await handlePrintErrorTicket('Reversada')
-                }
+                } */
                 if (ERR?.response_code == '') {
                     /* Timeout */
-                    mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
-                    mmkvStorage.remove(StorageKey.PENDING_TX_DATE)
-                    await handlePrintErrorTicket('Tiempo de espera agotado')
+                    /* mmkvStorage.remove(StorageKey.PENDING_TX_UNIQUE_REFERENCE);
+                    mmkvStorage.remove(StorageKey.PENDING_TX_DATE) */
+                    await handlePrintErrorTicket(ERR?.error_message)
                 }
                 throw new Error(ERR?.response_code)
             }

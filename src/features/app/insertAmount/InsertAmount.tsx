@@ -42,6 +42,11 @@ const InsertAmount = () => {
             if (price.length === 0) return
             await verifyPendingTransaction().then(() => {
                 handleProceedPay();
+            }).catch((err: any) => {
+                console.error('ERRRROR')
+                console.error(err)
+                setPrice('')
+                setSelectedExtra('')
             });
         } else {
             setLoadingText('Sin conexión')
@@ -63,7 +68,12 @@ const InsertAmount = () => {
     useFocusEffect(useCallback(() => {
         if (isConnected) {
             (async () => {
-                await verifyPendingTransaction();
+                await verifyPendingTransaction().catch((err: any) => {
+                    console.error('ERRRROR')
+                    console.error(err)
+                    setPrice('')
+                    setSelectedExtra('')
+                });
             })()
         }
     }, [isConnected]))

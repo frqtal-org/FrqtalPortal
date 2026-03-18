@@ -8,7 +8,22 @@ import StorageKey from "./store/keysStore";
 const { PrinterModule } = NativeModules;
 
 export async function printTicketAUX(ticketData: any) {
+    console.log('ticketData')
+    console.log(ticketData)
     try {
+        function getAuthType() {
+            if (ticketData?.ENTRY_MODE == '07') return 'Contactless';
+            else if (ticketData?.ENTRY_MODE == '05') return 'Chip';
+            else if (ticketData?.ENTRY_MODE == '80' || ticketData?.ENTRY_MODE == '90') return 'Banda Magnética';
+        };
+
+        function getSignaturTag() {
+            if (ticketData?.SIGNATURE_FLAG == '0') return 'Autorizada mediante firma electrónica';
+            else if (ticketData?.SIGNATURE_FLAG == '1') return null; /* Only signature, no tag */
+            else if (ticketData?.SIGNATURE_FLAG == '2') return 'Autorización sin firma';
+            else if (ticketData?.SIGNATURE_FLAG == '3') return 'Autorizada mediante firma electrónica';
+        };
+
         const TICKET_IMAGE = mmkvStorage.getString(StorageKey.LOGO_64);
         const ADDRESS = mmkvStorage.getString(StorageKey.LOCATION_ADRESS);
         const DATE = transactionDateDate(ticketData?.TXN_DATE)
@@ -17,11 +32,13 @@ export async function printTicketAUX(ticketData: any) {
         const CARD = `**** ${ticketData?.ACCOUNT_NUMBER?.slice(-4)}`
         const CARD_BRAND = ticketData?.TAG_50
         const CARD_TYPE = ticketData?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'
-        const AUTH_TYPE = ticketData?.ENTRY_MODE == '07' ? 'Contactless' : 'Chip'
+        const AUTH_TYPE = getAuthType()
         const IMPRESSION_TYPE = 'Original'
-        const AMOUNT = parseFloat(formatPriceFromDigits(ticketData?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-        const EXTRA = parseFloat(formatPriceFromDigits(ticketData?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-        const TOTAL = ticketData?.TIP ? sumarMontosExactos(parseFloat(formatPriceFromDigits(ticketData?.AMOUNT)), parseFloat(formatPriceFromDigits(ticketData?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) : AMOUNT
+        const rawAmount = parseFloat(formatPriceFromDigits(ticketData?.AMOUNT).replaceAll(',', ''));
+        const rawTip = ticketData?.TIP ? parseFloat(formatPriceFromDigits(ticketData?.TIP).replaceAll(',', '')) : 0;
+        const AMOUNT = rawAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        const EXTRA = rawTip.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        const TOTAL = sumarMontosExactos(rawAmount, rawTip).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
         const BANK = ticketData?.CARD_NAME
         const AFILIATION_NUMBER = ticketData?.MERCHANT_ID
         const REFERENCE = ticketData?.SG_REFERENCE
@@ -31,8 +48,9 @@ export async function printTicketAUX(ticketData: any) {
         const CVM = ticketData?.TAG_9F34
         const TVR = ticketData?.TAG_95
         const TSI = ticketData?.TAG_9B
-        const TXN_TYPE = ticketData?.TXN_NAME === 'VENTA EN LINEA' ? 'abrobada' : 'cancelada'
+        const TXN_TYPE = ticketData?.TXN_NAME === 'VENTA EN LINEA' ? 'aprobada' : 'cancelada'
         const FIRMA = ticketData?.SIGNATURE_BYTES
+        const FIRMA_TAG = getSignaturTag()
 
         await PrinterModule.printTicket(
             TICKET_IMAGE,
@@ -59,22 +77,7 @@ export async function printTicketAUX(ticketData: any) {
             TSI,
             TXN_TYPE,
             FIRMA,
-        );
-    } catch (error: any) {
-        console.error(error)
-        console.error(error?.message)
-        throw new Error(error?.message)
-    }
-}
-
-export async function printErrorTicket(ticketData: any) {
-    try {
-        await PrinterModule.printErrorTicket(
-            ticketData.TICKET_IMAGE,
-            ticketData.ADDRESS,
-            ticketData.DATE,
-            ticketData.TIME,
-            ticketData.TXN_TYPE,
+            FIRMA_TAG,
         );
     } catch (error: any) {
         console.error(error)
@@ -87,8 +90,8 @@ export async function printErrorTicketAUX(text: any) {
     try {
         const TICKET_IMAGE = mmkvStorage.getString(StorageKey.LOGO_64);
         const ADDRESS = mmkvStorage.getString(StorageKey.LOCATION_ADRESS);
-        const DATE =  obtenerFechaActual();
-        const TIME =  obtenerHoraActual();
+        const DATE = obtenerFechaActual();
+        const TIME = obtenerHoraActual();
 
         await PrinterModule.printErrorTicket(
             TICKET_IMAGE,

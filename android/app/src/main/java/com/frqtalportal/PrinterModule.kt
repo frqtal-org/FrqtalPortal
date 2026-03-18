@@ -39,6 +39,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
         TSI: String?,
         txnType: String?,
         firma: String?,
+        firmaTag: String?,
         promise: Promise,
     ) {
         try {
@@ -67,21 +68,22 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             myPrinter.printText("Tarjeta: ${Card}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             myPrinter.printText("Marca: ${CardBrand}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             /* myPrinter.printText("Tipo: ${CardType}", PrnTool.PRT_ALIGNLEFT, isBold = false) */
-            myPrinter.printText("Autarización: ${AuthType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
+            myPrinter.printText("Lectura: ${AuthType}", PrnTool.PRT_ALIGNLEFT, isBold = false)
             /* myPrinter.printText("Impresión: ${ImpressionType}", PrnTool.PRT_ALIGNLEFT, isBold = false) */
             myPrinter.printLineFeed()
             
             // --- TOTALES ---
+            myPrinter.printText("Venta ${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
+            if (firmaTag != null && firmaTag.isNotEmpty() && firmaTag != "") {
+                myPrinter.printText(firmaTag, PrnTool.PRT_ALIGNCENTER, isBold = false)
+            }
+            myPrinter.printLineFeed()
             if (Extra != null && Extra.isNotEmpty() && Extra != "\$0.00") {
-                myPrinter.printText("Venta ${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
-                myPrinter.printLineFeed()
                 myPrinter.printTwoColumn("Consumo: ", "${Amount} MXN", isBold = false)
                 myPrinter.printTwoColumn("Propina: ", "${Extra} MXN", isBold = false)
                 myPrinter.printTwoColumn("Total: ", "${Total} MXN", isBold = false)
                 myPrinter.printLineFeed()
             } else {
-                myPrinter.printText("Venta ${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
-                myPrinter.printLineFeed()
                 myPrinter.printTwoColumn("Total: ", "${Total} MXN", isBold = false)
                 myPrinter.printLineFeed()
             }
@@ -173,7 +175,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             /* myPrinter.printText(Date + " " + Time, PrnTool.PRT_ALIGNCENTER, isBold = true) */
             myPrinter.printLineFeed()
             myPrinter.printText("Venta declinada", PrnTool.PRT_ALIGNCENTER, isBold = true)
-            myPrinter.printText("${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
+            myPrinter.printText("${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = false)
             myPrinter.printLineFeed()
             
             // --- PIE DE PÁGINA Y LEGALES ---            

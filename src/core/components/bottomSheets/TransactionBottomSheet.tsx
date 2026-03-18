@@ -73,6 +73,15 @@ const TransactionBottomSheet = () => {
     const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
     const { verifyPendingTransaction } = useContext(InsertAmountContext)
 
+
+    const rawAmount = parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT).replaceAll(',', ''));
+    const rawTip = transactionSelected?.data_raw?.TIP ? parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP).replaceAll(',', '')) : 0;
+    const AMOUNT = rawAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    const EXTRA = rawTip.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    const TOTAL = sumarMontosExactos(rawAmount, rawTip).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+
+
+
     async function handlePrintTicket(ticketData: any) {
         try {
             setLoadingText('Imprimiendo ticket')
@@ -101,15 +110,15 @@ const TransactionBottomSheet = () => {
     async function handleRefund() {
         if (isConnected) {
             await verifyPendingTransaction().then(async () => {
-                const AMOUNT = formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)
-                const EXTRA = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
+                const AMOUNT_TO_REFUND = formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)
+                const EXTRA_TO_REFUND = formatPriceFromDigits(transactionSelected?.data_raw?.TIP)
                 const DATE = parseDateToDate(transactionSelected?.data_raw?.TXN_DATE)
                 const REFERENCE = transactionSelected?.data_raw?.SG_REFERENCE
                 const APPROVAL_CODE = transactionSelected?.data_raw?.TXN_APPROVAL_CODE
 
                 try {
                     if (isTodayTransactionDate(transactionSelected?.data_raw?.TXN_DATE)) {
-                        const resp = await SmartWrapperModule.cancelTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, REFERENCE);
+                        const resp = await SmartWrapperModule.cancelTransaction(AMOUNT_TO_REFUND.replaceAll(',', ''), EXTRA_TO_REFUND.replaceAll(',', ''), DATE, REFERENCE);
                         const RESP_JSON = JSON.parse(resp);
                         mmkvStorage.set(StorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
 
@@ -119,15 +128,14 @@ const TransactionBottomSheet = () => {
                                 mmkvStorage.remove(StorageKey.PENDING_CANCEL_TRANSACTION)
                                 setTransactionSelected({ event_name: 'cancel', data_raw: { ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF } })
                                 setRefetchData(true)
-                                const ID = transactionSelected?.data_raw?.TXN_UNIQUE_REF
-                                await handlePrintTicket({ ...RESP_JSON, ID })
+                                await handlePrintTicket({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF })
                             })
 
                         }
 
 
                     } else {
-                        const resp = await SmartWrapperModule.refundTransaction(AMOUNT.replaceAll(',', ''), EXTRA.replaceAll(',', ''), DATE, APPROVAL_CODE);
+                        const resp = await SmartWrapperModule.refundTransaction(AMOUNT_TO_REFUND.replaceAll(',', ''), EXTRA_TO_REFUND.replaceAll(',', ''), DATE, APPROVAL_CODE);
                         const RESP_JSON = JSON.parse(resp);
                         mmkvStorage.set(StorageKey.PENDING_CANCEL_TRANSACTION, JSON.stringify({ ...RESP_JSON, TXN_UNIQUE_REF: transactionSelected?.data_raw?.TXN_UNIQUE_REF, device_id: deviceId }))
                         if (RESP_JSON.RESPONSE_CODE === '00') {
@@ -206,12 +214,12 @@ const TransactionBottomSheet = () => {
                 <ListItem listKey='Marca' listValue={toTitleCase(transactionSelected?.data_raw?.TAG_50)} />
                 {/* <ListItem listKey='Tipo' listValue={transactionSelected?.data_raw?.CARD_TYPE == '0' ? 'Débito' : 'Crédito'} /> */}
                 <ListItem listKey='Autarización' listValue={transactionSelected?.data_raw?.CARD_TYPE == '07' ? 'Contactless' : 'Chip'} />
-                {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Consumo' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />}
-                {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Extra' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} greenText={`${getExtraPercentage({ montoBase: transactionSelected?.data_raw?.AMOUNT, montoExtra: transactionSelected?.data_raw?.TIP })}`} />}
+                {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Consumo' listValue={`${AMOUNT} MXN`} />}
+                {(transactionSelected?.data_raw?.TIP && transactionSelected?.data_raw?.TIP !== '0') && <ListItem listKey='Extra' listValue={`${EXTRA} MXN`} greenText={`${getExtraPercentage({ montoBase: transactionSelected?.data_raw?.AMOUNT, montoExtra: transactionSelected?.data_raw?.TIP })}`} />}
                 {
                     transactionSelected?.data_raw?.TIP
-                        ? <ListItem listKey='Total' listValue={`${sumarMontosExactos(parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)), parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.TIP))).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />
-                        : <ListItem listKey='Total' listValue={`${parseFloat(formatPriceFromDigits(transactionSelected?.data_raw?.AMOUNT)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })} MXN`} />
+                        ? <ListItem listKey='Total' listValue={`${TOTAL} MXN`} />
+                        : <ListItem listKey='Total' listValue={`${AMOUNT} MXN`} />
                 }
             </View>
 
