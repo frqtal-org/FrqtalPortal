@@ -31,7 +31,7 @@ const TransactionsHistory = () => {
   const listRef = useRef<FlatList<any>>(null)
   const [selectedFilter, setSelectedFilter] = useState('all')
   const [TXNs, setTXNs] = useState<any>([])
-  const [totalAmounts, setTotalAmounts] = useState({ totalExtraToday: null, totalToday: null, totalPages: 0 })
+  const [totalAmounts, setTotalAmounts] = useState(mmkvStorage.getString(StorageKey.TOTAL_AMOUNTS) ? JSON.parse(mmkvStorage.getString(StorageKey.TOTAL_AMOUNTS)!) : { totalExtraToday: null, totalToday: null, totalPages: 0 })
   const [currentPage, setCurrentPage] = useState(1)
   const [isLoadingTxns, setIsLoadingTxns] = useState(false)
   const { isConnected } = useNetInfo();
@@ -63,7 +63,7 @@ const TransactionsHistory = () => {
 
   function handleGetData(props: any) {
     if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      abortControllerRef.current.abort();
     }
 
     abortControllerRef.current = new AbortController();
@@ -72,10 +72,12 @@ const TransactionsHistory = () => {
     handleGetHistorial({ ...props, signal: currentSignal }).then((resp: any) => {
       if (currentSignal.aborted) {
         console.log("Ignorando respuesta de petición abortada.");
-        return; 
+        return;
       }
 
-      setTotalAmounts({ totalExtraToday: resp.extraToday, totalToday: resp.totalToday, totalPages: resp.totalPages })
+      const TOTAL_AMOUNTS = { totalExtraToday: resp.extraToday, totalToday: resp.totalToday, totalPages: resp.totalPages };
+      mmkvStorage.set(StorageKey.TOTAL_AMOUNTS, JSON.stringify(TOTAL_AMOUNTS))
+      setTotalAmounts(TOTAL_AMOUNTS)
       setTXNs((prev: any) => {
         if (props.page === 1) {
           return resp.data;
@@ -85,16 +87,16 @@ const TransactionsHistory = () => {
 
       setRefetchData(false)
       setIsLoadingTxns(false)
-      
+
     }).catch((error: any) => {
-          if (error.name === 'CanceledError' || error.name === 'AbortError' || currentSignal.aborted) {
-              console.log("Petición anterior abortada por cambio de filtro.");
-              return;
-          }
-          console.error("Error real en la petición:", error);
-          setRefetchData(false)
-          setIsLoadingTxns(false)
-      });
+      if (error.name === 'CanceledError' || error.name === 'AbortError' || currentSignal.aborted) {
+        console.log("Petición anterior abortada por cambio de filtro.");
+        return;
+      }
+      console.error("Error real en la petición:", error);
+      setRefetchData(false)
+      setIsLoadingTxns(false)
+    });
   }
 
   function handleNextPage() {
@@ -142,6 +144,8 @@ const TransactionsHistory = () => {
   useFocusEffect(useCallback(() => {
     return () => {
       setIsFirstScreenRendered(false)
+      const TOTAL_AMOUNTS = { ...totalAmounts, totalPages: 0 };
+      mmkvStorage.set(StorageKey.TOTAL_AMOUNTS, JSON.stringify(TOTAL_AMOUNTS))
     }
   }, []))
   /* ------- END Effects ------- */

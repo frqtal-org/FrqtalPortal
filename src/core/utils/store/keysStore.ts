@@ -13,7 +13,10 @@ const StorageKey = {
   PENDING_CANCEL_TRANSACTION: '@pending-cancel-transaction',
   PENDING_TX_UNIQUE_REFERENCE: '@pending-tx-reference',
   PENDING_TX_DATE: '@pending-tx-date',
+
   SESSION_AUTH_TOKEN: '@session-auth-token',
+
+  TOTAL_AMOUNTS: '@total-amounts',
 };
 
 export default StorageKey;

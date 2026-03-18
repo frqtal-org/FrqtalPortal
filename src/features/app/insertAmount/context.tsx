@@ -18,7 +18,7 @@ const InsertAmountContext = createContext<any>({});
 const { SmartWrapperModule } = NativeModules;
 
 export function InsertAmountContextProvider({ children }: { children: React.ReactNode }) {
-    const { setRefetchData } = useContext(TransactionsHistoryContext)
+    const { setRefetchData, setIsFirstScreenRendered, isFirstScreenRendered, setIsScreenFocused } = useContext(TransactionsHistoryContext)
     const { setTransactionSelected } = useContext(BottomSheetsContext)
     const { isLoadingSV, setLoadingText } = useContext(AppNavigationContext)
 
@@ -90,6 +90,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                         }).finally(() => {
                             setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
                             setRefetchData(true)
+                            !isFirstScreenRendered && setIsFirstScreenRendered(true)
+                            !isFirstScreenRendered && setIsScreenFocused(true)
                         })
                         return respuestaJSON
                     } catch (err: any) {
@@ -165,6 +167,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                     }).finally(() => {
                         setRefetchData(true)
                         setTransactionSelected({ event_name: 'transaction', data_raw: respuestaJSON })
+                        !isFirstScreenRendered && setIsFirstScreenRendered(true)
+                        !isFirstScreenRendered && setIsScreenFocused(true)
                     })
                     return respuestaJSON
                 } catch (err: any) {

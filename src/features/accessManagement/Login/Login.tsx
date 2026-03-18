@@ -61,6 +61,12 @@ const Login = () => {
         navigate('AppNavigation')
       })
       .catch((err: any) => {
+        console.log('errLOGIN')
+        console.log(err)
+        console.log(err?.message)
+        console.log(err?.name)
+        console.log(err?.stack)
+        console.log(Object.keys(err))
         setFieldValue('code', '')
         isBadCodeSV.set(true)
         badCodeTO && clearTimeout(badCodeTO)

@@ -60,13 +60,14 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
     function handleLogin({ code, deviceId, onLogin }: any): Promise<unknown> {
         return new Promise((res, rej) => {
             isAuthenticationLoadingSV.set(true)
-            useLoginMutator.mutateAsync({ pin: code, device_id: deviceId }).then(async ({ data }) => {
-                await saveToken(data.authToken)
-                autenticarTerminal({ onLogin, ...data })
-                    .then(res)
-                    .catch(rej)
-                    .finally(() => isAuthenticationLoadingSV.set(false))
-            })
+            useLoginMutator.mutateAsync({ pin: code, device_id: deviceId })
+                .then(async ({ data }) => {
+                    await saveToken(data.authToken)
+                    autenticarTerminal({ onLogin, ...data })
+                        .then(res)
+                        .catch(rej)
+                        .finally(() => isAuthenticationLoadingSV.set(false))
+                })
                 .catch(err => {
                     isAuthenticationLoadingSV.set(false)
                     rej(err)
