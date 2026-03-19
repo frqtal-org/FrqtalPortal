@@ -8,8 +8,6 @@ import StorageKey from "./store/keysStore";
 const { PrinterModule } = NativeModules;
 
 export async function printTicketAUX(ticketData: any) {
-    console.log('ticketData')
-    console.log(ticketData)
     try {
         function getAuthType() {
             if (ticketData?.ENTRY_MODE == '07') return 'Contactless';
@@ -48,7 +46,7 @@ export async function printTicketAUX(ticketData: any) {
         const CVM = ticketData?.TAG_9F34
         const TVR = ticketData?.TAG_95
         const TSI = ticketData?.TAG_9B
-        const TXN_TYPE = ticketData?.TXN_NAME === 'VENTA EN LINEA' ? 'aprobada' : 'cancelada'
+        const TXN_TYPE = ticketData?.TXN_NAME === 'VENTA EN LINEA' ? 'Venta aprobada' : 'Cancelación'
         const FIRMA = ticketData?.SIGNATURE_BYTES
         const FIRMA_TAG = getSignaturTag()
 

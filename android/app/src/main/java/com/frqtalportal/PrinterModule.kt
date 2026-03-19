@@ -73,7 +73,7 @@ class PrinterModule(private val reactContext: ReactApplicationContext) : ReactCo
             myPrinter.printLineFeed()
             
             // --- TOTALES ---
-            myPrinter.printText("Venta ${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
+            myPrinter.printText("${txnType}", PrnTool.PRT_ALIGNCENTER, isBold = true)
             if (firmaTag != null && firmaTag.isNotEmpty() && firmaTag != "") {
                 myPrinter.printText(firmaTag, PrnTool.PRT_ALIGNCENTER, isBold = false)
             }

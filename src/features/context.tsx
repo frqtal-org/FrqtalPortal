@@ -18,8 +18,6 @@ const TerminalDeviceContext = createContext<any>({});
 export function TerminalDeviceContextProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         (async () => {
-            mmkvStorage.set(StorageKey.LOGO_64, TICKET_IMAGE_8)
-            mmkvStorage.set(StorageKey.LOCATION_ADRESS, ADDRESS)
             mmkvStorage.set(StorageKey.DEVICE_SERIAL_NUMBER, getUniqueIdSync())
             mmkvStorage.set(StorageKey.APP_VERSION_NAME, getVersion())
             mmkvStorage.set(StorageKey.SP_API_KEY, "6fac5de4-4c4c-43ae-a475-baf32459509d")

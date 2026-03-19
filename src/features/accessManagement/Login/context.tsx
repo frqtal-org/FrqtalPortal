@@ -62,6 +62,10 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
             isAuthenticationLoadingSV.set(true)
             useLoginMutator.mutateAsync({ pin: code, device_id: deviceId })
                 .then(async ({ data }) => {
+                    console.log('LOGIN data')
+                    console.log(data)
+                    mmkvStorage.set(StorageKey.LOGO_64, data.logo_image)
+                    mmkvStorage.set(StorageKey.LOCATION_ADRESS, data.location)
                     await saveToken(data.authToken)
                     autenticarTerminal({ onLogin, ...data })
                         .then(res)
