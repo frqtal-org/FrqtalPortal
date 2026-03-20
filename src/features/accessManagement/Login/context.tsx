@@ -86,6 +86,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
                 await deleteToken()
             })
         } catch (err: any) {
+            console.error('LOGOUT err');
             console.error(err);
             throw new Error(err)
         }

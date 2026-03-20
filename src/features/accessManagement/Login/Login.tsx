@@ -163,7 +163,7 @@ const Login = () => {
             <Typography color='notificationYellow' variant='text02Medium' >{deviceId}</Typography>
           </Animated.View>
           <Animated.View style={[isBadCodeStyle]} >
-            <Typography color='notificationRed' variant='text02Medium' >PIN inválido, intenta de nuevo</Typography>
+            <Typography color='notificationRed' variant='text02Medium' >PIN inválido, intente de nuevo</Typography>
           </Animated.View>
         </View>
       </View>
