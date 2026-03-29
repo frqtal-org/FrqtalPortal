@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { useMMKVString } from 'react-native-mmkv';
 import StorageKey from '../../../core/utils/store/keysStore';
 import { mmkvStorage } from '../../../core/store/principalStore';
@@ -11,7 +11,7 @@ import { useFormik } from 'formik';
 import FastImage from 'react-native-fast-image';
 import LoadingScreen from '../../../core/components/Loading/LoadingScreen';
 import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper';
 import { LoginContext } from './context';
 import { NumbersKeyPad } from '../../../core/components/NumbersKeyPad';
@@ -23,6 +23,7 @@ const Code = ({ value }: { value: string }) => {
 
 let badCodeTO: number
 let diveceIdTO: number
+let NO_CONNECTION_TO: number
 
 const Login = () => {
   /*  */
@@ -120,7 +121,8 @@ const Login = () => {
       } else {
         setLoadingTextStatus('Sin conexión')
         isAuthenticationLoadingSV.set(true)
-        setTimeout(() => {
+        NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO)
+        NO_CONNECTION_TO = setTimeout(() => {
           isAuthenticationLoadingSV.set(false)
           setLoadingTextStatus('')
           setFieldValue('code', '')
@@ -129,6 +131,14 @@ const Login = () => {
     }
   }, [values.code])
   /* ------- END Effects ------- */
+
+  useFocusEffect(useCallback(() => {
+    return () => {
+      badCodeTO && clearTimeout(badCodeTO);
+      diveceIdTO && clearTimeout(diveceIdTO);
+      NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO);
+    }
+  }, []))
 
   return (
     <BasicScreenWrapper

@@ -21,6 +21,8 @@ import { useFocusEffect } from '@react-navigation/native';
 const { SmartWrapperModule } = NativeModules;
 
 let filterTO: number;
+let NO_CONNECTION_TO: number
+let PENDING_TXN_TO: number
 
 const TransactionsHistory = () => {
   const { setRefetchData, refetchData, handleGetHistorial, isScreenFocused, setIsFirstScreenRendered } = useContext(TransactionsHistoryContext)
@@ -45,7 +47,8 @@ const TransactionsHistory = () => {
 
       setLoadingText('Verificando transacción inconclusa')
       isLoadingSV.set(true)
-      setTimeout(async () => {
+      PENDING_TXN_TO && clearTimeout(PENDING_TXN_TO)
+      PENDING_TXN_TO = setTimeout(async () => {
         await verifyPendingTransaction().then(async () => {
           await SmartWrapperModule.getBalance();
         });
@@ -54,7 +57,8 @@ const TransactionsHistory = () => {
     } else {
       setLoadingText('Sin conexión')
       isLoadingSV.set(true)
-      setTimeout(() => {
+      NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO)
+      NO_CONNECTION_TO = setTimeout(() => {
         isLoadingSV.set(false)
         setLoadingText('')
       }, 3000)
@@ -143,9 +147,12 @@ const TransactionsHistory = () => {
 
   useFocusEffect(useCallback(() => {
     return () => {
-      setIsFirstScreenRendered(false)
+      setIsFirstScreenRendered(false);
       const TOTAL_AMOUNTS = { ...totalAmounts, totalPages: 0 };
-      mmkvStorage.set(StorageKey.TOTAL_AMOUNTS, JSON.stringify(TOTAL_AMOUNTS))
+      mmkvStorage.set(StorageKey.TOTAL_AMOUNTS, JSON.stringify(TOTAL_AMOUNTS));
+      PENDING_TXN_TO && clearTimeout(PENDING_TXN_TO);
+      NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO);
+      filterTO && clearTimeout(filterTO);
     }
   }, []))
   /* ------- END Effects ------- */
@@ -184,7 +191,8 @@ const TransactionsHistory = () => {
                 } else {
                   setLoadingText('Sin conexión')
                   isLoadingSV.set(true)
-                  setTimeout(() => {
+                  NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO)
+                  NO_CONNECTION_TO = setTimeout(() => {
                     isLoadingSV.set(false)
                     setLoadingText('')
                   }, 3000)

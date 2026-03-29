@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 import { NativeModules } from "react-native";
 import { useMMKVString } from "react-native-mmkv";
 import uuid from 'react-native-uuid';
@@ -12,10 +12,15 @@ import { TransactionsHistoryContext } from "../transactionsHistory/context";
 import { AppNavigationContext } from "../appNavigation/context";
 import { printErrorTicketAUX, printTicketAUX } from "../../../core/utils/printTicket";
 import { fetch } from "@react-native-community/netinfo";
+import { useFocusEffect } from "@react-navigation/native";
 
 const InsertAmountContext = createContext<any>({});
 
 const { SmartWrapperModule } = NativeModules;
+
+let PRINTER_ERROR_TO: number
+let TXN_ERROR_TO: number
+let PENDING_TRANSACTION_TO: number
 
 export function InsertAmountContextProvider({ children }: { children: React.ReactNode }) {
     const { setRefetchData, setIsFirstScreenRendered, isFirstScreenRendered, setIsScreenFocused } = useContext(TransactionsHistoryContext)
@@ -41,7 +46,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 console.error(err)
                 setLoadingText(err.message)
                 isLoadingSV.set(true)
-                setTimeout(() => {
+                PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO)
+                PRINTER_ERROR_TO = setTimeout(() => {
                     setLoadingText('')
                     isLoadingSV.set(false)
                 }, 3000)
@@ -62,7 +68,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                 console.error(err)
                 setLoadingText(err.message)
                 isLoadingSV.set(true)
-                setTimeout(() => {
+                PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO)
+                PRINTER_ERROR_TO = setTimeout(() => {
                     setLoadingText('')
                     isLoadingSV.set(false)
                 }, 3000)
@@ -111,7 +118,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                     await handlePrintErrorTicket(ERR?.error_message)
                     setLoadingText('Porfavor espere un momento')
                     isLoadingSV.set(true)
-                    setTimeout(() => {
+                    TXN_ERROR_TO && clearTimeout(TXN_ERROR_TO)
+                    TXN_ERROR_TO = setTimeout(() => {
                         isLoadingSV.set(false)
                         setLoadingText('')
                     }, 3000)
@@ -196,7 +204,8 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
                     if (ERR.suggest_query === 'true') {
                         setLoadingText('Validando información');
                         isLoadingSV.set(true)
-                        setTimeout(async () => {
+                        PENDING_TRANSACTION_TO && clearTimeout(PENDING_TRANSACTION_TO)
+                        PENDING_TRANSACTION_TO = setTimeout(async () => {
                             await verifyPendingTransaction()
                         }, 3000)
                     } else if (ERR?.response_code) {
@@ -223,6 +232,14 @@ export function InsertAmountContextProvider({ children }: { children: React.Reac
             throw new Error(error.message)
         }
     };
+
+    useFocusEffect(useCallback(() => {
+        return () => {
+            PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO);
+            TXN_ERROR_TO && clearTimeout(TXN_ERROR_TO);
+            PENDING_TRANSACTION_TO && clearTimeout(PENDING_TRANSACTION_TO);
+        }
+    }, []))
 
     return (
         <InsertAmountContext.Provider value={{

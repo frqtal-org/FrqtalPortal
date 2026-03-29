@@ -1,5 +1,5 @@
 import { Pressable, View, NativeModules } from 'react-native'
-import React, { useContext, useEffect } from 'react'
+import React, { useCallback, useContext, useEffect } from 'react'
 import GeneralBottomSheet from './GeneralBottomSheet'
 import { BottomSheetsContext } from './context'
 import { Typography } from '../Typography'
@@ -21,9 +21,13 @@ import { useNetInfo } from '@react-native-community/netinfo'
 import { printTicketAUX } from '../../utils/printTicket'
 import { AppNavigationContext } from '../../../features/app/appNavigation/context'
 import { InsertAmountContext } from '../../../features/app/insertAmount/context'
+import { useFocusEffect } from '@react-navigation/native'
 
 const { SmartWrapperModule } = NativeModules;
 
+let PRINTER_ERROR_TO: number
+let NO_CONNECTION_TO: number
+let PENDING_CANCEL_TO: number
 
 const ListItem = ({ listKey, listValue, greenText }: { listKey: string, listValue: string, greenText?: string }) => {
     return <View style={[{ flexDirection: 'row', alignItems: 'center' }]} >
@@ -97,7 +101,8 @@ const TransactionBottomSheet = () => {
                     console.error(err)
                     setLoadingText(err.message)
                     isLoadingSV.set(true)
-                    setTimeout(() => {
+                    PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO)
+                    PRINTER_ERROR_TO = setTimeout(() => {
                         setLoadingText('')
                         isLoadingSV.set(false)
                     }, 3000)
@@ -160,7 +165,8 @@ const TransactionBottomSheet = () => {
         } else {
             setLoadingText('Sin conexión')
             isLoadingSV.set(true)
-            setTimeout(() => {
+            NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO)
+            NO_CONNECTION_TO = setTimeout(() => {
                 isLoadingSV.set(false)
                 setLoadingText('')
             }, 3000)
@@ -172,7 +178,8 @@ const TransactionBottomSheet = () => {
         if (isConnected) {
             if (pendingCancelation) {
                 const PENDING_CANCELATION = JSON.parse(pendingCancelation)
-                setTimeout(async () => {
+                PENDING_CANCEL_TO && clearTimeout(PENDING_CANCEL_TO)
+                PENDING_CANCEL_TO = setTimeout(async () => {
                     await transactionRegisterMutator.mutateAsync({ ...PENDING_CANCELATION }).then(async () => {
                         mmkvStorage.remove(StorageKey.PENDING_CANCEL_TRANSACTION)
                         setTransactionSelected({ event_name: 'cancel', data_raw: { ...PENDING_CANCELATION } })
@@ -184,6 +191,14 @@ const TransactionBottomSheet = () => {
             }
         }
     }, [isConnected])
+
+    useFocusEffect(useCallback(() => {
+        return () => {
+            PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO);
+            NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO);
+            PENDING_CANCEL_TO && clearTimeout(PENDING_CANCEL_TO);
+        }
+    }, []))
 
     return (
         <GeneralBottomSheet borderColor={statusToColor[transactionSelected?.event_name]} ref={transactionBottomSheetRef} >

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { sizeToDp } from '../../../../core/utils/sizeToDP.tsx';
@@ -12,6 +12,7 @@ import { toTitleCase } from '../../../../core/utils/titleCase.ts';
 import { getExtraPercentage } from '../../../../core/utils/getExtraPercentage.ts';
 import { printTicketAUX } from '../../../../core/utils/printTicket.ts';
 import { AppNavigationContext } from '../../appNavigation/context.tsx';
+import { useFocusEffect } from '@react-navigation/native';
 
 const statusToImageMap: Record<string, any> = {
   cancel: require('../../../../core/assets/images/error.webp'),
@@ -22,6 +23,8 @@ const statusText: Record<string, any> = {
   cancel: 'Reembolso',
   transaction: 'Aprobada',
 };
+
+let PRINTER_ERROR_TO: number
 
 
 const Transaction = ({ onBack, onVerify, ...item }: any) => {
@@ -59,7 +62,8 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
             console.error(err)
             setLoadingText(err.message)
             isLoadingSV.set(true)
-            setTimeout(() => {
+            PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO)
+            PRINTER_ERROR_TO = setTimeout(() => {
               setLoadingText('')
               isLoadingSV.set(false)
             }, 3000)
@@ -70,6 +74,12 @@ const Transaction = ({ onBack, onVerify, ...item }: any) => {
       }
     })
   }
+
+  useFocusEffect(useCallback(() => {
+    return () => {
+      PRINTER_ERROR_TO && clearTimeout(PRINTER_ERROR_TO);
+    }
+  }, []))
 
   return (
     <View style={[STYLES.componentWrapper]}>

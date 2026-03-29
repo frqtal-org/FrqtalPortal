@@ -80,6 +80,8 @@ const AppNavigation = () => {
         return () => {
             isLoadingSV.set(false);
             setLoadingText('');
+            lockScreenTimeOut && clearTimeout(lockScreenTimeOut);
+            loadingLockScreenTimeOut && clearTimeout(loadingLockScreenTimeOut);
         };
     }, []));
     /* ------- END Effects ------- */

@@ -11,6 +11,8 @@ import { useNetInfo } from "@react-native-community/netinfo";
 import { AppNavigationContext } from '../appNavigation/context'
 import { useFocusEffect } from '@react-navigation/native'
 
+let NO_CONNECTION_TO: number
+
 const InsertAmount = () => {
     /*  */
     const INSETS = useContext(InsetsContext)
@@ -51,7 +53,8 @@ const InsertAmount = () => {
         } else {
             setLoadingText('Sin conexión')
             isLoadingSV.set(true)
-            setTimeout(() => {
+            NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO)
+            NO_CONNECTION_TO = setTimeout(() => {
                 isLoadingSV.set(false)
                 setLoadingText('')
             }, 3000)
@@ -75,6 +78,9 @@ const InsertAmount = () => {
                     setSelectedExtra('')
                 });
             })()
+        }
+        return () => {
+            NO_CONNECTION_TO && clearTimeout(NO_CONNECTION_TO);
         }
     }, [isConnected]))
     /* ------- END Effects ------- */

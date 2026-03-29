@@ -1,4 +1,4 @@
-import React, { createContext, useEffect } from 'react';
+import React, { createContext, useCallback, useEffect } from 'react';
 import { useLogin } from '../../../core/api/login';
 import { useSharedValue } from 'react-native-reanimated';
 import { NativeModules } from 'react-native';
@@ -7,7 +7,7 @@ import StorageKey from '../../../core/utils/store/keysStore';
 import { deleteToken, getToken, saveToken } from '../../../core/store/tokenKeyChainStore';
 import { useRefreshToken } from '../../../core/api/refreshToken';
 import { useLogout } from '../../../core/api/logout';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { AXIOS_INSTANCE } from '../../../core/api/customInstance';
 import { useMMKVString } from 'react-native-mmkv';
 import { handleListenNetwork } from '../../../core/utils/queryClientConfiguration';
@@ -94,7 +94,7 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
 
     async function handleRefreshToken({ url }: any) {
         const TOKEN = await getToken()
-        clearTimeout(REFRESH_TOKEN_TIMEOUT_ID);
+        REFRESH_TOKEN_TIMEOUT_ID && clearTimeout(REFRESH_TOKEN_TIMEOUT_ID);
         REFRESH_TOKEN_TIMEOUT_ID = setTimeout(() => {
             if (url !== '/terminal/refresh-token' && url !== '/terminal/login' && url !== '/terminal/logout') {
                 refreshTokenMutator.mutateAsync({ auth_token_login: TOKEN })
@@ -148,6 +148,12 @@ export function LoginProvider({ children }: { children: React.ReactNode }) {
         );
     }, []);
     /* ------- END Effects ------- */
+
+    useFocusEffect(useCallback(() => {
+        return () => {
+            REFRESH_TOKEN_TIMEOUT_ID && clearTimeout(REFRESH_TOKEN_TIMEOUT_ID);
+        }
+    }, []))
 
     return (
         <LoginContext.Provider
