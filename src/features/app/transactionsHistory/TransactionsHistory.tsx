@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { FlatList, NativeModules, Pressable, StyleSheet, View } from 'react-native';
+import React, { memo, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { NativeModules, Pressable, StyleSheet, View } from 'react-native';
 import BalanceHeaderInfo from "../../../core/components/headers/BalanceHeaderInfo.tsx";
 import LoadingListLoader from "../../../core/components/LoadingListLoader.tsx";
 import BasicScreenWrapper from '../../../core/components/screenWrappers/BasicScreenWrapper.tsx';
@@ -17,6 +17,7 @@ import { InsertAmountContext } from '../insertAmount/context.tsx';
 import { AppNavigationContext } from '../appNavigation/context.tsx';
 import StorageKey from '../../../core/utils/store/keysStore.ts';
 import { useFocusEffect } from '@react-navigation/native';
+import { FlatList } from 'react-native-gesture-handler';
 
 const { SmartWrapperModule } = NativeModules;
 
@@ -24,7 +25,7 @@ let filterTO: number;
 let NO_CONNECTION_TO: number
 let PENDING_TXN_TO: number
 
-const TransactionsHistory = () => {
+const TransactionsHistory = memo(() => {
   const { setRefetchData, refetchData, handleGetHistorial, isScreenFocused, setIsFirstScreenRendered } = useContext(TransactionsHistoryContext)
   const { transactionBottomSheetRef } = useContext(BottomSheetsContext)
   const { verifyPendingTransaction } = useContext(InsertAmountContext)
@@ -212,6 +213,10 @@ const TransactionsHistory = () => {
           contentContainerStyle={[(TXNs.length === 0 && !isLoadingTxns) && { flex: 1 }]}
           ListEmptyComponent={!isLoadingTxns ? <View style={[STYLES.emptyListContainer, { height: '100%', paddingBottom: sizeToDp(APP_PADDING * 0.8) }]} ><Typography style={[{ textAlign: 'center' }]} variant='subtitle02Regular' color='textSecondary' >Sin transacciones</Typography></View> : <></>}
           data={TXNs}
+          removeClippedSubviews
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          initialNumToRender={8}
           onEndReachedThreshold={2}
           renderItem={({ item }) => <TransactionListItem
             onVerify={async (onAction: () => void) => {
@@ -229,7 +234,7 @@ const TransactionsHistory = () => {
       </BasicScreenWrapper>
     </>
   );
-};
+});
 
 export default TransactionsHistory;
 

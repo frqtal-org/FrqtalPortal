@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { memo, useCallback, useContext, useEffect, useState } from 'react'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
 import { PaymentAmountHeader } from './components/PaymentAmountHeader'
@@ -13,7 +13,7 @@ import { useFocusEffect } from '@react-navigation/native'
 
 let NO_CONNECTION_TO: number
 
-const InsertAmount = () => {
+const InsertAmount = memo(() => {
     /*  */
     const INSETS = useContext(InsetsContext)
     const { handlePayAmount, verifyPendingTransaction } = useContext(InsertAmountContext)
@@ -111,7 +111,7 @@ const InsertAmount = () => {
             </View>
         </>
     )
-}
+})
 
 export default InsertAmount
 

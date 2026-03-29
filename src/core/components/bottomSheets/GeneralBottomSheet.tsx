@@ -1,19 +1,14 @@
 
-import React, { Children, useCallback, useContext, useRef } from 'react';
-import { Text, StyleSheet, Dimensions, View, Pressable } from 'react-native';
+import React, { useCallback } from 'react';
+import { StyleSheet } from 'react-native';
 import BottomSheet, { BottomSheetView, BottomSheetBackdrop } from '@gorhom/bottom-sheet';
 import { sizeToDp } from '../../utils/sizeToDP';
 import { APP_PADDING } from '../../utils/constants';
 import theme from '../../utils/styles/styles';
-import { Typography } from '../Typography';
-import { InsetsContext } from '../../utils/styles/insets';
-import HeaderGradient from '../../utils/styles/backgroundGradients/HeaderGradient';
 import SuperMenuGradient from '../../utils/styles/backgroundGradients/SuperMenuGradient';
-import FastImage from 'react-native-fast-image';
+import { Easing, ReduceMotion } from 'react-native-reanimated';
 
 const GeneralBottomSheet = ({ ref, borderColor, children }: any) => {
-    const INSETS = useContext(InsetsContext)
-
     const handleSheetChanges = useCallback((index: number) => {
 
     }, []);
@@ -45,6 +40,7 @@ const GeneralBottomSheet = ({ ref, borderColor, children }: any) => {
             backgroundStyle={{ backgroundColor: 'transparent' }}
             enableOverDrag={false}
             backdropComponent={renderBackdrop}
+            animationConfigs={{ reduceMotion: ReduceMotion.Never, duration: 250, easing: Easing.bezier(0.05, 0.7, 0.1, 1) }}
         >
             <BottomSheetView style={[styles.contentContainer, {
                 borderRightColor: theme.colors[borderColor],

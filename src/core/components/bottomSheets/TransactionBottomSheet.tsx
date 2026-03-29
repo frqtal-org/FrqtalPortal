@@ -44,6 +44,7 @@ const statusToImageMap: Record<string, any> = {
     cancel: require('../../assets/images/error.webp'),
     Pendiente: require('../../assets/images/pending.webp'),
     transaction: require('../../assets/images/accepted.webp'),
+    processed: require('../../assets/images/accepted.webp'),
 };
 
 const statusToColor: Record<string, any> = {
@@ -51,6 +52,7 @@ const statusToColor: Record<string, any> = {
     cancel: 'notificationRed',
     Pendiente: 'notificationYellow',
     transaction: 'notificationGreen',
+    processed: 'notificationGreen',
 };
 
 const txnName: Record<string, any> = {
@@ -58,6 +60,7 @@ const txnName: Record<string, any> = {
     cancel: 'Reembolso',
     Pendiente: '',
     transaction: 'Aprobada',
+    processed: 'Aprobada',
 };
 
 const Divider = ({ text }: { text: string }) => {

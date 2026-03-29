@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useContext } from 'react'
+import React, { memo, useContext } from 'react'
 import SettingsItems from './SettingsItems'
 import { sizeToDp } from '../../../core/utils/sizeToDP'
 import { APP_PADDING } from '../../../core/utils/constants'
@@ -7,7 +7,7 @@ import { InsetsContext } from '../../../core/utils/styles/insets'
 import { useNavigation } from '@react-navigation/native'
 import { LoginContext } from '../../accessManagement/Login/context'
 
-const Settings = () => {
+const Settings = memo(() => {
     const INSETS = useContext(InsetsContext)
     const { handleLogout } = useContext(LoginContext)
 
@@ -42,7 +42,7 @@ const Settings = () => {
             />
         </View>
     )
-}
+})
 
 export default Settings
 

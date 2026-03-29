@@ -17,11 +17,13 @@ import { useFocusEffect } from '@react-navigation/native';
 const statusToImageMap: Record<string, any> = {
   cancel: require('../../../../core/assets/images/error.webp'),
   transaction: require('../../../../core/assets/images/accepted.webp'),
+  processed: require('../../../../core/assets/images/accepted.webp'),
 };
 
 const statusText: Record<string, any> = {
   cancel: 'Reembolso',
   transaction: 'Aprobada',
+  processed: 'Aprobada',
 };
 
 let PRINTER_ERROR_TO: number
