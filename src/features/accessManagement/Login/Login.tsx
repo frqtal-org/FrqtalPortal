@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { memo, useCallback, useContext, useEffect, useState } from 'react'
 import { useMMKVString } from 'react-native-mmkv';
 import StorageKey from '../../../core/utils/store/keysStore';
 import { mmkvStorage } from '../../../core/store/principalStore';
@@ -25,7 +25,7 @@ let badCodeTO: number
 let diveceIdTO: number
 let NO_CONNECTION_TO: number
 
-const Login = () => {
+const Login = memo(() => {
   /*  */
   const { handleLogin, isAuthenticationLoadingSV } = useContext(LoginContext)
   /*  */
@@ -197,7 +197,7 @@ const Login = () => {
     </BasicScreenWrapper>
   )
 }
-
+)
 export default Login
 
 
