@@ -1,7 +1,7 @@
 <manifest
   xmlns:android="http://schemas.android.com/apk/res/android"
   xmlns:tools="http://schemas.android.com/tools"
-  package="com.frqtalportal">
+  package="org.frqtalportal.net">
   <queries>
     <package android:name="com.smart.smart.qa.debug" />
   </queries>

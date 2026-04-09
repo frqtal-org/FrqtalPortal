@@ -1,4 +1,4 @@
-package com.frqtalportal
+package org.frqtalportal.net
 
 import CTOS.CtPrint
 import CTOS.CtPrinterException

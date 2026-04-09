@@ -1,4 +1,4 @@
-package com.frqtalportal
+package org.frqtalportal.net
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

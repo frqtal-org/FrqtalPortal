@@ -1,4 +1,4 @@
-package com.frqtalportal
+package org.frqtalportal.net
 
 import android.app.Activity
 import android.content.ComponentName
@@ -18,8 +18,8 @@ class SmartWrapperModule(private val reactContext: ReactApplicationContext) : Re
     private var currentPromise: Promise? = null
     private val REQUEST_CODE_SMART = 1001
 
-    private val jsonConfigNoPrint = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": false}"
-    private val jsonConfigPrint = "{\"activityStr\": \"com.frqtalportal.MainActivity\", \"packageStr\":\"com.frqtalportal\", \"print\": true}"
+    private val jsonConfigNoPrint = "{\"activityStr\": \"org.frqtalportal.net.MainActivity\", \"packageStr\":\"org.frqtalportal.net\", \"print\": false}"
+    private val jsonConfigPrint = "{\"activityStr\": \"org.frqtalportal.net.MainActivity\", \"packageStr\":\"org.frqtalportal.net\", \"print\": true}"
 
     private var isReceiverRegistered = false
 

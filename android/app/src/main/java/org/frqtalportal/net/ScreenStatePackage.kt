@@ -1,4 +1,4 @@
-package com.frqtalportal
+package org.frqtalportal.net
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

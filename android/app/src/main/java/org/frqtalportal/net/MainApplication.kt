@@ -1,4 +1,4 @@
-package com.frqtalportal
+package org.frqtalportal.net
 
 import android.app.Application
 import com.facebook.react.PackageList

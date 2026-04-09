@@ -1,4 +1,4 @@
-package com.frqtalportal
+package org.frqtalportal.net
 
 import android.content.BroadcastReceiver
 import android.content.Context
