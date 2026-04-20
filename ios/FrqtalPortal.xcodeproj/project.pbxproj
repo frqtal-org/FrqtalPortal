@@ -25,10 +25,10 @@
 		79D41F12932F4CBDBBD5F043 /* Poppins-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 90D5536E384140BDA812E468 /* Poppins-Black.ttf */; };
 		7E37879FFBF549F79CEBA406 /* Poppins-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D117BE1CA554DB78C0E0B93 /* Poppins-SemiBold.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		91DF76A6EBBCA70838D706D2 /* libPods-FrqtalPortal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C23BBF75EBB4AC839C5FD996 /* libPods-FrqtalPortal.a */; };
 		A831BEACF4244DD0BA7A840D /* Poppins-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2963F24266304359BE48DB75 /* Poppins-ThinItalic.ttf */; };
 		A8EA46A4DB1840C9ACA28ACC /* Poppins-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 04425EC3B33141F480D0EF22 /* Poppins-BoldItalic.ttf */; };
 		AB19A1A3E1FC4397AAD4305D /* Poppins-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5E721BFC7DC34941A6ADFD94 /* Poppins-Regular.ttf */; };
+		AD7985EB6710FEE3397C6A0B /* libPods-FrqtalPortal.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EF24D7EAC6F849D8E370992 /* libPods-FrqtalPortal.a */; };
 		EF019B3250994753BD8796F5 /* Poppins-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AD2125B5F5014994BE393237 /* Poppins-ExtraBold.ttf */; };
 		F5E7A575259846208EF3E8CC /* Poppins-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 780EC97F94D34B5591B47FB9 /* Poppins-ExtraLightItalic.ttf */; };
 		FFE031413A7748B7BE313594 /* Poppins-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 980E282732994C4988FAC086 /* Poppins-Light.ttf */; };
@@ -42,12 +42,12 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = FrqtalPortal/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = FrqtalPortal/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = FrqtalPortal/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		20A019FE000336A1C163D1E8 /* Pods-FrqtalPortal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.debug.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.debug.xcconfig"; sourceTree = "<group>"; };
+		1EF24D7EAC6F849D8E370992 /* libPods-FrqtalPortal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FrqtalPortal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		24FD267135A34CBD891F6551 /* Poppins-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-BlackItalic.ttf"; path = "../src/core/assets/fonts/Poppins-BlackItalic.ttf"; sourceTree = "<group>"; };
 		2963F24266304359BE48DB75 /* Poppins-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ThinItalic.ttf"; path = "../src/core/assets/fonts/Poppins-ThinItalic.ttf"; sourceTree = "<group>"; };
 		2B1F47DD12C44710ADA9BE6C /* Poppins-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Medium.ttf"; path = "../src/core/assets/fonts/Poppins-Medium.ttf"; sourceTree = "<group>"; };
+		308A9AFC265756DAD5328748 /* Pods-FrqtalPortal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.release.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.release.xcconfig"; sourceTree = "<group>"; };
 		3A919948DB274278A6D72547 /* Colors.xcassets */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = folder.assetcatalog; name = Colors.xcassets; path = FrqtalPortal/Colors.xcassets; sourceTree = "<group>"; };
-		45E70373B61171C6CB300041 /* Pods-FrqtalPortal.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.release.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.release.xcconfig"; sourceTree = "<group>"; };
 		5D117BE1CA554DB78C0E0B93 /* Poppins-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-SemiBold.ttf"; path = "../src/core/assets/fonts/Poppins-SemiBold.ttf"; sourceTree = "<group>"; };
 		5D2EE607E4854AC08820BACA /* Poppins-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraLight.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraLight.ttf"; sourceTree = "<group>"; };
 		5E721BFC7DC34941A6ADFD94 /* Poppins-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Regular.ttf"; path = "../src/core/assets/fonts/Poppins-Regular.ttf"; sourceTree = "<group>"; };
@@ -61,7 +61,7 @@
 		9364EC5E6EB641B78BB5EA69 /* Poppins-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Bold.ttf"; path = "../src/core/assets/fonts/Poppins-Bold.ttf"; sourceTree = "<group>"; };
 		980E282732994C4988FAC086 /* Poppins-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-Light.ttf"; path = "../src/core/assets/fonts/Poppins-Light.ttf"; sourceTree = "<group>"; };
 		AD2125B5F5014994BE393237 /* Poppins-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBold.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraBold.ttf"; sourceTree = "<group>"; };
-		C23BBF75EBB4AC839C5FD996 /* libPods-FrqtalPortal.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FrqtalPortal.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B6424FB7C07793324BCD70DD /* Pods-FrqtalPortal.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FrqtalPortal.debug.xcconfig"; path = "Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal.debug.xcconfig"; sourceTree = "<group>"; };
 		D261BE83FB9446D2B98F6D49 /* Poppins-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-ExtraBoldItalic.ttf"; path = "../src/core/assets/fonts/Poppins-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
 		DC437DB452BC437CA6FC7C1E /* Poppins-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "Poppins-MediumItalic.ttf"; path = "../src/core/assets/fonts/Poppins-MediumItalic.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -72,7 +72,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				91DF76A6EBBCA70838D706D2 /* libPods-FrqtalPortal.a in Frameworks */,
+				AD7985EB6710FEE3397C6A0B /* libPods-FrqtalPortal.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -97,7 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				C23BBF75EBB4AC839C5FD996 /* libPods-FrqtalPortal.a */,
+				1EF24D7EAC6F849D8E370992 /* libPods-FrqtalPortal.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -160,8 +160,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				20A019FE000336A1C163D1E8 /* Pods-FrqtalPortal.debug.xcconfig */,
-				45E70373B61171C6CB300041 /* Pods-FrqtalPortal.release.xcconfig */,
+				B6424FB7C07793324BCD70DD /* Pods-FrqtalPortal.debug.xcconfig */,
+				308A9AFC265756DAD5328748 /* Pods-FrqtalPortal.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -173,13 +173,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "FrqtalPortal" */;
 			buildPhases = (
-				AA7239F5B8B12A24ABB64230 /* [CP] Check Pods Manifest.lock */,
+				A32B5465657141B52C0FC6C4 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				9E37BE8120F0C566613C6FE0 /* [CP] Embed Pods Frameworks */,
-				1F373E3AE1B66EC3933A3640 /* [CP] Copy Pods Resources */,
+				96D3A64154E04B37561CAA0A /* [CP] Embed Pods Frameworks */,
+				77F1FF18831C7DFF86F131AA /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -271,7 +271,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"\\\"$WITH_ENVIRONMENT\\\" \\\"$REACT_NATIVE_XCODE\\\"\"\n";
 		};
-		1F373E3AE1B66EC3933A3640 /* [CP] Copy Pods Resources */ = {
+		77F1FF18831C7DFF86F131AA /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -288,7 +288,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9E37BE8120F0C566613C6FE0 /* [CP] Embed Pods Frameworks */ = {
+		96D3A64154E04B37561CAA0A /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -305,7 +305,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FrqtalPortal/Pods-FrqtalPortal-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AA7239F5B8B12A24ABB64230 /* [CP] Check Pods Manifest.lock */ = {
+		A32B5465657141B52C0FC6C4 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -343,7 +343,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 20A019FE000336A1C163D1E8 /* Pods-FrqtalPortal.debug.xcconfig */;
+			baseConfigurationReference = B6424FB7C07793324BCD70DD /* Pods-FrqtalPortal.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -374,7 +374,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 45E70373B61171C6CB300041 /* Pods-FrqtalPortal.release.xcconfig */;
+			baseConfigurationReference = 308A9AFC265756DAD5328748 /* Pods-FrqtalPortal.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
