@@ -22,7 +22,7 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
         <TerminalDeviceContextProvider>
           <SafeAreaProvider>
             <InsetsProvider>
-              <GestureHandlerRootView style={[{ height: Dimensions.get('window').height }]} >
+              <GestureHandlerRootView /* style={[{ height: Dimensions.get('window').height }]} */ >
                 <LoginProvider>
                   <AppNavigationContextProvider>
                     <BottomSheetsProvider>

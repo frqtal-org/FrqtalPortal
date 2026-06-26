@@ -167,7 +167,7 @@ const AppNavigation = () => {
                     loop={false}
                     ref={carouselRef}
                     width={CAROUSEL_WIDTH}
-                    height={CAROUSEL_HEIGHT - INSETS.top}
+                    height={CAROUSEL_HEIGHT - INSETS.bottom}
                     data={CAROUSEL_PAGES}
                     renderItem={({ item }: any) => item?.component?.()}
                     onConfigurePanGesture={panGestureConfig}
